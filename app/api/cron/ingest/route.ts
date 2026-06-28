@@ -18,14 +18,18 @@ async function enrichCoordinates(events: NormalizedEvent[]): Promise<void> {
     // Prefer a real street address; otherwise fall back to venue/borough text.
     const query = e.address || [e.venue_name, e.borough].filter(Boolean).join(", ")
     if (!query) continue
+    // A query that begins with a house number ("1904 Surf Avenue, ...") geocodes to a
+    // precise point, so we treat the result as exact. A bare venue/neighborhood name
+    // ("Carnegie Hall", "Lower East Side") only resolves approximately.
+    const isStreetAddress = /^\s*\d+\s+\S/.test(query)
     const withCity = /new york|ny\b|\bnyc\b/i.test(query) ? query : `${query}, New York, NY`
     attempts++
     const coord = await geocodeAddress(withCity)
     if (coord) {
       e.latitude = coord.lat
       e.longitude = coord.lng
-      // Geocoded from text (address/venue/borough), so the point is an approximation.
-      e.approximate_location = true
+      // Only flag approximate when we geocoded from imprecise text (not a street address).
+      if (!isStreetAddress) e.approximate_location = true
     }
   }
 }
