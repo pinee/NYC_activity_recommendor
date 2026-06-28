@@ -120,7 +120,7 @@ export default function Page() {
             })
           } else if (msg.type === "result") {
             const activities = msg.activities ?? []
-            setPlan({ summary: msg.summary, activities, sources: msg.sources ?? [] })
+            setPlan({ summary: msg.summary, activities, sources: msg.sources ?? [], filteredNote: msg.filteredNote })
             if (activities.length === 0) {
               toast("No activities matched your interests this week")
             } else {

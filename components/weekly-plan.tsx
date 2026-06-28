@@ -171,6 +171,11 @@ export function WeeklyPlanView({ plan }: { plan: WeeklyPlan }) {
       {plan.summary && (
         <p className="text-pretty text-base leading-relaxed text-muted-foreground">{plan.summary}</p>
       )}
+      {plan.filteredNote && (
+        <p className="rounded-lg border border-border bg-secondary/50 px-3 py-2 text-xs text-muted-foreground">
+          {plan.filteredNote} Adjust your budget, travel time, or working hours to see more.
+        </p>
+      )}
       {byDay.length === 0 && (
         <div className="rounded-xl border border-dashed border-border px-6 py-12 text-center">
           <p className="text-pretty text-sm leading-relaxed text-muted-foreground">

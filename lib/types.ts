@@ -35,6 +35,33 @@ export const INTEREST_OPTIONS = [
 
 export type Interest = (typeof INTEREST_OPTIONS)[number]
 
+// Maps each interest to category keywords used to PRE-FILTER events in the database
+// before the AI curator runs. Matching is a case-insensitive substring match against
+// the event's (short, controlled) `category` field, so a few extra terms improve recall
+// without much risk of false positives. Keep keywords >= 3 chars to avoid noise.
+export const INTEREST_KEYWORDS: Record<string, string[]> = {
+  "Live music": ["music", "concert", "band", "jazz", "singer", "orchestra", "choir", "performance"],
+  "Art & galleries": ["art", "gallery", "exhibit", "painting", "sculpture", "mural", "crafts"],
+  Theater: ["theater", "theatre", "play", "drama", "musical", "broadway", "performance"],
+  Museums: ["museum", "exhibit", "gallery", "history", "science"],
+  "Food & dining": ["food", "dining", "tasting", "culinary", "cooking", "brunch"],
+  "Coffee & cafes": ["coffee", "cafe", "espresso", "tea"],
+  Nightlife: ["nightlife", "club", "party", "dance"],
+  "Running & fitness": ["run", "running", "fitness", "workout", "bootcamp", "marathon", "exercise"],
+  "Yoga & wellness": ["yoga", "wellness", "meditation", "mindfulness", "tai chi", "pilates"],
+  Cycling: ["cycling", "bike", "bicycle", "ride"],
+  "Hiking & parks": ["hike", "hiking", "park", "trail", "nature", "outdoor", "garden", "walk"],
+  Comedy: ["comedy", "comedian", "standup", "improv"],
+  "Film & cinema": ["film", "cinema", "movie", "screening"],
+  "Markets & shopping": ["market", "shopping", "bazaar", "fair", "flea", "vendor"],
+  "Tech & startups": ["tech", "startup", "coding", "hackathon", "developer"],
+  "Books & readings": ["book", "reading", "author", "poetry", "literature", "library"],
+  Dance: ["dance", "ballet", "salsa", "tango", "choreography"],
+  "Sports & games": ["sport", "game", "basketball", "soccer", "tennis", "baseball", "volleyball", "chess", "pickleball"],
+  Volunteering: ["volunteer", "cleanup", "charity", "stewardship"],
+  Photography: ["photo", "photography", "camera"],
+}
+
 export interface Profile {
   homeAddress: string
   officeAddress: string
@@ -105,6 +132,9 @@ export interface WeeklyPlan {
   summary: string
   activities: Activity[]
   sources?: PlanSource[]
+  // Set when deterministic filters (budget / working hours / travel) removed events
+  // the AI had otherwise selected, e.g. "3 events hidden: 2 too far, 1 over budget."
+  filteredNote?: string
 }
 
 export const DEFAULT_PROFILE: Profile = {
