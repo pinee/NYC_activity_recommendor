@@ -1,7 +1,8 @@
 import { generateText, Output } from "ai"
 import { z } from "zod"
-import { WEEK_DAYS } from "@/lib/types"
+import { type WeekDay } from "@/lib/types"
 import { createServiceClient } from "@/lib/supabase/server"
+import { nyToUtcISO } from "@/lib/event-sources/util"
 
 export const maxDuration = 60
 
@@ -40,6 +41,21 @@ function nyParts(iso: string) {
   return { date, weekday, startTime }
 }
 
+// NYC-local calendar date (YYYY-MM-DD) from a UTC timestamp.
+function nyDateOf(iso: string): string {
+  return new Date(iso).toLocaleDateString("en-CA", { timeZone: "America/New_York" })
+}
+
+// NYC-local 24h clock (HH:MM) from a UTC timestamp.
+function nyClockOf(iso: string): string {
+  return new Date(iso).toLocaleTimeString("en-GB", {
+    timeZone: "America/New_York",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  })
+}
+
 // ---- Short-lived in-memory cache (per warm server instance) ----
 type CacheEntry = { expires: number; payload: unknown }
 const CACHE = new Map<string, CacheEntry>()
@@ -67,6 +83,7 @@ type EventRow = {
   description: string | null
   category: string | null
   start_time: string
+  end_time: string | null
   venue_name: string | null
   address: string | null
   latitude: number | null
@@ -78,16 +95,20 @@ type EventRow = {
   neighborhood: string | null
 }
 
-// Fetch all events stored for the next 7 days (rolling window from now).
+// Fetch events whose span overlaps the next 7 days (rolling window from the start
+// of today, NY time). This includes ongoing multi-day events that began earlier:
+// an event is in-window if it starts on/before the window end AND it either ends
+// on/after the window start, or (single-day, no end_time) starts on/after it.
 async function fetchUpcomingEvents(): Promise<EventRow[]> {
   const supabase = createServiceClient()
-  const nowISO = new Date().toISOString()
-  const endISO = new Date(Date.now() + 7 * 86400000).toISOString()
+  const todayNY = new Date().toLocaleString("sv-SE", { timeZone: "America/New_York" }).slice(0, 10)
+  const windowStartISO = nyToUtcISO(todayNY, "00:00") ?? new Date().toISOString()
+  const windowEndISO = new Date(new Date(windowStartISO).getTime() + 7 * 86400000).toISOString()
   const { data, error } = await supabase
     .from("events")
     .select("*")
-    .gte("start_time", nowISO)
-    .lte("start_time", endISO)
+    .lte("start_time", windowEndISO)
+    .or(`end_time.gte.${windowStartISO},and(end_time.is.null,start_time.gte.${windowStartISO})`)
     .order("start_time", { ascending: true })
     .limit(200)
   if (error) throw new Error(error.message)
@@ -158,7 +179,13 @@ async function buildPlan(body: any) {
   const eventLines = rows
     .map((r) => {
       const { date, startTime } = nyParts(r.start_time)
-      return `id:${r.id} | ${date} ${startTime || "(time TBD)"} | ${r.category || "Uncategorized"} | ${r.title} | venue: ${r.venue_name || "?"} | address: ${r.address || "?"} | price: ${r.price || "?"} | ${r.description || ""}`
+      const endDate = r.end_time ? nyDateOf(r.end_time) : null
+      // Multi-day events show a range and are flagged as available any day in that span.
+      const when =
+        endDate && endDate !== date
+          ? `${date} to ${endDate} (multi-day, available any day in range)`
+          : `${date} ${startTime || "(time TBD)"}`
+      return `id:${r.id} | ${when} | ${r.category || "Uncategorized"} | ${r.title} | venue: ${r.venue_name || "?"} | address: ${r.address || "?"} | price: ${r.price || "?"} | ${r.description || ""}`
     })
     .join("\n")
 
@@ -257,12 +284,24 @@ ${eventLines}
   }
 
   const validIso = new Set(dates.map((d) => d.iso))
+  const weekdayByIso = new Map(dates.map((d) => [d.iso, d.weekday as WeekDay]))
+  const todayIso = dates[0].iso
 
   // 3) Merge curation with authoritative DB fields. DB owns title/date/url/price; meta owns why/travel/etc.
   const activities = picks
     .map(({ row, meta }) => {
-      const { date, weekday, startTime } = nyParts(row.start_time)
-      return { row, meta, date, weekday: weekday as (typeof WEEK_DAYS)[number], startTime }
+      const startDate = nyDateOf(row.start_time)
+      const endDate = row.end_time ? nyDateOf(row.end_time) : null
+      const multiDay = !!endDate && endDate !== startDate
+      // Ongoing events started before today are anchored to today so they still
+      // surface in the week view; otherwise we use their real start day.
+      const displayDate = startDate < todayIso ? todayIso : startDate
+      const isOpeningDay = displayDate === startDate
+      // Show a clock time only on the event's actual start day. For ongoing days we
+      // rely on the "Runs through" range label instead. End time only for single-day.
+      const startTime = isOpeningDay ? nyClockOf(row.start_time) : ""
+      const endTime = !multiDay && row.end_time ? nyClockOf(row.end_time) : ""
+      return { row, meta, date: displayDate, endDate, startTime, endTime }
     })
     // Defensive: only show events that fall within the next 7 days.
     .filter((x) => validIso.has(x.date))
@@ -273,9 +312,10 @@ ${eventLines}
       title: x.row.title,
       category: x.row.category || "Event",
       date: x.date,
-      day: x.weekday,
+      day: weekdayByIso.get(x.date) ?? ("Monday" as WeekDay),
       startTime: x.startTime,
-      endTime: "",
+      endTime: x.endTime,
+      endDate: x.endDate ?? "",
       venue: x.row.venue_name || "",
       neighborhood: x.meta.neighborhood || x.row.neighborhood || "",
       address: x.row.address || "",

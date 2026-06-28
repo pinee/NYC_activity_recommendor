@@ -64,11 +64,14 @@ export const nycParksSource: EventSource = {
 
   async fetchEvents({ horizonDays }): Promise<NormalizedEvent[]> {
     // The dataset holds a large backlog ordered by date, so we MUST filter
-    // server-side to "today forward" (NY date) — otherwise a 1000-row page is
-    // entirely past events. $where uses a Socrata floating timestamp literal.
+    // server-side. We keep anything still relevant today: events that START today
+    // or later, OR multi-day events that END today or later (i.e. still ongoing
+    // even though they began earlier). $where uses Socrata floating timestamps.
     // "sv-SE" formats as "YYYY-MM-DD HH:mm:ss", so the date part is the NY calendar date.
     const todayNY = isoDatePart(new Date().toLocaleString("sv-SE", { timeZone: "America/New_York" }))
-    const where = encodeURIComponent(`startdate >= '${todayNY}T00:00:00'`)
+    const where = encodeURIComponent(
+      `(startdate >= '${todayNY}T00:00:00') OR (enddate >= '${todayNY}T00:00:00')`,
+    )
     const url = `${SODA_ENDPOINT}?$limit=1000&$order=startdate ASC&$where=${where}`
     const res = await fetch(url, { headers: { Accept: "application/json" } })
     if (!res.ok) {
@@ -89,12 +92,15 @@ export const nycParksSource: EventSource = {
       const startTime = nyToUtcISO(startDate, parseClockTo24h(r.starttime))
       if (!startTime) continue
 
-      // Keep only events that fall inside the rolling horizon.
-      const startMs = new Date(startTime).getTime()
-      if (startMs < startWindow || startMs > endWindow) continue
-
       const endDate = isoDatePart(r.enddate)
       const endTime = endDate ? nyToUtcISO(endDate, parseClockTo24h(r.endtime)) : null
+
+      // Keep events whose [start, end] span overlaps the rolling [today, today+horizon]
+      // window. A single-day event has no end, so its span is just its start moment.
+      const startMs = new Date(startTime).getTime()
+      const endMs = endTime ? new Date(endTime).getTime() : startMs
+      if (endMs < startWindow) continue // already finished
+      if (startMs > endWindow) continue // starts after the window
 
       const { lat, lng } = parseCoordinates(r.coordinates)
       const { category, tags } = parseCategories(r.categories)

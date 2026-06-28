@@ -66,12 +66,18 @@ async function ingest(): Promise<IngestResult> {
     upserted = deduped.length
   }
 
-  // Clean up events from before today (NY time) so the table stays lean. We anchor
-  // to the START of today rather than the current moment, so an event happening
-  // later today (or one with a midnight/all-day start) is never dropped mid-day.
+  // Clean up only events that have truly FINISHED, anchored to the start of today
+  // (NY time). A multi-day event that began earlier but still runs is kept; we delete
+  // it only once its end_time has passed. Single-day events (no end_time) are judged
+  // by their start_time instead.
   const todayNY = new Date().toLocaleString("sv-SE", { timeZone: "America/New_York" }).slice(0, 10)
   const startOfTodayUTC = nyToUtcISO(todayNY, "00:00") ?? new Date().toISOString()
-  await supabase.from("events").delete().lt("start_time", startOfTodayUTC)
+  await supabase
+    .from("events")
+    .delete()
+    .or(
+      `and(end_time.not.is.null,end_time.lt.${startOfTodayUTC}),and(end_time.is.null,start_time.lt.${startOfTodayUTC})`,
+    )
 
   return {
     found: deduped.length,

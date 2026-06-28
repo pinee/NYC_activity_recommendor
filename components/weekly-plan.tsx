@@ -1,6 +1,6 @@
 "use client"
 
-import { MapPin, Clock, ExternalLink, Sun, Building, ArrowRight, Home, Briefcase, Globe } from "lucide-react"
+import { MapPin, Clock, ExternalLink, Sun, Building, ArrowRight, Home, Briefcase, Globe, CalendarRange } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import type { Activity, WeeklyPlan } from "@/lib/types"
 
@@ -17,6 +17,8 @@ function normalizeUrl(url: string): string | null {
 function ActivityCard({ activity }: { activity: Activity }) {
   const sourceUrl = normalizeUrl(activity.url)
   const imageUrl = activity.imageUrl ? normalizeUrl(activity.imageUrl) : null
+  // A multi-day event ends on a different day than the one it's displayed under.
+  const isMultiDay = Boolean(activity.endDate && activity.endDate !== activity.date)
   return (
     <article className="group flex flex-col gap-3 overflow-hidden rounded-xl border border-border bg-card transition-colors hover:border-foreground/20">
       {imageUrl && (
@@ -71,6 +73,12 @@ function ActivityCard({ activity }: { activity: Activity }) {
               {activity.startTime}
               {activity.endTime ? `–${activity.endTime}` : ""}
             </span>
+          </span>
+        )}
+        {isMultiDay && (
+          <span className="flex items-center gap-2">
+            <CalendarRange className="size-3.5 shrink-0" />
+            <span>Runs through {formatDateLabel(activity.endDate as string, "")}</span>
           </span>
         )}
         <a

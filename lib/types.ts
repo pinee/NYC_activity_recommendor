@@ -81,6 +81,7 @@ export interface Activity {
   day: WeekDay
   startTime: string
   endTime: string
+  endDate?: string // ISO date when a multi-day event ends; used to show "Runs through …"
   venue: string
   neighborhood: string
   address: string
