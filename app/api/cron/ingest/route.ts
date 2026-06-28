@@ -107,22 +107,34 @@ async function researchGroup(categories: string, dateList: string[]) {
   return { events: structured.experimental_output.events, citations }
 }
 
-async function ingest() {
+type IngestResult = {
+  found: number
+  ingested: number
+  upserted: number
+  rowsAdded: number
+  duplicatesRemoved: number
+  rowsTotal: number
+}
+
+async function ingest(): Promise<IngestResult> {
   const supabase = createServiceClient()
   const dateList = horizonDates(INGEST_HORIZON_DAYS)
   const allowed = new Set(dateList)
 
+  // Matches the public.events schema. Columns without a source during ingestion
+  // (borough, neighborhood, tags, organizer, end_time, currency, image_url, etc.)
+  // are left to their table defaults.
   type Row = {
     id: string
     title: string
     description: string | null
     category: string | null
-    date_time: string
-    venue: string | null
+    start_time: string
+    venue_name: string | null
     address: string | null
     latitude: null
     longitude: null
-    url: string | null
+    event_url: string | null
     source: string | null
     price: string | null
   }
@@ -148,12 +160,12 @@ async function ingest() {
             title: e.title,
             description: e.description || null,
             category: e.category || null,
-            date_time: dateTime,
-            venue: e.venue || null,
+            start_time: dateTime,
+            venue_name: e.venue || null,
             address: e.address || null,
             latitude: null,
             longitude: null,
-            url,
+            event_url: url,
             source: e.source || null,
             price: e.price || null,
           },
@@ -175,14 +187,23 @@ async function ingest() {
     seen.add(r.id)
     return true
   })
+  // Rows discarded as duplicates: dead-link drops + repeated keys within the batch.
+  const duplicatesRemoved = collected.length - deduped.length
 
   let upserted = 0
+  let rowsAdded = 0
   if (deduped.length > 0) {
+    // Determine which ids already exist so we can report new rows vs. refreshed rows.
+    const ids = deduped.map((r) => r.id)
+    const { data: existing } = await supabase.from("events").select("id").in("id", ids)
+    const existingIds = new Set((existing || []).map((e: { id: string }) => e.id))
+    rowsAdded = deduped.filter((r) => !existingIds.has(r.id)).length
+
     // Upsert on the primary key so re-running refreshes existing events instead of duplicating.
     const { error } = await supabase
       .from("events")
       .upsert(
-        deduped.map((r) => ({ ...r, updated_at: new Date().toISOString() })),
+        deduped.map((r) => ({ ...r, last_updated: new Date().toISOString(), status: "active" })),
         { onConflict: "id", ignoreDuplicates: false },
       )
     if (error) throw new Error(error.message)
@@ -190,9 +211,16 @@ async function ingest() {
   }
 
   // Clean up events that have already passed so the table stays lean.
-  await supabase.from("events").delete().lt("date_time", new Date().toISOString())
+  await supabase.from("events").delete().lt("start_time", new Date().toISOString())
 
-  return { found: collected.length, ingested: deduped.length, upserted }
+  return {
+    found: collected.length,
+    ingested: deduped.length,
+    upserted,
+    rowsAdded,
+    duplicatesRemoved,
+    rowsTotal: deduped.length,
+  }
 }
 
 function authorized(req: Request): boolean {
@@ -206,13 +234,47 @@ export async function GET(req: Request) {
   if (!authorized(req)) {
     return Response.json({ error: "Unauthorized" }, { status: 401 })
   }
+
+  // Open an ingestion log row (status 'running') so each run is auditable.
+  const supabase = createServiceClient()
+  let logId: string | null = null
+  const startedAt = new Date().toISOString()
+  try {
+    const { data } = await supabase
+      .from("ingestion_logs")
+      .insert({ started_at: startedAt, status: "running" })
+      .select("id")
+      .single()
+    logId = (data as { id: string } | null)?.id ?? null
+  } catch (err) {
+    console.log("[v0] could not open ingestion log:", err instanceof Error ? err.message : err)
+  }
+
   try {
     const result = await ingest()
     console.log("[v0] ingest complete:", result)
+    if (logId) {
+      await supabase
+        .from("ingestion_logs")
+        .update({
+          finished_at: new Date().toISOString(),
+          status: "success",
+          rows_added: result.rowsAdded,
+          duplicates_removed: result.duplicatesRemoved,
+          rows_total: result.rowsTotal,
+        })
+        .eq("id", logId)
+    }
     return Response.json({ ok: true, ...result })
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
     console.log("[v0] ingest error:", message)
+    if (logId) {
+      await supabase
+        .from("ingestion_logs")
+        .update({ finished_at: new Date().toISOString(), status: "failure", error_message: message })
+        .eq("id", logId)
+    }
     return Response.json({ ok: false, error: message }, { status: 500 })
   }
 }

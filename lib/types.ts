@@ -87,6 +87,7 @@ export interface Activity {
   priceLabel: string
   indoor: boolean
   url: string
+  imageUrl?: string // optional event image from the catalog
   why: string
   travelNote: string
   travelFromHome: string // e.g. "~25 min by subway"

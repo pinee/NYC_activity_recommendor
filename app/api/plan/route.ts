@@ -66,14 +66,16 @@ type EventRow = {
   title: string
   description: string | null
   category: string | null
-  date_time: string
-  venue: string | null
+  start_time: string
+  venue_name: string | null
   address: string | null
   latitude: number | null
   longitude: number | null
-  url: string | null
+  event_url: string | null
   source: string | null
   price: string | null
+  image_url: string | null
+  neighborhood: string | null
 }
 
 // Fetch all events stored for the next 7 days (rolling window from now).
@@ -84,9 +86,9 @@ async function fetchUpcomingEvents(): Promise<EventRow[]> {
   const { data, error } = await supabase
     .from("events")
     .select("*")
-    .gte("date_time", nowISO)
-    .lte("date_time", endISO)
-    .order("date_time", { ascending: true })
+    .gte("start_time", nowISO)
+    .lte("start_time", endISO)
+    .order("start_time", { ascending: true })
     .limit(200)
   if (error) throw new Error(error.message)
   return (data as EventRow[]) || []
@@ -102,7 +104,7 @@ type PickMeta = {
   why: string
 }
 
-function tokenize(s: string): string[] {
+function tokenize(s: string | null): string[] {
   return (s || "").toLowerCase().match(/[a-z]+/g) || []
 }
 
@@ -155,8 +157,8 @@ async function buildPlan(body: any) {
   const byId = new Map(rows.map((r) => [r.id, r]))
   const eventLines = rows
     .map((r) => {
-      const { date, startTime } = nyParts(r.date_time)
-      return `id:${r.id} | ${date} ${startTime || "(time TBD)"} | ${r.category || "Uncategorized"} | ${r.title} | venue: ${r.venue || "?"} | address: ${r.address || "?"} | price: ${r.price || "?"} | ${r.description || ""}`
+      const { date, startTime } = nyParts(r.start_time)
+      return `id:${r.id} | ${date} ${startTime || "(time TBD)"} | ${r.category || "Uncategorized"} | ${r.title} | venue: ${r.venue_name || "?"} | address: ${r.address || "?"} | price: ${r.price || "?"} | ${r.description || ""}`
     })
     .join("\n")
 
@@ -259,7 +261,7 @@ ${eventLines}
   // 3) Merge curation with authoritative DB fields. DB owns title/date/url/price; meta owns why/travel/etc.
   const activities = picks
     .map(({ row, meta }) => {
-      const { date, weekday, startTime } = nyParts(row.date_time)
+      const { date, weekday, startTime } = nyParts(row.start_time)
       return { row, meta, date, weekday: weekday as (typeof WEEK_DAYS)[number], startTime }
     })
     // Defensive: only show events that fall within the next 7 days.
@@ -274,12 +276,13 @@ ${eventLines}
       day: x.weekday,
       startTime: x.startTime,
       endTime: "",
-      venue: x.row.venue || "",
-      neighborhood: x.meta.neighborhood || "",
+      venue: x.row.venue_name || "",
+      neighborhood: x.meta.neighborhood || x.row.neighborhood || "",
       address: x.row.address || "",
       priceLabel: x.row.price || "",
       indoor: x.meta.indoor,
-      url: x.row.url || "",
+      url: x.row.event_url || "",
+      imageUrl: x.row.image_url || "",
       why: x.meta.why || "",
       travelNote: x.meta.travelNote || "",
       travelFromHome: x.meta.travelFromHome || "",
@@ -298,7 +301,7 @@ ${eventLines}
           } catch {
             host = a.url
           }
-          const row = rows.find((r) => r.url === a.url)
+          const row = rows.find((r) => r.event_url === a.url)
           return [host, { title: row?.source || host, url: a.url, host }]
         }),
     ).values(),

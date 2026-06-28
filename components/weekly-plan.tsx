@@ -16,8 +16,26 @@ function normalizeUrl(url: string): string | null {
 
 function ActivityCard({ activity }: { activity: Activity }) {
   const sourceUrl = normalizeUrl(activity.url)
+  const imageUrl = activity.imageUrl ? normalizeUrl(activity.imageUrl) : null
   return (
-    <article className="group flex flex-col gap-3 rounded-xl border border-border bg-card p-4 transition-colors hover:border-foreground/20">
+    <article className="group flex flex-col gap-3 overflow-hidden rounded-xl border border-border bg-card transition-colors hover:border-foreground/20">
+      {imageUrl && (
+        <div className="-mx-px -mt-px aspect-[16/9] w-[calc(100%+2px)] overflow-hidden bg-secondary">
+          <img
+            src={imageUrl || "/placeholder.svg"}
+            alt={`${activity.title} at ${activity.venue || "an NYC venue"}`}
+            className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
+            loading="lazy"
+            crossOrigin="anonymous"
+            onError={(e) => {
+              // Hide the image wrapper if the source fails to load.
+              const wrapper = (e.currentTarget as HTMLImageElement).parentElement
+              if (wrapper) wrapper.style.display = "none"
+            }}
+          />
+        </div>
+      )}
+      <div className="flex flex-1 flex-col gap-3 p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="flex flex-col gap-1">
           <div className="flex flex-wrap items-center gap-2">
@@ -110,6 +128,7 @@ function ActivityCard({ activity }: { activity: Activity }) {
             Details <ExternalLink className="size-3.5" />
           </a>
         )}
+      </div>
       </div>
     </article>
   )
