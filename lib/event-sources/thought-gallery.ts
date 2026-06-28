@@ -72,6 +72,52 @@ function inferCategory(slugs: string[]): string {
   return "Talks & lectures"
 }
 
+// Coordinates for well-known, recurring NYC cultural venues. Thought Gallery usually lists
+// only a venue name (no street address), which the Census geocoder can't resolve — so we
+// map the common institutions directly. Matching is done by normalized substring, so
+// "The 92nd Street Y, New York" still hits the "92nd street y" key.
+const VENUE_COORDS: Array<{ match: string; lat: number; lng: number }> = [
+  { match: "high line", lat: 40.748, lng: -74.0048 },
+  { match: "92nd street y", lat: 40.7825, lng: -73.9514 },
+  { match: "morgan library", lat: 40.7491, lng: -73.9815 },
+  { match: "carnegie hall", lat: 40.7651, lng: -73.9799 },
+  { match: "fraunces tavern", lat: 40.7033, lng: -74.0113 },
+  { match: "manhattan municipal building", lat: 40.7128, lng: -74.004 },
+  { match: "center for brooklyn history", lat: 40.6896, lng: -73.9918 },
+  { match: "st. john the divine", lat: 40.8038, lng: -73.962 },
+  { match: "national lighthouse museum", lat: 40.6432, lng: -74.0729 },
+  { match: "the new school", lat: 40.7355, lng: -73.997 },
+  { match: "53rd street library", lat: 40.7596, lng: -73.974 },
+  { match: "bohemian national hall", lat: 40.7707, lng: -73.954 },
+  { match: "center for fiction", lat: 40.6884, lng: -73.9776 },
+  { match: "interference archive", lat: 40.673, lng: -73.987 },
+  { match: "caveat", lat: 40.7185, lng: -73.989 },
+  { match: "stavros niarchos", lat: 40.7522, lng: -73.9818 },
+  { match: "battery park city library", lat: 40.7118, lng: -74.017 },
+  { match: "issue project room", lat: 40.6905, lng: -73.989 },
+  { match: "schwarzman building", lat: 40.7532, lng: -73.9822 },
+  { match: "pioneer works", lat: 40.6766, lng: -74.0123 },
+  { match: "slipper room", lat: 40.7212, lng: -73.9885 },
+  { match: "national sawdust", lat: 40.7184, lng: -73.9618 },
+  { match: "museum of mathematics", lat: 40.7443, lng: -73.9879 },
+  { match: "new york transit museum", lat: 40.6904, lng: -73.9905 },
+  { match: "roosevelt island library", lat: 40.7616, lng: -73.9505 },
+  { match: "the shed", lat: 40.7536, lng: -74.0021 },
+  { match: "carnegie", lat: 40.7651, lng: -73.9799 },
+  { match: "the strand", lat: 40.7332, lng: -73.9908 },
+  { match: "brooklyn academy of music", lat: 40.6865, lng: -73.9776 },
+]
+
+// Resolve a venue name to coordinates via the known-venue table (normalized substring).
+function venueCoords(venue: string | null): { lat: number; lng: number } | null {
+  if (!venue) return null
+  const hay = venue.toLowerCase()
+  for (const v of VENUE_COORDS) {
+    if (hay.includes(v.match)) return { lat: v.lat, lng: v.lng }
+  }
+  return null
+}
+
 // Pull "(Neighborhood)" out of a location string, leaving the venue name.
 function splitVenue(location: string): { venue: string | null; neighborhood: string | null } {
   const m = /^(.*?)\s*\(([^)]+)\)\s*$/.exec(location)
@@ -145,6 +191,9 @@ function parseList(html: string, horizonDays: number): NormalizedEvent[] {
     const { venue, neighborhood } = location ? splitVenue(location) : { venue: null, neighborhood: null }
     const isFree = slugs.includes("free")
     const category = inferCategory(slugs)
+    // Resolve coordinates from the known-venue table when possible; otherwise leave null
+    // and let the ingest geocoder try the address text.
+    const coords = venueCoords(venue)
 
     out.push({
       id: deterministicId([SOURCE_NAME, url || title]),
@@ -154,10 +203,10 @@ function parseList(html: string, horizonDays: number): NormalizedEvent[] {
       source_event_id: url || title,
       event_url: url,
       venue_name: venue,
-      // Feed the ingest geocoder a named venue (these resolve well at venue level).
+      // Feed the ingest geocoder a named venue (used only when not in our known table).
       address: venue ? `${venue}, New York, NY` : null,
-      latitude: null,
-      longitude: null,
+      latitude: coords?.lat ?? null,
+      longitude: coords?.lng ?? null,
       borough: null,
       neighborhood,
       category,
