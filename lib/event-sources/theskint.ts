@@ -37,10 +37,12 @@ function resolveEndDate(md: string, todayNY: Date): string | null {
   const day = Number(m[2])
   if (month < 1 || month > 12 || day < 1 || day > 31) return null
   let year = todayNY.getFullYear()
-  // If the target date is well before today, assume it's next year.
+  // Only roll to next year for a genuine calendar wrap (e.g. "thru 1/4" seen in December),
+  // i.e. the date is MORE than ~4 months in the past. A date that's only recently passed
+  // ("thru 6/25" on 6/28) is treated as this year so the "already ended" filter drops it.
   const candidate = new Date(year, month - 1, day)
   const todayMidnight = new Date(todayNY.getFullYear(), todayNY.getMonth(), todayNY.getDate())
-  if (candidate.getTime() < todayMidnight.getTime() - 2 * 86400000) year += 1
+  if (candidate.getTime() < todayMidnight.getTime() - 120 * 86400000) year += 1
   return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`
 }
 
@@ -59,17 +61,72 @@ function parsePrice(text: string): string | null {
   if (/free admission|free entry|\bfree\b/i.test(text)) return "Free"
   if (/various prices|prices vary/i.test(text)) return "Various prices"
   const m = /\$\s?\d[\d.,]*(?:\s*[-–]\s*\$?\d[\d.,]*)?/.exec(text)
-  return m ? m[0].replace(/\s+/g, "") : null
+  // Strip a trailing sentence period (e.g. "$18." -> "$18") without harming "$10.50".
+  return m ? m[0].replace(/\s+/g, "").replace(/\.$/, "") : null
 }
 
-// Map the bullet text to one of our interest categories so the pre-filter can match it.
-// Defaults to "Arts & Culture" (contains "art", so it still matches the Art interest).
-function inferCategory(haystack: string): string {
-  const hay = haystack.toLowerCase()
+// Known NYC repertory cinemas / film venues. theskint's "ongoing" list is dominated by
+// film series, and the venue name is a far more reliable signal than the title text.
+const CINEMA_VENUES =
+  /metrograph|roxy cinema|nitehawk|quad cinema|paris theater|museum of the moving image|film forum|anthology|angelika|ifc center|l'alliance|alliance new york/i
+
+// Whole-word match so we don't get false hits like "pride" -> "ride" or "crime" -> ...
+function hasWord(hay: string, word: string): boolean {
+  return new RegExp(`\\b${word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i").test(hay)
+}
+
+// Decide the interest category from the event's title + venue (NOT the neighborhood, which
+// is noisy — e.g. "prospect park" would wrongly imply Hiking & parks). Order of signals:
+//   1) a known cinema venue or explicit film word  -> "Film & cinema"
+//   2) whole-word match against our interest keyword map
+//   3) fallback "Arts & Culture" (matches the "Art & galleries" interest via "art")
+function inferCategory(title: string, venue: string | null): string {
+  const hay = `${title} ${venue || ""}`.toLowerCase()
+  if (CINEMA_VENUES.test(hay) || /\bfilms?\b|\bcinema\b|\bscreenings?\b|\bmovies?\b/i.test(hay)) {
+    return "Film & cinema"
+  }
   for (const [interest, keywords] of Object.entries(INTEREST_KEYWORDS)) {
-    if (keywords.some((k) => hay.includes(k))) return interest
+    if (keywords.some((k) => hasWord(hay, k))) return interest
   }
   return "Arts & Culture"
+}
+
+// Approximate centroids for the NYC neighborhoods theskint references. theskint gives no
+// coordinates and its venue strings ("metrograph, les") don't geocode well, so we map the
+// neighborhood to a representative point. This lets the deterministic travel-time filter
+// apply (approximately) instead of skipping these events entirely.
+const NEIGHBORHOOD_COORDS: Record<string, { lat: number; lng: number }> = {
+  les: { lat: 40.718, lng: -73.989 },
+  "lower east side": { lat: 40.718, lng: -73.989 },
+  ues: { lat: 40.7736, lng: -73.9566 },
+  "upper east side": { lat: 40.7736, lng: -73.9566 },
+  uws: { lat: 40.787, lng: -73.9754 },
+  "upper west side": { lat: 40.787, lng: -73.9754 },
+  "east village": { lat: 40.7265, lng: -73.9815 },
+  "west village": { lat: 40.7358, lng: -74.0036 },
+  "greenwich village": { lat: 40.7336, lng: -74.0027 },
+  williamsburg: { lat: 40.7081, lng: -73.9571 },
+  tribeca: { lat: 40.7163, lng: -74.0086 },
+  soho: { lat: 40.7233, lng: -74.0006 },
+  midtown: { lat: 40.7549, lng: -73.984 },
+  "garment district": { lat: 40.7547, lng: -73.991 },
+  astoria: { lat: 40.7644, lng: -73.9235 },
+  chelsea: { lat: 40.7465, lng: -74.0014 },
+  harlem: { lat: 40.8116, lng: -73.9465 },
+  brooklyn: { lat: 40.6782, lng: -73.9442 },
+  "prospect park": { lat: 40.6602, lng: -73.969 },
+}
+
+// Resolve a neighborhood phrase (possibly "williamsburg and prospect park") to coords by
+// taking the first segment that we recognize.
+function neighborhoodCoords(neighborhood: string | null): { lat: number; lng: number } | null {
+  if (!neighborhood) return null
+  const candidates = neighborhood.toLowerCase().split(/\s+and\s+|,|\//)
+  for (const c of candidates) {
+    const key = c.trim()
+    if (NEIGHBORHOOD_COORDS[key]) return NEIGHBORHOOD_COORDS[key]
+  }
+  return null
 }
 
 function parseBullets(html: string, todayNY: Date): NormalizedEvent[] {
@@ -108,10 +165,12 @@ function parseBullets(html: string, todayNY: Date): NormalizedEvent[] {
 
     const { venue, neighborhood } = parseVenue(details || rest)
     const price = parsePrice(rawText)
-    const haystack = `${title} ${details}`
-    const category = inferCategory(haystack)
+    // Infer category from title + venue only (neighborhood is noisy and misleads matching).
+    const category = inferCategory(title, venue)
     // Address feeds the ingest geocoder; include neighborhood for better accuracy.
     const address = [venue, neighborhood].filter(Boolean).join(", ") || null
+    // Approximate coords from the neighborhood so travel filtering can apply.
+    const coords = neighborhoodCoords(neighborhood)
 
     out.push({
       id: deterministicId([SOURCE_NAME, url || title]),
@@ -122,8 +181,8 @@ function parseBullets(html: string, todayNY: Date): NormalizedEvent[] {
       event_url: url,
       venue_name: venue,
       address,
-      latitude: null,
-      longitude: null,
+      latitude: coords?.lat ?? null,
+      longitude: coords?.lng ?? null,
       borough: null,
       neighborhood,
       category,
