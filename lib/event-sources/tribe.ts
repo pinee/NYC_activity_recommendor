@@ -156,9 +156,11 @@ export function createTribeSource(config: TribeSourceConfig): EventSource {
           const feedLng = numberOrNull(e.venue?.geo_lng)
           const lat = feedLat ?? config.defaultLatitude ?? null
           const lng = feedLng ?? config.defaultLongitude ?? null
-          // Exact only when the feed gave real venue coordinates; the org-level fallback
-          // (e.g. Prospect Park / Green-Wood center) is an approximation.
-          const approximate = !(feedLat !== null && feedLng !== null) && lat !== null
+          // Exact ONLY when the feed gave real per-venue coordinates. Anything else is
+          // approximate: an org-level fallback (e.g. Green-Wood center) OR no coordinates
+          // at all (e.g. SummerStage's borough-only venues) — in both cases we can't trust
+          // the travel time, so the user's "exact venue only" toggle should hide them.
+          const approximate = !(feedLat !== null && feedLng !== null)
 
           out.push({
             id: deterministicId([config.name, String(e.id || `${title}|${start}`)]),
