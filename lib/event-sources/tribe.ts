@@ -20,6 +20,14 @@ export type TribeSourceConfig = {
   // (e.g. "SummerStage") doesn't contain words our interest pre-filter looks for.
   // The site's real categories are still preserved in `tags`.
   categoryOverride?: string
+  // Optional fallback coordinates for sites whose venues lack geo (e.g. a single-location
+  // org like Prospect Park or Green-Wood). Applied only when an event has no venue geo,
+  // so the deterministic travel-time filter still works. Also used as a default venue
+  // label when the feed omits one.
+  defaultLatitude?: number
+  defaultLongitude?: number
+  defaultVenueName?: string
+  defaultBorough?: string
 }
 
 // Raw shape of a Tribe event (only the fields we use).
@@ -41,6 +49,11 @@ type TribeResponse = { events?: TribeEvent[]; total_pages?: number; total?: numb
 
 const MAX_PAGES = 6 // safety cap; with a category filter the feed is small
 const PER_PAGE = 50
+
+// Some Tribe sites sit behind a WAF that 403s non-browser User-Agents (e.g. Prospect
+// Park), so we present a realistic browser UA. The endpoint is still a public JSON API.
+const BROWSER_UA =
+  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
 
 // Decode the HTML entities WordPress emits in titles/descriptions (e.g. &#8217; &amp;).
 function decodeEntities(input: string): string {
@@ -109,7 +122,7 @@ export function createTribeSource(config: TribeSourceConfig): EventSource {
       let totalPages = 1
       do {
         const res = await fetch(`${base}&page=${page}`, {
-          headers: { Accept: "application/json", "User-Agent": "NYC-Activities/1.0" },
+          headers: { Accept: "application/json", "User-Agent": BROWSER_UA },
         })
         if (!res.ok) {
           // A 400 past the last page is expected; otherwise surface the error.
@@ -135,7 +148,12 @@ export function createTribeSource(config: TribeSourceConfig): EventSource {
           const siteCategories = (e.categories || []).map((c) => c?.name).filter(Boolean) as string[]
           const siteTags = (e.tags || []).map((t) => t?.name).filter(Boolean) as string[]
           const tags = [...new Set([...siteCategories, ...siteTags])]
-          const venueName = e.venue?.venue?.trim() || null
+          const venueName = e.venue?.venue?.trim() || config.defaultVenueName || null
+
+          // Use the feed's own coordinates when present; otherwise fall back to the
+          // source's known location so travel-time filtering still applies.
+          const lat = numberOrNull(e.venue?.geo_lat) ?? config.defaultLatitude ?? null
+          const lng = numberOrNull(e.venue?.geo_lng) ?? config.defaultLongitude ?? null
 
           out.push({
             id: deterministicId([config.name, String(e.id || `${title}|${start}`)]),
@@ -146,9 +164,9 @@ export function createTribeSource(config: TribeSourceConfig): EventSource {
             event_url: url,
             venue_name: venueName,
             address: venueAddress(e.venue),
-            latitude: numberOrNull(e.venue?.geo_lat),
-            longitude: numberOrNull(e.venue?.geo_lng),
-            borough: null,
+            latitude: lat,
+            longitude: lng,
+            borough: config.defaultBorough || null,
             neighborhood: null,
             // Override keeps interest matching working when the site's own category
             // wording (e.g. "SummerStage") lacks our keywords. Originals live in tags.
