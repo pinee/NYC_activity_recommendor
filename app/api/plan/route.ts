@@ -72,6 +72,7 @@ function cacheKey(profile: any, requests: any, weekStart: string) {
     budget: profile.budget,
     diversity: profile.diversity,
     workDays: profile.workDays,
+    includeApprox: profile.includeApproximateLocations !== false,
     requests: (requests || []).map((r: any) => r.text),
   })
 }
