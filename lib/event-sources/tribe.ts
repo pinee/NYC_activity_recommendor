@@ -152,8 +152,13 @@ export function createTribeSource(config: TribeSourceConfig): EventSource {
 
           // Use the feed's own coordinates when present; otherwise fall back to the
           // source's known location so travel-time filtering still applies.
-          const lat = numberOrNull(e.venue?.geo_lat) ?? config.defaultLatitude ?? null
-          const lng = numberOrNull(e.venue?.geo_lng) ?? config.defaultLongitude ?? null
+          const feedLat = numberOrNull(e.venue?.geo_lat)
+          const feedLng = numberOrNull(e.venue?.geo_lng)
+          const lat = feedLat ?? config.defaultLatitude ?? null
+          const lng = feedLng ?? config.defaultLongitude ?? null
+          // Exact only when the feed gave real venue coordinates; the org-level fallback
+          // (e.g. Prospect Park / Green-Wood center) is an approximation.
+          const approximate = !(feedLat !== null && feedLng !== null) && lat !== null
 
           out.push({
             id: deterministicId([config.name, String(e.id || `${title}|${start}`)]),
@@ -178,6 +183,7 @@ export function createTribeSource(config: TribeSourceConfig): EventSource {
             price: e.cost?.trim() || null,
             currency: "USD",
             image_url: imageUrl(e.image),
+            approximate_location: approximate,
           })
         }
         page++

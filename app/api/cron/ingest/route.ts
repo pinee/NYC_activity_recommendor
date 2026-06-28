@@ -24,6 +24,8 @@ async function enrichCoordinates(events: NormalizedEvent[]): Promise<void> {
     if (coord) {
       e.latitude = coord.lat
       e.longitude = coord.lng
+      // Geocoded from text (address/venue/borough), so the point is an approximation.
+      e.approximate_location = true
     }
   }
 }

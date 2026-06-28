@@ -115,6 +115,9 @@ function ActivityCard({ activity }: { activity: Activity }) {
               <span className="ml-auto font-medium tabular-nums text-foreground">{activity.travelFromOffice}</span>
             </span>
           )}
+          {activity.approximateLocation && (
+            <span className="text-[11px] italic text-muted-foreground">Approximate location — travel time is an estimate</span>
+          )}
         </div>
       )}
 

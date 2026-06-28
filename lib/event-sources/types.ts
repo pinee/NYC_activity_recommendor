@@ -22,6 +22,10 @@ export type NormalizedEvent = {
   price: string | null
   currency: string | null
   image_url: string | null
+  // True when the coordinates are NOT the event's exact venue location — e.g. a
+  // neighborhood/borough centroid or an org-level fallback. Travel-time estimates for
+  // these events are approximate, so the app lets users opt out of them.
+  approximate_location: boolean
 }
 
 // Contract every event source implements. Add a new source by creating a file

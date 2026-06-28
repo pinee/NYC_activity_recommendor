@@ -193,6 +193,9 @@ function parseBullets(html: string, todayNY: Date): NormalizedEvent[] {
       price,
       currency: price && price !== "Free" && price !== "Various prices" ? "USD" : null,
       image_url: null,
+      // theskint never gives exact venue coordinates; any coords we have are a
+      // neighborhood centroid, so travel times for these events are approximate.
+      approximate_location: coords !== null,
     })
   }
   return out
