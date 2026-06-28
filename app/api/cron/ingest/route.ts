@@ -1,5 +1,6 @@
 import { createServiceClient } from "@/lib/supabase/server"
 import { eventSources, type NormalizedEvent } from "@/lib/event-sources"
+import { nyToUtcISO } from "@/lib/event-sources/util"
 
 export const maxDuration = 300
 
@@ -65,8 +66,12 @@ async function ingest(): Promise<IngestResult> {
     upserted = deduped.length
   }
 
-  // Clean up events that have already passed so the table stays lean.
-  await supabase.from("events").delete().lt("start_time", new Date().toISOString())
+  // Clean up events from before today (NY time) so the table stays lean. We anchor
+  // to the START of today rather than the current moment, so an event happening
+  // later today (or one with a midnight/all-day start) is never dropped mid-day.
+  const todayNY = new Date().toLocaleString("sv-SE", { timeZone: "America/New_York" }).slice(0, 10)
+  const startOfTodayUTC = nyToUtcISO(todayNY, "00:00") ?? new Date().toISOString()
+  await supabase.from("events").delete().lt("start_time", startOfTodayUTC)
 
   return {
     found: deduped.length,

@@ -63,8 +63,13 @@ export const nycParksSource: EventSource = {
   enabled: true,
 
   async fetchEvents({ horizonDays }): Promise<NormalizedEvent[]> {
-    // Pull a generous page; the feed is already scoped to upcoming events.
-    const url = `${SODA_ENDPOINT}?$limit=1000&$order=startdate ASC`
+    // The dataset holds a large backlog ordered by date, so we MUST filter
+    // server-side to "today forward" (NY date) — otherwise a 1000-row page is
+    // entirely past events. $where uses a Socrata floating timestamp literal.
+    // "sv-SE" formats as "YYYY-MM-DD HH:mm:ss", so the date part is the NY calendar date.
+    const todayNY = isoDatePart(new Date().toLocaleString("sv-SE", { timeZone: "America/New_York" }))
+    const where = encodeURIComponent(`startdate >= '${todayNY}T00:00:00'`)
+    const url = `${SODA_ENDPOINT}?$limit=1000&$order=startdate ASC&$where=${where}`
     const res = await fetch(url, { headers: { Accept: "application/json" } })
     if (!res.ok) {
       throw new Error(`NYC Parks feed returned HTTP ${res.status}`)
