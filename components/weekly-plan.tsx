@@ -1,6 +1,6 @@
 "use client"
 
-import { MapPin, Clock, ExternalLink, Sun, Building, ArrowRight, Home, Briefcase, Globe } from "lucide-react"
+import { MapPin, Clock, ExternalLink, Sun, Building, ArrowRight, Home, Briefcase, Globe, CalendarRange } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import type { Activity, WeeklyPlan } from "@/lib/types"
 
@@ -16,8 +16,28 @@ function normalizeUrl(url: string): string | null {
 
 function ActivityCard({ activity }: { activity: Activity }) {
   const sourceUrl = normalizeUrl(activity.url)
+  const imageUrl = activity.imageUrl ? normalizeUrl(activity.imageUrl) : null
+  // A multi-day event ends on a different day than the one it's displayed under.
+  const isMultiDay = Boolean(activity.endDate && activity.endDate !== activity.date)
   return (
-    <article className="group flex flex-col gap-3 rounded-xl border border-border bg-card p-4 transition-colors hover:border-foreground/20">
+    <article className="group flex flex-col gap-3 overflow-hidden rounded-xl border border-border bg-card transition-colors hover:border-foreground/20">
+      {imageUrl && (
+        <div className="-mx-px -mt-px aspect-[16/9] w-[calc(100%+2px)] overflow-hidden bg-secondary">
+          <img
+            src={imageUrl || "/placeholder.svg"}
+            alt={`${activity.title} at ${activity.venue || "an NYC venue"}`}
+            className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
+            loading="lazy"
+            crossOrigin="anonymous"
+            onError={(e) => {
+              // Hide the image wrapper if the source fails to load.
+              const wrapper = (e.currentTarget as HTMLImageElement).parentElement
+              if (wrapper) wrapper.style.display = "none"
+            }}
+          />
+        </div>
+      )}
+      <div className="flex flex-1 flex-col gap-3 p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="flex flex-col gap-1">
           <div className="flex flex-wrap items-center gap-2">
@@ -53,6 +73,12 @@ function ActivityCard({ activity }: { activity: Activity }) {
               {activity.startTime}
               {activity.endTime ? `–${activity.endTime}` : ""}
             </span>
+          </span>
+        )}
+        {isMultiDay && (
+          <span className="flex items-center gap-2">
+            <CalendarRange className="size-3.5 shrink-0" />
+            <span>Runs through {formatDateLabel(activity.endDate as string, "")}</span>
           </span>
         )}
         <a
@@ -111,6 +137,7 @@ function ActivityCard({ activity }: { activity: Activity }) {
           </a>
         )}
       </div>
+      </div>
     </article>
   )
 }
@@ -143,6 +170,11 @@ export function WeeklyPlanView({ plan }: { plan: WeeklyPlan }) {
     <div className="flex flex-col gap-8">
       {plan.summary && (
         <p className="text-pretty text-base leading-relaxed text-muted-foreground">{plan.summary}</p>
+      )}
+      {plan.filteredNote && (
+        <p className="rounded-lg border border-border bg-secondary/50 px-3 py-2 text-xs text-muted-foreground">
+          {plan.filteredNote} Adjust your budget, travel time, or working hours to see more.
+        </p>
       )}
       {byDay.length === 0 && (
         <div className="rounded-xl border border-dashed border-border px-6 py-12 text-center">

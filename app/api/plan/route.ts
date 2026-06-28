@@ -1,7 +1,9 @@
 import { generateText, Output } from "ai"
 import { z } from "zod"
-import { WEEK_DAYS } from "@/lib/types"
+import { type WeekDay, INTEREST_KEYWORDS } from "@/lib/types"
 import { createServiceClient } from "@/lib/supabase/server"
+import { nyToUtcISO } from "@/lib/event-sources/util"
+import { geocodeAddress, estimateTravelMinutes, type Coord } from "@/lib/geo"
 
 export const maxDuration = 60
 
@@ -40,6 +42,21 @@ function nyParts(iso: string) {
   return { date, weekday, startTime }
 }
 
+// NYC-local calendar date (YYYY-MM-DD) from a UTC timestamp.
+function nyDateOf(iso: string): string {
+  return new Date(iso).toLocaleDateString("en-CA", { timeZone: "America/New_York" })
+}
+
+// NYC-local 24h clock (HH:MM) from a UTC timestamp.
+function nyClockOf(iso: string): string {
+  return new Date(iso).toLocaleTimeString("en-GB", {
+    timeZone: "America/New_York",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  })
+}
+
 // ---- Short-lived in-memory cache (per warm server instance) ----
 type CacheEntry = { expires: number; payload: unknown }
 const CACHE = new Map<string, CacheEntry>()
@@ -66,30 +83,90 @@ type EventRow = {
   title: string
   description: string | null
   category: string | null
-  date_time: string
-  venue: string | null
+  start_time: string
+  end_time: string | null
+  venue_name: string | null
   address: string | null
   latitude: number | null
   longitude: number | null
-  url: string | null
+  event_url: string | null
   source: string | null
   price: string | null
+  image_url: string | null
+  neighborhood: string | null
 }
 
-// Fetch all events stored for the next 7 days (rolling window from now).
-async function fetchUpcomingEvents(): Promise<EventRow[]> {
+// Build the set of category keywords for the user's interests (deduped, lowercased).
+function interestKeywords(interests: string[]): string[] {
+  const set = new Set<string>()
+  for (const it of interests) {
+    const kws = INTEREST_KEYWORDS[it] || tokenize(it).filter((t) => t.length >= 3)
+    for (const k of kws) set.add(k.toLowerCase())
+  }
+  return [...set]
+}
+
+// Fetch events whose span overlaps the next 7 days (rolling window from the start of
+// today, NY time), PRE-FILTERED to the user's interests so the (capped) result set is
+// always relevant rather than just "the earliest N events". This includes ongoing
+// multi-day events that began earlier: an event is in-window if it starts on/before the
+// window end AND it either ends on/after the window start, or (single-day) starts after it.
+async function fetchUpcomingEvents(interests: string[]): Promise<EventRow[]> {
   const supabase = createServiceClient()
-  const nowISO = new Date().toISOString()
-  const endISO = new Date(Date.now() + 7 * 86400000).toISOString()
-  const { data, error } = await supabase
+  const todayNY = new Date().toLocaleString("sv-SE", { timeZone: "America/New_York" }).slice(0, 10)
+  const windowStartISO = nyToUtcISO(todayNY, "00:00") ?? new Date().toISOString()
+  const windowEndISO = new Date(new Date(windowStartISO).getTime() + 7 * 86400000).toISOString()
+
+  let query = supabase
     .from("events")
     .select("*")
-    .gte("date_time", nowISO)
-    .lte("date_time", endISO)
-    .order("date_time", { ascending: true })
-    .limit(200)
+    .lte("start_time", windowEndISO)
+    .or(`end_time.gte.${windowStartISO},and(end_time.is.null,start_time.gte.${windowStartISO})`)
+
+  // Category pre-filter: keep only events whose category matches an interest keyword.
+  // When no interests are set, fall through and return the whole window.
+  const keywords = interestKeywords(interests)
+  if (keywords.length > 0) {
+    query = query.or(keywords.map((k) => `category.ilike.%${k}%`).join(","))
+  }
+
+  const { data, error } = await query.order("start_time", { ascending: true }).limit(500)
   if (error) throw new Error(error.message)
   return (data as EventRow[]) || []
+}
+
+// ---- Deterministic filter helpers (budget / working hours / travel) ----
+
+// Parse a free-text price into the cheapest dollar figure it implies.
+// "Free" -> 0, "$25" -> 25, "$10–$40" -> 10 (lowest), unknown/blank -> null (can't judge).
+function parsePriceUSD(price: string | null): number | null {
+  if (!price) return null
+  const text = price.toLowerCase()
+  if (text.includes("free") || text.includes("no charge")) return 0
+  const nums = (price.match(/\d+(?:\.\d+)?/g) || []).map(Number)
+  if (nums.length === 0) return null
+  return Math.min(...nums)
+}
+
+// Map the user's budget preference to a maximum acceptable price (null = no cap).
+function budgetCapUSD(budget: string): number | null {
+  switch (budget) {
+    case "free":
+      return 0
+    case "low":
+      return 25
+    case "medium":
+      return 75
+    default:
+      return null // "any"
+  }
+}
+
+// "HH:MM" -> minutes since midnight (for working-hours comparisons).
+function clockToMinutes(hhmm: string): number | null {
+  const m = /^(\d{1,2}):(\d{2})$/.exec(hhmm || "")
+  if (!m) return null
+  return Number(m[1]) * 60 + Number(m[2])
 }
 
 // Metadata the model adds on top of an authoritative DB event.
@@ -102,7 +179,7 @@ type PickMeta = {
   why: string
 }
 
-function tokenize(s: string): string[] {
+function tokenize(s: string | null): string[] {
   return (s || "").toLowerCase().match(/[a-z]+/g) || []
 }
 
@@ -139,8 +216,8 @@ async function buildPlan(body: any) {
   const { profile, weather, events: busy, requests } = body
   const dates = upcomingDates()
 
-  // 1) Read the catalog from the database (no live web search).
-  const rows = await fetchUpcomingEvents()
+  // 1) Read the catalog from the database (no live web search), pre-filtered to interests.
+  const rows = await fetchUpcomingEvents(profile.interests || [])
 
   if (rows.length === 0) {
     return {
@@ -155,8 +232,14 @@ async function buildPlan(body: any) {
   const byId = new Map(rows.map((r) => [r.id, r]))
   const eventLines = rows
     .map((r) => {
-      const { date, startTime } = nyParts(r.date_time)
-      return `id:${r.id} | ${date} ${startTime || "(time TBD)"} | ${r.category || "Uncategorized"} | ${r.title} | venue: ${r.venue || "?"} | address: ${r.address || "?"} | price: ${r.price || "?"} | ${r.description || ""}`
+      const { date, startTime } = nyParts(r.start_time)
+      const endDate = r.end_time ? nyDateOf(r.end_time) : null
+      // Multi-day events show a range and are flagged as available any day in that span.
+      const when =
+        endDate && endDate !== date
+          ? `${date} to ${endDate} (multi-day, available any day in range)`
+          : `${date} ${startTime || "(time TBD)"}`
+      return `id:${r.id} | ${when} | ${r.category || "Uncategorized"} | ${r.title} | venue: ${r.venue_name || "?"} | address: ${r.address || "?"} | price: ${r.price || "?"} | ${r.description || ""}`
     })
     .join("\n")
 
@@ -255,15 +338,85 @@ ${eventLines}
   }
 
   const validIso = new Set(dates.map((d) => d.iso))
+  const weekdayByIso = new Map(dates.map((d) => [d.iso, d.weekday as WeekDay]))
+  const todayIso = dates[0].iso
+
+  // Geocode home/office once for deterministic travel filtering (free, cached, best-effort).
+  const [homeCoord, officeCoord] = await Promise.all([
+    geocodeAddress(profile.homeAddress),
+    geocodeAddress(profile.officeAddress),
+  ])
+
+  // Deterministic constraints, applied AFTER the AI has chosen relevant events.
+  const cap = budgetCapUSD(profile.budget)
+  const maxTravel = typeof profile.maxTravelMinutes === "number" ? profile.maxTravelMinutes : null
+  const workStartMin = clockToMinutes(profile.workStart)
+  const workEndMin = clockToMinutes(profile.workEnd)
+  const workDays: string[] = profile.workDays || []
+  const removed = { budget: 0, hours: 0, travel: 0 }
 
   // 3) Merge curation with authoritative DB fields. DB owns title/date/url/price; meta owns why/travel/etc.
-  const activities = picks
+  const enriched = picks
     .map(({ row, meta }) => {
-      const { date, weekday, startTime } = nyParts(row.date_time)
-      return { row, meta, date, weekday: weekday as (typeof WEEK_DAYS)[number], startTime }
+      const startDate = nyDateOf(row.start_time)
+      const endDate = row.end_time ? nyDateOf(row.end_time) : null
+      const multiDay = !!endDate && endDate !== startDate
+      // Ongoing events started before today are anchored to today so they still
+      // surface in the week view; otherwise we use their real start day.
+      const displayDate = startDate < todayIso ? todayIso : startDate
+      const isOpeningDay = displayDate === startDate
+      // Show a clock time only on the event's actual start day. For ongoing days we
+      // rely on the "Runs through" range label instead. End time only for single-day.
+      const startTime = isOpeningDay ? nyClockOf(row.start_time) : ""
+      const endTime = !multiDay && row.end_time ? nyClockOf(row.end_time) : ""
+      return { row, meta, date: displayDate, endDate, startTime, endTime, weekday: weekdayByIso.get(displayDate) }
     })
     // Defensive: only show events that fall within the next 7 days.
     .filter((x) => validIso.has(x.date))
+
+  // 4) Apply the deterministic budget / working-hours / travel filters.
+  const kept: (typeof enriched[number] & { detHome: number | null; detOffice: number | null })[] = []
+  for (const x of enriched) {
+    // Budget: drop only when we can parse a price AND it exceeds the cap. Unknown/free pass.
+    if (cap !== null) {
+      const priceUSD = parsePriceUSD(x.row.price)
+      if (priceUSD !== null && priceUSD > cap) {
+        removed.budget++
+        continue
+      }
+    }
+
+    // Working hours: drop events that start during the user's working hours on a workday.
+    if (x.startTime && x.weekday && workDays.includes(x.weekday) && workStartMin !== null && workEndMin !== null) {
+      const startMin = clockToMinutes(x.startTime)
+      if (startMin !== null && startMin >= workStartMin && startMin < workEndMin) {
+        removed.hours++
+        continue
+      }
+    }
+
+    // Travel: estimate one-way minutes from home and office (straight-line). Keep the
+    // closer of the two. Only filter when we have BOTH an event location and an origin.
+    let detHome: number | null = null
+    let detOffice: number | null = null
+    const eventCoord: Coord | null =
+      typeof x.row.latitude === "number" && typeof x.row.longitude === "number"
+        ? { lat: x.row.latitude, lng: x.row.longitude }
+        : null
+    if (eventCoord) {
+      if (homeCoord) detHome = estimateTravelMinutes(homeCoord, eventCoord)
+      if (officeCoord) detOffice = estimateTravelMinutes(officeCoord, eventCoord)
+    }
+    const bestTravel = [detHome, detOffice].filter((n): n is number => n !== null).sort((a, b) => a - b)[0] ?? null
+    if (maxTravel !== null && bestTravel !== null && bestTravel > maxTravel) {
+      removed.travel++
+      continue
+    }
+
+    kept.push({ ...x, detHome, detOffice })
+  }
+
+  const activities = kept
     .sort((a, b) => (a.date === b.date ? a.startTime.localeCompare(b.startTime) : a.date.localeCompare(b.date)))
     .slice(0, MAX_ACTIVITIES)
     .map((x, i) => ({
@@ -271,20 +424,34 @@ ${eventLines}
       title: x.row.title,
       category: x.row.category || "Event",
       date: x.date,
-      day: x.weekday,
+      day: x.weekday ?? ("Monday" as WeekDay),
       startTime: x.startTime,
-      endTime: "",
-      venue: x.row.venue || "",
-      neighborhood: x.meta.neighborhood || "",
+      endTime: x.endTime,
+      endDate: x.endDate ?? "",
+      venue: x.row.venue_name || "",
+      neighborhood: x.meta.neighborhood || x.row.neighborhood || "",
       address: x.row.address || "",
       priceLabel: x.row.price || "",
       indoor: x.meta.indoor,
-      url: x.row.url || "",
+      url: x.row.event_url || "",
+      imageUrl: x.row.image_url || "",
       why: x.meta.why || "",
       travelNote: x.meta.travelNote || "",
-      travelFromHome: x.meta.travelFromHome || "",
-      travelFromOffice: x.meta.travelFromOffice || "",
+      // Prefer the deterministic straight-line estimate; fall back to the AI's text.
+      travelFromHome: x.detHome !== null ? `~${x.detHome} min` : x.meta.travelFromHome || "",
+      travelFromOffice: x.detOffice !== null ? `~${x.detOffice} min` : x.meta.travelFromOffice || "",
     }))
+
+  // Note describing what the deterministic filters removed (shown to the user).
+  const totalRemoved = removed.budget + removed.hours + removed.travel
+  let filteredNote = ""
+  if (totalRemoved > 0) {
+    const parts: string[] = []
+    if (removed.travel) parts.push(`${removed.travel} too far`)
+    if (removed.budget) parts.push(`${removed.budget} over budget`)
+    if (removed.hours) parts.push(`${removed.hours} during working hours`)
+    filteredNote = `${totalRemoved} ${totalRemoved === 1 ? "event" : "events"} hidden: ${parts.join(", ")}.`
+  }
 
   // Build a de-duplicated source list from the events actually shown.
   const sources = Array.from(
@@ -298,13 +465,13 @@ ${eventLines}
           } catch {
             host = a.url
           }
-          const row = rows.find((r) => r.url === a.url)
+          const row = rows.find((r) => r.event_url === a.url)
           return [host, { title: row?.source || host, url: a.url, host }]
         }),
     ).values(),
   )
 
-  return { summary, activities, sources }
+  return { summary, activities, sources, filteredNote: filteredNote || undefined }
 }
 
 export async function POST(req: Request) {
