@@ -3,6 +3,7 @@ import { nycParksSource } from "./nyc-parks"
 import { summerStageSource } from "./summerstage"
 import { prospectParkSource } from "./prospect-park"
 import { greenWoodSource } from "./green-wood"
+import { theSkintSource } from "./theskint"
 
 // Registry of all event sources the ingest job pulls from.
 // To add a new free feed or official API later (e.g. Luma, Meetup), implement the
@@ -13,6 +14,7 @@ export const eventSources: EventSource[] = [
   summerStageSource,
   prospectParkSource,
   greenWoodSource,
+  theSkintSource,
 ]
 
 export type { EventSource, NormalizedEvent } from "./types"
