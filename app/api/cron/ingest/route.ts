@@ -26,6 +26,43 @@ const CATEGORY_GROUPS = [
 const INGEST_HORIZON_DAYS = 14
 const PER_GROUP_LIMIT = 12
 
+// Quality control: only ingest events whose listing URL lives on one of these
+// approved ticketing/registration platforms. This is the hard guarantee — the AI
+// prompt steers toward these sites, but this filter is what actually enforces it.
+// Add more domains here later to expand coverage.
+const ALLOWED_SOURCE_DOMAINS = [
+  "eventbrite.com",
+  "meetup.com",
+  "lu.ma", // Luma
+  "dice.fm",
+  "feverup.com", // Fever
+]
+
+// True if the URL's host is (or is a subdomain of) one of the approved domains.
+function isAllowedSource(url: string): boolean {
+  try {
+    const host = new URL(url).hostname.replace(/^www\./, "").toLowerCase()
+    return ALLOWED_SOURCE_DOMAINS.some((d) => host === d || host.endsWith(`.${d}`))
+  } catch {
+    return false
+  }
+}
+
+// Human-readable platform name from a URL host, used to fill the `source` column consistently.
+function sourceNameFor(url: string): string | null {
+  try {
+    const host = new URL(url).hostname.replace(/^www\./, "").toLowerCase()
+    if (host === "eventbrite.com" || host.endsWith(".eventbrite.com")) return "Eventbrite"
+    if (host === "meetup.com" || host.endsWith(".meetup.com")) return "Meetup"
+    if (host === "lu.ma" || host.endsWith(".lu.ma")) return "Luma"
+    if (host === "dice.fm" || host.endsWith(".dice.fm")) return "Dice"
+    if (host === "feverup.com" || host.endsWith(".feverup.com")) return "Fever"
+    return null
+  } catch {
+    return null
+  }
+}
+
 const ingestEventSchema = z.object({
   title: z.string(),
   description: z.string().describe("1-2 sentence description of the event"),
@@ -74,10 +111,10 @@ async function researchGroup(categories: string, dateList: string[]) {
     model: "perplexity/sonar-pro",
     system:
       "You are a meticulous New York City events researcher. Search the live web for REAL, currently-scheduled events in NYC happening on the specific upcoming dates. Only include things that genuinely exist with real venues and a working listing/ticket URL. " +
-      "SOURCE COVERAGE: cross-reference a broad range of authoritative NYC sources — NYC Parks & NYC.gov calendars, Time Out New York, The Skint, Secret NYC, NYC Tourism, Eventbrite, Meetup, Dice, Resident Advisor, Bandsintown, Songkick, official venue/museum/gallery sites, NYPL/BPL/QPL libraries, NYRR and studio sites. Prefer primary/official sources. " +
+      "SOURCE RESTRICTION: ONLY include events whose listing page is hosted on one of these five platforms — Eventbrite (eventbrite.com), Meetup (meetup.com), Luma (lu.ma), Dice (dice.fm), or Fever (feverup.com). The URL you provide MUST be a direct link to that event's page on one of those five sites. Ignore any event you cannot find on one of these platforms. " +
       "NEIGHBORHOOD COVERAGE: span many neighborhoods across all five boroughs, not just one area. " +
-      "Every event MUST be in New York City — never another city. Provide the event's own page or its venue's page, never a generic 'events calendar' roundup when a specific page exists.",
-    prompt: `Find up to ${PER_GROUP_LIMIT} real NYC events in these categories: ${categories}.\nThey must occur on one of these exact dates: ${dateList.join(", ")}.\nFor each event give: title, 1-2 sentence description, a specific category label, exact ISO date (YYYY-MM-DD), start time (24h), venue name, full street address with borough, price, the source website name, and a working URL to the specific event or venue.`,
+      "Every event MUST be in New York City — never another city. Provide the event's own page on one of the five platforms, never a generic 'events calendar' roundup.",
+    prompt: `Find up to ${PER_GROUP_LIMIT} real NYC events in these categories: ${categories}.\nThey must occur on one of these exact dates: ${dateList.join(", ")}.\nThey MUST be listed on Eventbrite, Meetup, Luma (lu.ma), Dice (dice.fm), or Fever (feverup.com).\nFor each event give: title, 1-2 sentence description, a specific category label, exact ISO date (YYYY-MM-DD), start time (24h), venue name, full street address with borough, price, the platform name, and the direct URL to the event's page on one of those five platforms.`,
   })
 
   const citations = ((research.sources as any[]) || [])
@@ -99,7 +136,7 @@ async function researchGroup(categories: string, dateList: string[]) {
     system:
       "Convert the research notes into a structured list of NYC events. Keep only real events mentioned in the notes. " +
       "DATE RULE: set 'date' to the exact ISO date (YYYY-MM-DD); it MUST be one of the allowed dates. Drop events outside that list. " +
-      "URL RULE: set 'url' to a real, complete http(s) link to the specific event or its venue from the CITATIONS or notes — never invent a URL, never a bare domain, never a search-engine URL, and NEVER a page for a city other than New York City. If no real NYC link exists, drop the event. " +
+      "URL RULE: set 'url' to a real, complete http(s) link to the specific event's page on Eventbrite (eventbrite.com), Meetup (meetup.com), Luma (lu.ma), Dice (dice.fm), or Fever (feverup.com), taken from the CITATIONS or notes — never invent a URL, never a bare domain, never a search-engine URL, never a page for a city other than New York City, and NEVER a link outside those five platforms. If no such link exists, drop the event. " +
       "Set 'source' to the website/publication name the listing came from.",
     prompt: `Allowed dates: ${dateList.join(", ")}\n\nCITATIONS (real links — format "title — url"):\n${citations.map((c) => `${c.title} — ${c.url}`).join("\n") || "(none)"}\n\nResearch notes:\n${research.text}`,
   })
@@ -151,6 +188,8 @@ async function ingest(): Promise<IngestResult> {
         const usableModelUrl = modelUrl && !isWrongCityUrl(modelUrl) ? modelUrl : null
         const url = usableModelUrl ?? bestCitationFor({ venue: e.venue, title: e.title }, citations) ?? ""
         if (!url) continue
+        // Quality gate: only keep events hosted on an approved platform.
+        if (!isAllowedSource(url)) continue
         const dateTime = nyToUtcISO(e.date, e.time)
         if (!dateTime) continue
         collected.push({
@@ -166,7 +205,8 @@ async function ingest(): Promise<IngestResult> {
             latitude: null,
             longitude: null,
             event_url: url,
-            source: e.source || null,
+            // Normalize source to the platform name so it always matches the link.
+            source: sourceNameFor(url) || e.source || null,
             price: e.price || null,
           },
         })
