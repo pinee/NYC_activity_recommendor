@@ -5,6 +5,7 @@ import { prospectParkSource } from "./prospect-park"
 import { greenWoodSource } from "./green-wood"
 import { theSkintSource } from "./theskint"
 import { thoughtGallerySource } from "./thought-gallery"
+import { pulsdSource } from "./pulsd"
 
 // Registry of all event sources the ingest job pulls from.
 // To add a new free feed or official API later (e.g. Luma, Meetup), implement the
@@ -17,6 +18,7 @@ export const eventSources: EventSource[] = [
   greenWoodSource,
   theSkintSource,
   thoughtGallerySource,
+  pulsdSource,
 ]
 
 export type { EventSource, NormalizedEvent } from "./types"
