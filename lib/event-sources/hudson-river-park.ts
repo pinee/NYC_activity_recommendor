@@ -1,5 +1,5 @@
 import type { EventSource, NormalizedEvent } from "./types"
-import { deterministicId, nyToUtcISO } from "./util"
+import { deterministicId, monthDayToNyDate, nyToUtcISO } from "./util"
 import { INTEREST_KEYWORDS } from "@/lib/types"
 
 // Hudson River Park (hudsonriverpark.org) sits behind Cloudflare bot management that
@@ -8,13 +8,18 @@ import { INTEREST_KEYWORDS } from "@/lib/types"
 // requests through the free r.jina.ai reader proxy, which fetches with a browser
 // fingerprint. With the `x-respond-with: html` header it returns the page's original HTML.
 //
-// The homepage events widget only shows a narrow, CDN-cached rolling window (~3 days), so
-// instead we read the WordPress event sitemaps (every event URL, with a date-stamped slug
+// PRIMARY path: read the WordPress event sitemaps (every event URL, with a date-stamped slug
 // like `...-july-10-2026/`), filter to the ingest horizon by slug date, and then fetch each
-// event's detail page for its title/time/location (carried in the og: meta tags).
+// event's detail page for its title/time/location (carried in the og: meta tags). This
+// covers the full horizon.
+//
+// FALLBACK path: if the sitemap path yields nothing (sitemaps unreachable, slug format
+// changes, or all detail fetches fail), scrape the events listing page, whose cards carry
+// title/date/time/pier inline — but only for a narrow CDN-cached rolling window (~3 days).
 const SOURCE_NAME = "Hudson River Park"
 const ORIGIN = "https://hudsonriverpark.org"
 const EVENT_SITEMAPS = ["events-sitemap.xml", "events-sitemap2.xml", "events-sitemap3.xml"]
+const LISTING_URL = `${ORIGIN}/visit/events/`
 const BROWSER_UA =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
 // Bound the number of detail-page fetches per ingest run (politeness + run time).
@@ -179,6 +184,50 @@ function deslugTitle(slug: string): string {
     .trim()
 }
 
+// Build a normalized event from already-resolved fields. `text` drives category + location
+// inference (title + description, or title + pier for listing cards). Shared by both the
+// sitemap detail-page path and the listing-card fallback.
+function assembleEvent(opts: {
+  url: string
+  title: string
+  description: string | null
+  dateISO: string
+  time: string
+  image: string | null
+  text: string
+}): NormalizedEvent | null {
+  const startUtc = nyToUtcISO(opts.dateISO, opts.time)
+  if (!startUtc) return null
+
+  const { lat, lng, venue, exact } = resolveLocation(opts.text)
+
+  return {
+    id: deterministicId([SOURCE_NAME, opts.url]),
+    title: opts.title,
+    description: opts.description || null,
+    source: SOURCE_NAME,
+    source_event_id: opts.url,
+    event_url: opts.url,
+    venue_name: venue ? `${venue}, Hudson River Park` : "Hudson River Park",
+    address: venue ? `${venue}, Hudson River Park, New York, NY` : "Hudson River Park, New York, NY",
+    latitude: lat,
+    longitude: lng,
+    borough: "Manhattan",
+    neighborhood: venue,
+    category: inferCategory(opts.text),
+    tags: ["hudson river park", ...(venue ? [venue.toLowerCase()] : [])],
+    organizer: "Hudson River Park",
+    start_time: startUtc,
+    end_time: null,
+    // Park programming is free unless stated otherwise; the pages list no ticket price.
+    price: "Free",
+    currency: "USD",
+    image_url: opts.image || null,
+    // Exact when we matched a known pier/named area; approximate on the park-center fallback.
+    approximate_location: !exact,
+  }
+}
+
 async function buildEvent(entry: SitemapEntry): Promise<NormalizedEvent | null> {
   const html = await fetchViaProxy(entry.url, "og:title")
   const title = metaContent(html, "og:title") || deslugTitle(entry.slug)
@@ -189,38 +238,49 @@ async function buildEvent(entry: SitemapEntry): Promise<NormalizedEvent | null> 
   // Time + location come from the human-readable description ("...Friday, July 10 at
   // 6:30 PM..." / "...off Pier 26..."). Default to a midday start if no time is stated, so
   // recurring daytime programming (drop-in fishing, galleries) still schedules.
-  const haystack = `${title}. ${description || ""}`
+  const text = `${title}. ${description || ""}`
   const time = (description && parseTimeFromText(description)) || "12:00"
-  const startUtc = nyToUtcISO(entry.dateISO, time)
-  if (!startUtc) return null
+  return assembleEvent({ url: entry.url, title, description, dateISO: entry.dateISO, time, image, text })
+}
 
-  const { lat, lng, venue, exact } = resolveLocation(haystack)
+// FALLBACK: parse the events listing page's inline cards. Each card carries title, a date
+// line ("Thursday, Jun 25 11:00 AM - 9:00 PM"), and a pier — so no per-event detail fetch is
+// needed. The listing only covers a ~3-day window, hence this is a fallback, not primary.
+function parseListingCards(html: string, todayNY: Date, horizonDays: number, seen: Set<string>): NormalizedEvent[] {
+  const out: NormalizedEvent[] = []
+  const startDay = new Date(todayNY.getFullYear(), todayNY.getMonth(), todayNY.getDate())
+  const endDay = new Date(startDay.getTime() + horizonDays * 86400000)
 
-  return {
-    id: deterministicId([SOURCE_NAME, entry.url]),
-    title,
-    description: description || null,
-    source: SOURCE_NAME,
-    source_event_id: entry.url,
-    event_url: entry.url,
-    venue_name: venue ? `${venue}, Hudson River Park` : "Hudson River Park",
-    address: venue ? `${venue}, Hudson River Park, New York, NY` : "Hudson River Park, New York, NY",
-    latitude: lat,
-    longitude: lng,
-    borough: "Manhattan",
-    neighborhood: venue,
-    category: inferCategory(haystack),
-    tags: ["hudson river park", ...(venue ? [venue.toLowerCase()] : [])],
-    organizer: "Hudson River Park",
-    start_time: startUtc,
-    end_time: null,
-    // Park programming is free unless stated otherwise; the pages list no ticket price.
-    price: "Free",
-    currency: "USD",
-    image_url: image || null,
-    // Exact when we matched a known pier/named area; approximate on the park-center fallback.
-    approximate_location: !exact,
+  const chunks = html.split(/<div class="hrpkcard--title">/).slice(1)
+  for (const chunk of chunks) {
+    const url = (chunk.match(/href="(https:\/\/hudsonriverpark\.org\/visit\/events\/event\/[^"]+)"/) || [])[1]
+    // The title sits inside the card's link, as either an <h3> (raw HTML) or nested <span>s
+    // (proxy-rendered HTML). Take the link's inner text and strip tags to handle both.
+    const anchor = (chunk.match(/<a\b[^>]*hrpkcard--link[^>]*>([\s\S]*?)<\/a>/i) || [])[1] || ""
+    const title = decodeEntities(anchor.replace(/<[^>]+>/g, " "))
+    const dateLine = decodeEntities((chunk.match(/hrpkcard--details-dates">([\s\S]*?)<\/div>/) || [])[1] || "")
+    const pierRaw = (chunk.match(/hrpkcard--details-pier">([\s\S]*?)<\/div>/) || [])[1] || ""
+    const pier = decodeEntities(pierRaw.replace(/<[^>]+>/g, " "))
+    if (!url || !title || !dateLine || seen.has(url)) continue
+    if (EXCLUDE_PATTERNS.test(url)) continue
+
+    // Date line is "Weekday, Mon DD ...": pull the month abbreviation + day (year-less).
+    const dm = dateLine.match(/\b([A-Z][a-z]{2})\s+(\d{1,2})\b/)
+    if (!dm) continue
+    const dateISO = monthDayToNyDate(dm[1], Number(dm[2]), todayNY)
+    if (!dateISO) continue
+    const d = new Date(`${dateISO}T12:00:00`)
+    if (d < startDay || d > endDay) continue
+
+    const time = parseTimeFromText(dateLine) || "12:00"
+    const text = `${title}. ${pier}`
+    const event = assembleEvent({ url, title, description: null, dateISO, time, image: null, text })
+    if (event) {
+      seen.add(url)
+      out.push(event)
+    }
   }
+  return out
 }
 
 // Resolve an array of items with bounded concurrency.
@@ -245,9 +305,11 @@ export const hudsonRiverParkSource: EventSource = {
   name: SOURCE_NAME,
   enabled: true,
   async fetchEvents({ horizonDays }) {
+    const todayNY = new Date(new Date().toLocaleString("en-US", { timeZone: "America/New_York" }))
+    const seen = new Set<string>()
+
     // 1) Collect every event URL from the sitemaps (via proxy; origin is blocked).
     const entries: SitemapEntry[] = []
-    const seen = new Set<string>()
     for (const sm of EVENT_SITEMAPS) {
       try {
         const xml = await fetchViaProxy(`${ORIGIN}/${sm}`)
@@ -263,7 +325,6 @@ export const hudsonRiverParkSource: EventSource = {
     }
 
     // 2) Filter to the ingest horizon by slug date, drop non-public items.
-    const todayNY = new Date(new Date().toLocaleString("en-US", { timeZone: "America/New_York" }))
     const startDay = new Date(todayNY.getFullYear(), todayNY.getMonth(), todayNY.getDate())
     const endDay = new Date(startDay.getTime() + horizonDays * 86400000)
     const inHorizon = entries
@@ -276,7 +337,19 @@ export const hudsonRiverParkSource: EventSource = {
       .slice(0, MAX_DETAIL_FETCHES)
 
     // 3) Fetch detail pages (bounded concurrency) and build events.
-    const built = await mapWithConcurrency(inHorizon, DETAIL_CONCURRENCY, buildEvent)
-    return built.filter((e): e is NormalizedEvent => e !== null)
+    const built = (await mapWithConcurrency(inHorizon, DETAIL_CONCURRENCY, buildEvent)).filter(
+      (e): e is NormalizedEvent => e !== null,
+    )
+    if (built.length > 0) return built
+
+    // 4) FALLBACK: the sitemap path produced nothing (sitemaps unreachable, slug format
+    // changed, or all detail fetches failed) — scrape the listing page's ~3-day window. The
+    // `seen` set is empty here (sitemap yielded nothing), so no de-duplication is lost.
+    try {
+      const html = await fetchViaProxy(LISTING_URL, "hrpkcard")
+      return parseListingCards(html, todayNY, horizonDays, seen)
+    } catch {
+      return built
+    }
   },
 }
