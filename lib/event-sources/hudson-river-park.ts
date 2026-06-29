@@ -132,7 +132,12 @@ function parseCards(html: string, todayNY: Date): NormalizedEvent[] {
 
 export const hudsonRiverParkSource: EventSource = {
   name: SOURCE_NAME,
-  enabled: true,
+  // Disabled: hudsonriverpark.org sits behind Cloudflare bot management that fingerprints
+  // the TLS/HTTP client. Every server-side fetch (undici/Node) returns 403 regardless of
+  // headers/User-Agent, even though a normal browser/curl works. The parser below is
+  // correct and ready; flip this to true if we add a fetch path with a browser-like
+  // network fingerprint (e.g. a headless browser or a fingerprint-spoofing proxy).
+  enabled: false,
   async fetchEvents() {
     const res = await fetch(PAGE_URL, { headers: { Accept: "text/html", "User-Agent": BROWSER_UA } })
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
