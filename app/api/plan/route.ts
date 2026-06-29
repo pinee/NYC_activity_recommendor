@@ -72,6 +72,7 @@ function cacheKey(profile: any, requests: any, weekStart: string) {
     budget: profile.budget,
     diversity: profile.diversity,
     workDays: profile.workDays,
+    includeApprox: profile.includeApproximateLocations !== false,
     requests: (requests || []).map((r: any) => r.text),
   })
 }
@@ -94,6 +95,7 @@ type EventRow = {
   price: string | null
   image_url: string | null
   neighborhood: string | null
+  approximate_location: boolean | null
 }
 
 // Build the set of category keywords for the user's interests (deduped, lowercased).
@@ -353,7 +355,9 @@ ${eventLines}
   const workStartMin = clockToMinutes(profile.workStart)
   const workEndMin = clockToMinutes(profile.workEnd)
   const workDays: string[] = profile.workDays || []
-  const removed = { budget: 0, hours: 0, travel: 0 }
+  // Default to including approximate-location events unless the user opts out.
+  const includeApproximate = profile.includeApproximateLocations !== false
+  const removed = { budget: 0, hours: 0, travel: 0, approx: 0 }
 
   // 3) Merge curation with authoritative DB fields. DB owns title/date/url/price; meta owns why/travel/etc.
   const enriched = picks
@@ -377,6 +381,14 @@ ${eventLines}
   // 4) Apply the deterministic budget / working-hours / travel filters.
   const kept: (typeof enriched[number] & { detHome: number | null; detOffice: number | null })[] = []
   for (const x of enriched) {
+    // Approximate location: when the user opts out, drop events whose coordinates are
+    // only an approximation (neighborhood/org centroid or geocoded), since their travel
+    // times can't be trusted.
+    if (!includeApproximate && x.row.approximate_location) {
+      removed.approx++
+      continue
+    }
+
     // Budget: drop only when we can parse a price AND it exceeds the cap. Unknown/free pass.
     if (cap !== null) {
       const priceUSD = parsePriceUSD(x.row.price)
@@ -440,16 +452,18 @@ ${eventLines}
       // Prefer the deterministic straight-line estimate; fall back to the AI's text.
       travelFromHome: x.detHome !== null ? `~${x.detHome} min` : x.meta.travelFromHome || "",
       travelFromOffice: x.detOffice !== null ? `~${x.detOffice} min` : x.meta.travelFromOffice || "",
+      approximateLocation: x.row.approximate_location ?? false,
     }))
 
   // Note describing what the deterministic filters removed (shown to the user).
-  const totalRemoved = removed.budget + removed.hours + removed.travel
+  const totalRemoved = removed.budget + removed.hours + removed.travel + removed.approx
   let filteredNote = ""
   if (totalRemoved > 0) {
     const parts: string[] = []
     if (removed.travel) parts.push(`${removed.travel} too far`)
     if (removed.budget) parts.push(`${removed.budget} over budget`)
     if (removed.hours) parts.push(`${removed.hours} during working hours`)
+    if (removed.approx) parts.push(`${removed.approx} with approximate locations`)
     filteredNote = `${totalRemoved} ${totalRemoved === 1 ? "event" : "events"} hidden: ${parts.join(", ")}.`
   }
 

@@ -126,6 +126,9 @@ export const nycParksSource: EventSource = {
         price: "Free", // NYC Parks public programming is free to attend.
         currency: "USD",
         image_url: null,
+        // Exact when the feed gave real per-event coordinates. Rows missing coordinates
+        // are flagged approximate (they may be geocoded during ingest, also approximate).
+        approximate_location: lat === null || lng === null,
       })
     }
 

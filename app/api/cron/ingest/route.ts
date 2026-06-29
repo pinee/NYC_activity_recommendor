@@ -1,6 +1,38 @@
 import { createServiceClient } from "@/lib/supabase/server"
 import { eventSources, type NormalizedEvent } from "@/lib/event-sources"
 import { nyToUtcISO } from "@/lib/event-sources/util"
+import { geocodeAddress } from "@/lib/geo"
+
+// Cap geocoding attempts per run so one ingest can't fan out into hundreds of
+// external requests. Events beyond the cap simply keep null coordinates.
+const MAX_GEOCODE_PER_RUN = 80
+
+// Best-effort fill of missing coordinates from an event's address/venue/borough.
+// Mutates events in place. Failures are silent (the event just stays coordinate-less,
+// which means the travel-time filter won't apply to it downstream).
+async function enrichCoordinates(events: NormalizedEvent[]): Promise<void> {
+  const missing = events.filter((e) => e.latitude === null || e.longitude === null)
+  let attempts = 0
+  for (const e of missing) {
+    if (attempts >= MAX_GEOCODE_PER_RUN) break
+    // Prefer a real street address; otherwise fall back to venue/borough text.
+    const query = e.address || [e.venue_name, e.borough].filter(Boolean).join(", ")
+    if (!query) continue
+    // A query that begins with a house number ("1904 Surf Avenue, ...") geocodes to a
+    // precise point, so we treat the result as exact. A bare venue/neighborhood name
+    // ("Carnegie Hall", "Lower East Side") only resolves approximately.
+    const isStreetAddress = /^\s*\d+\s+\S/.test(query)
+    const withCity = /new york|ny\b|\bnyc\b/i.test(query) ? query : `${query}, New York, NY`
+    attempts++
+    const coord = await geocodeAddress(withCity)
+    if (coord) {
+      e.latitude = coord.lat
+      e.longitude = coord.lng
+      // Only flag approximate when we geocoded from imprecise text (not a street address).
+      if (!isStreetAddress) e.approximate_location = true
+    }
+  }
+}
 
 export const maxDuration = 300
 
@@ -44,6 +76,10 @@ async function ingest(): Promise<IngestResult> {
     return true
   })
   const duplicatesRemoved = collected.length - deduped.length
+
+  // Fill missing coordinates (e.g. SummerStage venues that arrive without geo) so the
+  // app's deterministic travel-time filter can apply to them. Best-effort and capped.
+  await enrichCoordinates(deduped)
 
   let upserted = 0
   let rowsAdded = 0

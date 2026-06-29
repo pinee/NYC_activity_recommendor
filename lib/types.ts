@@ -27,6 +27,7 @@ export const INTEREST_OPTIONS = [
   "Markets & shopping",
   "Tech & startups",
   "Books & readings",
+  "Talks & lectures",
   "Dance",
   "Sports & games",
   "Volunteering",
@@ -56,6 +57,7 @@ export const INTEREST_KEYWORDS: Record<string, string[]> = {
   "Markets & shopping": ["market", "shopping", "bazaar", "fair", "flea", "vendor"],
   "Tech & startups": ["tech", "startup", "coding", "hackathon", "developer"],
   "Books & readings": ["book", "reading", "author", "poetry", "literature", "library"],
+  "Talks & lectures": ["talk", "lecture", "seminar", "panel", "discussion", "conversation", "keynote", "symposium"],
   Dance: ["dance", "ballet", "salsa", "tango", "choreography"],
   "Sports & games": ["sport", "game", "basketball", "soccer", "tennis", "baseball", "volleyball", "chess", "pickleball"],
   Volunteering: ["volunteer", "cleanup", "charity", "stewardship"],
@@ -73,6 +75,9 @@ export interface Profile {
   diversity: number
   maxTravelMinutes: number
   budget: "free" | "low" | "medium" | "any"
+  // When false, events whose location/travel time is only approximate (e.g. mapped to a
+  // neighborhood centroid rather than an exact venue) are excluded from the plan.
+  includeApproximateLocations: boolean
 }
 
 export interface CalendarEvent {
@@ -120,6 +125,7 @@ export interface Activity {
   travelNote: string
   travelFromHome: string // e.g. "~25 min by subway"
   travelFromOffice: string // e.g. "~15 min walk"
+  approximateLocation?: boolean // true when travel time is based on an approximate location
 }
 
 export interface PlanSource {
@@ -147,4 +153,5 @@ export const DEFAULT_PROFILE: Profile = {
   diversity: 3,
   maxTravelMinutes: 40,
   budget: "any",
+  includeApproximateLocations: true,
 }

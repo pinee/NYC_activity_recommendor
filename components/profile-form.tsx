@@ -1,6 +1,6 @@
 "use client"
 
-import { Home, Building2, Clock, Compass } from "lucide-react"
+import { Home, Building2, Clock, Compass, Check, MapPin } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { AddressAutocomplete } from "@/components/address-autocomplete"
@@ -196,6 +196,39 @@ export function ProfileForm({ profile, onChange }: Props) {
             </SelectContent>
           </Select>
         </div>
+      </section>
+
+      {/* Approximate locations toggle */}
+      <section>
+        <button
+          type="button"
+          role="checkbox"
+          aria-checked={profile.includeApproximateLocations}
+          onClick={() =>
+            onChange({ ...profile, includeApproximateLocations: !profile.includeApproximateLocations })
+          }
+          className="flex w-full items-start gap-3 rounded-lg border border-border bg-card p-3 text-left transition-colors hover:border-foreground/30"
+        >
+          <span
+            className={cn(
+              "mt-0.5 flex size-5 shrink-0 items-center justify-center rounded border transition-colors",
+              profile.includeApproximateLocations
+                ? "border-accent bg-accent text-accent-foreground"
+                : "border-border bg-background text-transparent",
+            )}
+          >
+            <Check className="size-3.5" strokeWidth={3} />
+          </span>
+          <span className="flex flex-col gap-0.5">
+            <span className="flex items-center gap-1.5 text-sm font-medium text-foreground">
+              <MapPin className="size-3.5 text-muted-foreground" /> Include events with approximate travel times
+            </span>
+            <span className="text-xs leading-relaxed text-muted-foreground">
+              Some events (e.g. newsletter picks) only give a neighborhood, so travel times are estimated. Uncheck to
+              show only events with an exact venue.
+            </span>
+          </span>
+        </button>
       </section>
     </div>
   )

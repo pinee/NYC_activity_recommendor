@@ -1,9 +1,36 @@
 import type { EventSource } from "./types"
 import { nycParksSource } from "./nyc-parks"
+import { summerStageSource } from "./summerstage"
+import { prospectParkSource } from "./prospect-park"
+import { greenWoodSource } from "./green-wood"
+import { theSkintSource } from "./theskint"
+import { thoughtGallerySource } from "./thought-gallery"
+import { pulsdSource } from "./pulsd"
+import { brooklynBridgeParkSource } from "./brooklyn-bridge-park"
+import { hudsonRiverParkSource } from "./hudson-river-park"
+import { rooftopFilmsSource } from "./rooftop-films"
+import { rooftopCinemaClubSource } from "./rooftop-cinema-club"
+import { bryantParkSource } from "./bryant-park"
+import { centralParkSource } from "./central-park"
 
 // Registry of all event sources the ingest job pulls from.
 // To add a new free feed or official API later (e.g. Luma, Meetup), implement the
-// EventSource interface in its own file and add it to this array.
-export const eventSources: EventSource[] = [nycParksSource]
+// EventSource interface in its own file and add it to this array. Sites running
+// "The Events Calendar" (Tribe) plugin can reuse createTribeSource (see summerstage.ts).
+export const eventSources: EventSource[] = [
+  nycParksSource,
+  summerStageSource,
+  prospectParkSource,
+  greenWoodSource,
+  theSkintSource,
+  thoughtGallerySource,
+  pulsdSource,
+  brooklynBridgeParkSource,
+  hudsonRiverParkSource,
+  rooftopFilmsSource,
+  rooftopCinemaClubSource,
+  bryantParkSource,
+  centralParkSource,
+]
 
 export type { EventSource, NormalizedEvent } from "./types"
