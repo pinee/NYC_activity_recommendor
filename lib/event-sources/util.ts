@@ -52,3 +52,22 @@ export function isoDatePart(raw: string | null | undefined): string | null {
   const m = /^(\d{4}-\d{2}-\d{2})/.exec(raw.trim())
   return m ? m[1] : null
 }
+
+const MONTH_INDEX: Record<string, number> = {
+  jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5,
+  jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11,
+}
+
+// Convert a year-less "month + day" (e.g. "Jun", 25) into a NY "YYYY-MM-DD" string,
+// inferring the year relative to today. Several of our sources render dates without a
+// year ("Jun 25", "Sun, Jun 28"); we assume the next occurrence, only rolling to next
+// year when the date is well in the past (>120 days) to avoid a calendar-wrap mistake.
+export function monthDayToNyDate(monthName: string, day: number, todayNY: Date): string | null {
+  const mo = MONTH_INDEX[monthName.slice(0, 3).toLowerCase()]
+  if (mo === undefined || !day || day < 1 || day > 31) return null
+  let year = todayNY.getFullYear()
+  const candidate = new Date(year, mo, day)
+  const todayMidnight = new Date(todayNY.getFullYear(), todayNY.getMonth(), todayNY.getDate())
+  if (candidate.getTime() < todayMidnight.getTime() - 120 * 86400000) year += 1
+  return `${year}-${String(mo + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
+}
