@@ -28,6 +28,11 @@ export type TribeSourceConfig = {
   defaultLongitude?: number
   defaultVenueName?: string
   defaultBorough?: string
+  // Some sites (e.g. Prospect Park) sit behind a WAF that intermittently 403s server-side
+  // requests even with a browser UA. When true, a failed direct fetch is retried through
+  // the r.jina.ai reader proxy, which fetches with a real browser fingerprint and returns
+  // the JSON body untouched (via the `x-respond-with: text` header).
+  useProxyFallback?: boolean
 }
 
 // Raw shape of a Tribe event (only the fields we use).
@@ -47,7 +52,9 @@ type TribeEvent = {
 
 type TribeResponse = { events?: TribeEvent[]; total_pages?: number; total?: number }
 
-const MAX_PAGES = 6 // safety cap; with a category filter the feed is small
+// Safety cap. Category-filtered feeds are tiny; unfiltered ones (e.g. Prospect Park) lean
+// on the ascending-order early-break below, so this just bounds the worst case.
+const MAX_PAGES = 12
 const PER_PAGE = 50
 
 // Some Tribe sites sit behind a WAF that 403s non-browser User-Agents (e.g. Prospect
@@ -102,6 +109,41 @@ function venueAddress(v: TribeEvent["venue"]): string | null {
   return parts.length > 0 ? parts.join(", ") : null
 }
 
+// Fetch one Tribe API page as parsed JSON. Tries a direct request first; if that fails and
+// the source opted into the proxy fallback, retries through the r.jina.ai reader proxy.
+// Returns null for an expected "past the last page" 400 so the caller can stop paginating.
+async function fetchTribePage(
+  url: string,
+  config: TribeSourceConfig,
+  page: number,
+): Promise<TribeResponse | null> {
+  const direct = await fetch(url, { headers: { Accept: "application/json", "User-Agent": BROWSER_UA } })
+  if (direct.ok) return (await direct.json()) as TribeResponse
+  // A 400 past the last page is expected; signal "stop" rather than error.
+  if (direct.status === 400 && page > 1) return null
+
+  if (config.useProxyFallback) {
+    // The proxy returns the raw JSON body; `x-respond-with: text` avoids markdown wrapping.
+    // We slice from the first "{" defensively in case any preamble is prepended.
+    const proxied = await fetch(`https://r.jina.ai/${url}`, {
+      headers: { "x-respond-with": "text", "User-Agent": BROWSER_UA },
+    })
+    if (proxied.ok) {
+      const raw = await proxied.text()
+      const start = raw.indexOf("{")
+      if (start !== -1) {
+        try {
+          return JSON.parse(raw.slice(start)) as TribeResponse
+        } catch {
+          // fall through to the error below
+        }
+      }
+    }
+  }
+
+  throw new Error(`${config.name} feed returned HTTP ${direct.status}`)
+}
+
 export function createTribeSource(config: TribeSourceConfig): EventSource {
   return {
     name: config.name,
@@ -121,16 +163,16 @@ export function createTribeSource(config: TribeSourceConfig): EventSource {
       let page = 1
       let totalPages = 1
       do {
-        const res = await fetch(`${base}&page=${page}`, {
-          headers: { Accept: "application/json", "User-Agent": BROWSER_UA },
-        })
-        if (!res.ok) {
-          // A 400 past the last page is expected; otherwise surface the error.
-          if (res.status === 400 && page > 1) break
-          throw new Error(`${config.name} feed returned HTTP ${res.status}`)
-        }
-        const data = (await res.json()) as TribeResponse
+        const data = await fetchTribePage(`${base}&page=${page}`, config, page)
+        if (!data) break // past the last page
         totalPages = data.total_pages ?? 1
+
+        // The feed is ordered by start date ascending, so once a page's earliest event is
+        // already beyond our window we've seen everything relevant and can stop paginating.
+        // This matters for busy sources (Prospect Park has 1,000+ future events) so we don't
+        // burn pages — and proxy calls — pulling events months away.
+        const firstStart = utcToISO((data.events || [])[0]?.utc_start_date)
+        if (firstStart && new Date(firstStart).getTime() > endWindow) break
 
         for (const e of data.events || []) {
           const title = e.title ? decodeEntities(e.title) : ""

@@ -1,16 +1,22 @@
 import type { EventSource, NormalizedEvent } from "./types"
 import { deterministicId, isoDatePart, nyToUtcISO, parseClockTo24h, nyMidnightToday } from "./util"
 
-// NYC Open Data — "NYC Parks Public Events – Upcoming 14 Days" (Socrata SODA API).
-// Official, free, and requires no API key. Returns real event pages on nycgovparks.org.
-const SODA_ENDPOINT = "https://data.cityofnewyork.us/resource/w3wp-dpdi.json"
+// NYC Parks official events RSS feed. Free, no API key, and the same data behind
+// nycgovparks.org. We use the RSS feed rather than the NYC Open Data Socrata dataset
+// ("Upcoming 14 Days", resource w3wp-dpdi) because that dataset is refreshed
+// infrequently and its horizon goes stale (it was dead-ending ~2 weeks in the past,
+// so dates like July 4 were missing). The RSS feed is regenerated continuously and
+// reliably covers the true upcoming ~14 days (1,000+ items across all five boroughs).
+const RSS_ENDPOINT = "https://www.nycgovparks.org/xml/events_300_rss.xml"
+const BROWSER_UA =
+  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
 
-// Raw shape of a row from the Socrata feed (only the fields we use).
+// Parsed shape of a single <item> in the RSS feed (only the fields we use).
 type ParksRow = {
   title?: string
   description?: string
   guid?: string
-  link?: { url?: string }
+  link?: string
   parknames?: string
   location?: string
   startdate?: string
@@ -20,6 +26,46 @@ type ParksRow = {
   categories?: string
   coordinates?: string
   parkids?: string
+}
+
+// Pull the inner text of <tag> (or <ns:tag>), unwrapping CDATA and decoding the few
+// entities the feed uses. Returns undefined when the tag is absent or empty.
+function tagText(itemXml: string, tag: string): string | undefined {
+  const m = itemXml.match(new RegExp(`<${tag}>([\\s\\S]*?)<\\/${tag}>`, "i"))
+  if (!m) return undefined
+  let v = m[1].trim()
+  const cdata = v.match(/^<!\[CDATA\[([\s\S]*?)\]\]>$/)
+  if (cdata) v = cdata[1].trim()
+  v = v
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#0?39;|&apos;/g, "'")
+    .replace(/\s+/g, " ")
+    .trim()
+  return v || undefined
+}
+
+// Parse one RSS <item> block into the field shape the mapping loop expects.
+function parseItem(itemXml: string): ParksRow {
+  // Event detail links come back as http://; normalize to https for clean, secure URLs.
+  const link = tagText(itemXml, "link")?.replace(/^http:\/\//i, "https://")
+  return {
+    title: tagText(itemXml, "title"),
+    description: tagText(itemXml, "description"),
+    guid: tagText(itemXml, "guid"),
+    link,
+    parkids: tagText(itemXml, "event:parkids"),
+    parknames: tagText(itemXml, "event:parknames"),
+    startdate: tagText(itemXml, "event:startdate"),
+    enddate: tagText(itemXml, "event:enddate"),
+    starttime: tagText(itemXml, "event:starttime"),
+    endtime: tagText(itemXml, "event:endtime"),
+    location: tagText(itemXml, "event:location"),
+    categories: tagText(itemXml, "event:categories"),
+    coordinates: tagText(itemXml, "event:coordinates"),
+  }
 }
 
 // Park id prefixes map to boroughs (e.g. "R129" -> Staten Island, "M010" -> Manhattan).
@@ -63,21 +109,17 @@ export const nycParksSource: EventSource = {
   enabled: true,
 
   async fetchEvents({ horizonDays }): Promise<NormalizedEvent[]> {
-    // The dataset holds a large backlog ordered by date, so we MUST filter
-    // server-side. We keep anything still relevant today: events that START today
-    // or later, OR multi-day events that END today or later (i.e. still ongoing
-    // even though they began earlier). $where uses Socrata floating timestamps.
-    // "sv-SE" formats as "YYYY-MM-DD HH:mm:ss", so the date part is the NY calendar date.
-    const todayNY = isoDatePart(new Date().toLocaleString("sv-SE", { timeZone: "America/New_York" }))
-    const where = encodeURIComponent(
-      `(startdate >= '${todayNY}T00:00:00') OR (enddate >= '${todayNY}T00:00:00')`,
-    )
-    const url = `${SODA_ENDPOINT}?$limit=1000&$order=startdate ASC&$where=${where}`
-    const res = await fetch(url, { headers: { Accept: "application/json" } })
+    const res = await fetch(RSS_ENDPOINT, {
+      headers: { Accept: "application/rss+xml, application/xml, text/xml", "User-Agent": BROWSER_UA },
+    })
     if (!res.ok) {
       throw new Error(`NYC Parks feed returned HTTP ${res.status}`)
     }
-    const rows = (await res.json()) as ParksRow[]
+    const xml = await res.text()
+
+    // The feed already covers the upcoming ~14 days, but we still apply our own horizon
+    // window below so this source honors the configured horizonDays exactly.
+    const rows = [...xml.matchAll(/<item>([\s\S]*?)<\/item>/g)].map((m) => parseItem(m[1]))
 
     const startWindow = nyMidnightToday().getTime()
     const endWindow = startWindow + horizonDays * 86400000
@@ -85,7 +127,7 @@ export const nycParksSource: EventSource = {
     const events: NormalizedEvent[] = []
     for (const r of rows) {
       const title = r.title?.trim()
-      const eventUrl = r.link?.url?.trim()
+      const eventUrl = r.link?.trim()
       const startDate = isoDatePart(r.startdate)
       if (!title || !eventUrl || !startDate) continue
 
