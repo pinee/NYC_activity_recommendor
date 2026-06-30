@@ -2,12 +2,15 @@ import type { EventSource, NormalizedEvent } from "./types"
 import { deterministicId, nyToUtcISO, parseClockTo24h } from "./util"
 import { INTEREST_KEYWORDS } from "@/lib/types"
 
-// Bryant Park renders its calendar via a server-side "week" fragment at /calendar/week.
-// Each card embeds the event date in its detail URL (/calendar/event/SLUG/YYYY-MM-DD) and
-// the time in a "cardFlag" label. The whole park is one fixed Midtown block, so every
-// event shares the same precise coordinates (exact, not approximate).
+// Bryant Park renders its calendar as server-side fragments. We use the MONTH view
+// (/calendar/month/YYYY/MM) rather than the week fragment (/calendar/week), because the
+// week fragment only ever returns the current 7 days and ignores any date param — so it
+// could never cover our full ~14-day horizon. The month view exposes every event as an
+// anchor: <a href="/calendar/event/SLUG/YYYY-MM-DD" class="calendarEvent"> TITLE
+// <span>7:00pm-8:30pm</span></a>. We fetch each month the horizon touches (usually one or
+// two) and parse those anchors. The whole park is one fixed Midtown block, so every event
+// shares the same precise coordinates (exact, not approximate).
 const SOURCE_NAME = "Bryant Park"
-const WEEK_URL = "https://bryantpark.org/calendar/week"
 const CALENDAR_PAGE = "https://bryantpark.org/calendar"
 const BASE = "https://bryantpark.org"
 const BROWSER_UA =
@@ -53,83 +56,107 @@ function inferCategory(activity: string, title: string): string {
   return "Hiking & parks"
 }
 
-function buildEvents(html: string): NormalizedEvent[] {
-  const cards = html.split(/<li class="card calendarEventCard">/).slice(1)
-  const out: NormalizedEvent[] = []
-  const now = Date.now()
-  const seen = new Set<string>()
+// List the "YYYY/MM" month paths that the horizon window [today, today+horizonDays] spans.
+// Almost always one or two months; we walk month-by-month so a horizon crossing a month
+// boundary (e.g. June 30 -> July 14) still fetches both.
+function monthsInHorizon(todayNY: Date, horizonDays: number): string[] {
+  const end = new Date(todayNY.getFullYear(), todayNY.getMonth(), todayNY.getDate() + horizonDays)
+  const months: string[] = []
+  const cursor = new Date(todayNY.getFullYear(), todayNY.getMonth(), 1)
+  while (cursor <= end) {
+    months.push(`${cursor.getFullYear()}/${String(cursor.getMonth() + 1).padStart(2, "0")}`)
+    cursor.setMonth(cursor.getMonth() + 1)
+  }
+  return months
+}
 
-  for (const card of cards) {
-    const titleMatch = card.match(
-      /cardTitle">\s*<a href="(\/calendar\/event\/[a-z0-9-]+\/(\d{4}-\d{2}-\d{2}))">([\s\S]*?)<\/a>/,
-    )
-    if (!titleMatch) continue
-    const path = titleMatch[1]
-    const ymd = titleMatch[2]
-    const title = clean(titleMatch[3])
+function buildEvents(
+  html: string,
+  out: NormalizedEvent[],
+  seen: Set<string>,
+  startMs: number,
+  endMs: number,
+): void {
+  // Each event is an anchor: <a href="/calendar/event/SLUG/YYYY-MM-DD" class="calendarEvent ">
+  //   Title<span>7:00pm-8:30pm</span></a>
+  const re =
+    /<a href="(\/calendar\/event\/[a-z0-9-]+\/(\d{4}-\d{2}-\d{2}))"\s+class="calendarEvent\s*">([\s\S]*?)<\/a>/g
+  let m: RegExpExecArray | null
+  while ((m = re.exec(html)) !== null) {
+    const path = m[1]
+    const ymd = m[2]
+    const inner = m[3]
+
+    // Split the inner content into the title text and the "<span>start-end</span>" time.
+    const span = (inner.match(/<span>([\s\S]*?)<\/span>/) || [])[1] || ""
+    const title = clean(inner.replace(/<span>[\s\S]*?<\/span>/, ""))
     if (!title) continue
 
-    const flag = clean((card.match(/cardFlag">([\s\S]*?)<\/div>/) || [])[1])
-    const activity = clean((card.match(/smallActivityName">([\s\S]*?)<\/div>/) || [])[1])
-
-    // Pull a clock time out of the flag ("...at 2:30pm"); default to late morning for
-    // all-day amenities (e.g. "Bryant Park Shop") so they still place on a day plan.
-    const time = parseClockTo24h(flag) || "11:00"
+    // Time span is "7:00pm-8:30pm"; take the start, and the end when present.
+    const [startRaw, endRaw] = span.split("-")
+    const time = parseClockTo24h(startRaw || "") || "11:00"
     const startUtc = nyToUtcISO(ymd, time)
     if (!startUtc) continue
-    if (new Date(startUtc).getTime() < now - 12 * 3600_000) continue
+    const t = new Date(startUtc).getTime()
+    if (t < startMs || t > endMs) continue
 
-    // De-dupe recurring amenities that repeat across the week at the same slot.
+    const endTime = endRaw ? parseClockTo24h(endRaw) : null
+    const endUtc = endTime ? nyToUtcISO(ymd, endTime) : null
+
+    // De-dupe recurring amenities that repeat at the same slot (and across overlapping
+    // month fetches).
     const key = `${title}|${startUtc}`
     if (seen.has(key)) continue
     seen.add(key)
 
-    const category = inferCategory(activity, title)
-    const url = `${BASE}${path}`
-    const tags = ["bryant park"]
-    if (activity) tags.push(activity.toLowerCase())
-
     out.push({
       id: deterministicId([SOURCE_NAME, path]),
       title,
-      description: activity && activity !== title ? `${activity} at Bryant Park` : null,
+      description: null,
       source: SOURCE_NAME,
       source_event_id: path,
-      event_url: url,
+      event_url: `${BASE}${path}`,
       venue_name: "Bryant Park",
       address: "Bryant Park, New York, NY 10018",
       latitude: PARK.lat,
       longitude: PARK.lng,
       borough: "Manhattan",
       neighborhood: "Midtown",
-      category,
-      tags,
+      category: inferCategory("", title),
+      tags: ["bryant park"],
       organizer: "Bryant Park Corporation",
       start_time: startUtc,
-      end_time: null,
+      end_time: endUtc,
       price: "Free",
       currency: "USD",
       image_url: null,
       approximate_location: false,
     })
   }
-  return out
 }
 
 export const bryantParkSource: EventSource = {
   name: SOURCE_NAME,
   enabled: true,
-  async fetchEvents() {
-    const res = await fetch(WEEK_URL, {
-      headers: {
-        Accept: "text/html,*/*",
-        "User-Agent": BROWSER_UA,
-        "X-Requested-With": "XMLHttpRequest",
-        Referer: CALENDAR_PAGE,
-      },
-    })
-    if (!res.ok) throw new Error(`HTTP ${res.status}`)
-    const html = await res.text()
-    return buildEvents(html)
+  async fetchEvents({ horizonDays }) {
+    const todayNY = new Date(new Date().toLocaleString("en-US", { timeZone: "America/New_York" }))
+    const startMs = new Date(todayNY.getFullYear(), todayNY.getMonth(), todayNY.getDate()).getTime()
+    const endMs = startMs + horizonDays * 86400000
+
+    const out: NormalizedEvent[] = []
+    const seen = new Set<string>()
+    for (const month of monthsInHorizon(todayNY, horizonDays)) {
+      const res = await fetch(`${BASE}/calendar/month/${month}`, {
+        headers: {
+          Accept: "text/html,*/*",
+          "User-Agent": BROWSER_UA,
+          "X-Requested-With": "XMLHttpRequest",
+          Referer: CALENDAR_PAGE,
+        },
+      })
+      if (!res.ok) throw new Error(`HTTP ${res.status} for month ${month}`)
+      buildEvents(await res.text(), out, seen, startMs, endMs)
+    }
+    return out
   },
 }
