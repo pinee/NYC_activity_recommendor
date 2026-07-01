@@ -9,6 +9,10 @@ export const maxDuration = 60
 
 const MAX_ACTIVITIES = 15
 
+// The one interest whose events we also match by title (holidays are categorized by
+// activity type, not by the holiday name — see fetchUpcomingEvents).
+const FESTIVALS_INTEREST = "Festivals & fireworks"
+
 // ---- Date helpers (anchored to America/New_York) ----
 
 // The next 7 calendar days starting today, each with ISO date, weekday, and a label.
@@ -125,11 +129,24 @@ async function fetchUpcomingEvents(interests: string[]): Promise<EventRow[]> {
     .lte("start_time", windowEndISO)
     .or(`end_time.gte.${windowStartISO},and(end_time.is.null,start_time.gte.${windowStartISO})`)
 
-  // Category pre-filter: keep only events whose category matches an interest keyword.
+  // Pre-filter: keep only events whose category matches an interest keyword.
   // When no interests are set, fall through and return the whole window.
+  //
+  // Holiday/festival events are the exception: sources almost always categorize them by
+  // activity type ("Concerts", "Nature Programs", "America250", "Arts & Culture"), not by
+  // the holiday — so a July-4 concert or a Pride festival would never match on category.
+  // For the "Festivals & fireworks" interest we therefore ALSO match on the event title,
+  // where the holiday name reliably appears ("...4th of July Concert", "pridefest...").
+  // All conditions go into a single .or() so they combine as OR (chaining .or() would AND).
   const keywords = interestKeywords(interests)
   if (keywords.length > 0) {
-    query = query.or(keywords.map((k) => `category.ilike.%${k}%`).join(","))
+    const conditions = keywords.map((k) => `category.ilike.%${k}%`)
+    if (interests.includes(FESTIVALS_INTEREST)) {
+      for (const k of INTEREST_KEYWORDS[FESTIVALS_INTEREST] ?? []) {
+        conditions.push(`title.ilike.%${k}%`)
+      }
+    }
+    query = query.or(conditions.join(","))
   }
 
   const { data, error } = await query.order("start_time", { ascending: true }).limit(500)
