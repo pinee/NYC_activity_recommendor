@@ -6,14 +6,19 @@ import { createTribeSource } from "./tribe"
 //
 // It's a single-venue institution, so we supply the museum's coordinates as a fallback
 // for any event whose feed entry omits venue geo, keeping travel-time filtering accurate.
-// Its own category text (e.g. "Programs") lacks our interest keywords for most talks/tours,
-// so we leave the site categories in `tags` and let the plan route's keyword matching work
-// off the real category when present.
+//
+// Its site categories only describe format ("In-Person"/"Virtual"), which match no interest.
+// The programming itself is varied — curatorial tours, workshops, jazz performances, family
+// events — so we infer each event's category from its title, and fall back to "Museums" when
+// inference is inconclusive (accurate, since every event is a museum program). Site
+// categories are still preserved in `tags`.
 export const posterHouseSource = createTribeSource({
   name: "Poster House",
   baseUrl: "https://posterhouse.org",
   enabled: true,
   organizer: "Poster House",
+  inferCategory: true,
+  categoryOverride: "Museums",
   defaultVenueName: "Poster House",
   defaultBorough: "Manhattan",
   defaultLatitude: 40.744,
