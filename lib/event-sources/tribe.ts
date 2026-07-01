@@ -1,5 +1,5 @@
 import type { EventSource, NormalizedEvent } from "./types"
-import { deterministicId, nyMidnightToday } from "./util"
+import { deterministicId, nyMidnightToday, inferCategoryFromText } from "./util"
 
 // Generic adapter for any WordPress site running "The Events Calendar" (Tribe) plugin,
 // which exposes a free, key-less JSON REST API at /wp-json/tribe/events/v1/events.
@@ -20,6 +20,12 @@ export type TribeSourceConfig = {
   // (e.g. "SummerStage") doesn't contain words our interest pre-filter looks for.
   // The site's real categories are still preserved in `tags`.
   categoryOverride?: string
+  // When true, infer each event's category from its title/description (via
+  // inferCategoryFromText) instead of trusting the site's categories. Useful for sites
+  // whose categories describe format, not topic (e.g. Flatiron NoMad tags everything
+  // "Culture"/"Entertainment", which matches no interest). Falls back to categoryOverride,
+  // then the site category, when inference is inconclusive. Site categories stay in `tags`.
+  inferCategory?: boolean
   // Optional fallback coordinates for sites whose venues lack geo (e.g. a single-location
   // org like Prospect Park or Green-Wood). Applied only when an event has no venue geo,
   // so the deterministic travel-time filter still works. Also used as a default venue
@@ -217,9 +223,17 @@ export function createTribeSource(config: TribeSourceConfig): EventSource {
             longitude: lng,
             borough: config.defaultBorough || null,
             neighborhood: null,
-            // Override keeps interest matching working when the site's own category
-            // wording (e.g. "SummerStage") lacks our keywords. Originals live in tags.
-            category: config.categoryOverride || siteCategories[siteCategories.length - 1] || null,
+            // Category resolution, in priority order:
+            //  1. Title/description inference (when enabled) — for sites whose categories
+            //     describe format not topic; routes e.g. a jazz night to "Live music".
+            //  2. categoryOverride — a fixed source-wide category (e.g. Poster House → Museums).
+            //  3. The site's own last category — the default for well-tagged feeds.
+            // Site categories are always preserved in `tags` regardless.
+            category:
+              (config.inferCategory ? inferCategoryFromText(title, e.description) : null) ||
+              config.categoryOverride ||
+              siteCategories[siteCategories.length - 1] ||
+              null,
             tags: tags.length > 0 ? tags : null,
             organizer: config.organizer || null,
             start_time: start,

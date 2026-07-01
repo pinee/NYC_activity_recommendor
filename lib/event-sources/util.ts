@@ -53,6 +53,47 @@ export function isoDatePart(raw: string | null | undefined): string | null {
   return m ? m[1] : null
 }
 
+// Infer an app interest-category from free text (an event title, optionally + description).
+// This intentionally does NOT reuse INTEREST_KEYWORDS from lib/types: those are tuned for
+// substring matching against the short, controlled `category` field, and are too noisy for
+// free-form titles (e.g. "walk" in "sidewalk", "park" in "parking"). Here we use tighter
+// word-boundary patterns, ordered most-specific-first so "Jazz Concert in the Park" resolves
+// to "Live music" rather than "Hiking & parks". Returns null when nothing matches confidently,
+// letting the caller fall back to a source default (or the "Others" catch-all).
+const CATEGORY_PATTERNS: { category: string; re: RegExp }[] = [
+  { category: "Live music", re: /\b(jazz|concert|orchestra|symphony|band|choir|opera|DJ|live music|singer|vocalist|recital)\b/i },
+  { category: "Theater", re: /\b(theater|theatre|broadway|play|musical|drama|opera|cabaret)\b/i },
+  { category: "Comedy", re: /\b(comedy|comedian|stand-?up|improv)\b/i },
+  { category: "Dance", re: /\b(dance|ballet|salsa|tango|choreograph)\w*/i },
+  { category: "Film & cinema", re: /\b(film|movie|cinema|screening)\b/i },
+  { category: "Books & readings", re: /\b(book|author|reading|poetry|literary|storytime|memoir)\b/i },
+  { category: "Talks & lectures", re: /\b(talk|lecture|panel|seminar|symposium|keynote|conversation|discussion)\b/i },
+  { category: "Art & galleries", re: /\b(gallery|exhibit|painting|sculpture|mural|artist|drawing|printmaking)\b/i },
+  { category: "Museums", re: /\b(museum|curator|curatorial|docent)\b/i },
+  { category: "Food & dining", re: /\b(food|dining|tasting|culinary|cooking|brunch|dinner|chef|wine|beer|cocktail)\b/i },
+  { category: "Coffee & cafes", re: /\b(coffee|espresso|cafe|café)\b/i },
+  { category: "Yoga & wellness", re: /\b(yoga|wellness|meditation|mindfulness|pilates|tai chi)\b/i },
+  { category: "Running & fitness", re: /\b(run|running|fitness|workout|bootcamp|marathon|weightlifting|strength)\b/i },
+  { category: "Cycling", re: /\b(cycling|bike|bicycle)\b/i },
+  { category: "Swimming & pools", re: /\b(swim|swimming|aquatics?)\b/i },
+  { category: "Hiking & parks", re: /\b(hike|hiking|trail|nature|birding|kayak|canoe|fishing)\b/i },
+  { category: "Markets & shopping", re: /\b(market|bazaar|flea|pop-?up|vendor)\b/i },
+  { category: "Tech & startups", re: /\b(tech|startup|coding|hackathon|developer)\b/i },
+  { category: "Sports & games", re: /\b(basketball|soccer|tennis|baseball|volleyball|chess|pickleball|tournament)\b/i },
+  { category: "Photography", re: /\b(photography|photo walk|photographer)\b/i },
+  { category: "Family & kids", re: /\b(kids?|family|children|toddler|storytime)\b/i },
+  { category: "Festivals & fireworks", re: /\b(festival|fireworks?|parade|celebration)\b/i },
+]
+
+export function inferCategoryFromText(...parts: (string | null | undefined)[]): string | null {
+  const hay = parts.filter(Boolean).join(" ")
+  if (!hay.trim()) return null
+  for (const { category, re } of CATEGORY_PATTERNS) {
+    if (re.test(hay)) return category
+  }
+  return null
+}
+
 const MONTH_INDEX: Record<string, number> = {
   jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5,
   jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11,

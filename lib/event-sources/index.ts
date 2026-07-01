@@ -13,6 +13,14 @@ import { rooftopCinemaClubSource } from "./rooftop-cinema-club"
 import { bryantParkSource } from "./bryant-park"
 import { centralParkSource } from "./central-park"
 import { nycMarqueeSource } from "./nyc-marquee"
+import { nycForFreeSource } from "./nyc-for-free"
+import { governorsIslandSource } from "./governors-island"
+import { nyplSource } from "./nypl"
+import { posterHouseSource } from "./poster-house"
+import { flatironNomadSource } from "./flatiron-nomad"
+import { downtownNySource } from "./downtown-ny"
+import { unionSquareSource } from "./union-square"
+import { hudsonYardsSource } from "./hudson-yards"
 
 // Registry of all event sources the ingest job pulls from.
 // To add a new free feed or official API later (e.g. Luma, Meetup), implement the
@@ -33,6 +41,14 @@ export const eventSources: EventSource[] = [
   bryantParkSource,
   centralParkSource,
   nycMarqueeSource,
+  nycForFreeSource,
+  governorsIslandSource,
+  nyplSource,
+  posterHouseSource,
+  flatironNomadSource,
+  downtownNySource,
+  unionSquareSource,
+  hudsonYardsSource,
 ]
 
 export type { EventSource, NormalizedEvent } from "./types"
