@@ -169,7 +169,23 @@ async function fetchUpcomingEvents(interests: string[]): Promise<EventRow[]> {
 
   const { data, error } = await query.order("start_time", { ascending: true }).limit(500)
   if (error) throw new Error(error.message)
-  return (data as EventRow[]) || []
+
+  // Drop events that have already begun, so a search at (say) 8 PM only surfaces events
+  // starting LATER than right now — not ones that already started earlier today. The DB
+  // window is anchored to the start of today (to fetch ongoing multi-day events), so this
+  // "now" cutoff is applied here in JS. Exception: multi-day events (festivals, exhibitions)
+  // stay visible for their whole run, since they remain attend-able after their opening day.
+  const now = Date.now()
+  const rows = ((data as EventRow[]) || []).filter((r) => {
+    const start = new Date(r.start_time).getTime()
+    if (start >= now) return true // starts in the future — always eligible
+    const startDay = nyDateOf(r.start_time)
+    const endDay = r.end_time ? nyDateOf(r.end_time) : null
+    const isMultiDay = !!endDay && endDay !== startDay
+    // Already started: keep only if it's a multi-day event that hasn't ended yet.
+    return isMultiDay && new Date(r.end_time as string).getTime() >= now
+  })
+  return rows
 }
 
 // ---- Deterministic filter helpers (budget / working hours / travel) ----
@@ -280,8 +296,18 @@ async function buildPlan(body: any) {
     })
     .join("\n")
 
+  const nowLabel = new Date().toLocaleString("en-US", {
+    timeZone: "America/New_York",
+    weekday: "long",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  })
+
   const context = `
-TODAY is ${dates[0].label}. Plan only the next 7 days.
+RIGHT NOW it is ${nowLabel} (America/New_York). Only pick events that start AFTER this moment; never pick anything earlier today. Multi-day events already underway are fine. Plan only the next 7 days.
+TODAY is ${dates[0].label}.
 
 USER PROFILE
 - Home: ${profile.homeAddress || "not provided (assume Manhattan)"}
