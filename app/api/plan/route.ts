@@ -1,6 +1,6 @@
 import { generateText, Output } from "ai"
 import { z } from "zod"
-import { type WeekDay, INTEREST_KEYWORDS } from "@/lib/types"
+import { type WeekDay, INTEREST_KEYWORDS, INTEREST_OPTIONS } from "@/lib/types"
 import { createServiceClient } from "@/lib/supabase/server"
 import { nyToUtcISO } from "@/lib/event-sources/util"
 import { geocodeAddress, estimateTravelMinutes, type Coord } from "@/lib/geo"
@@ -8,6 +8,13 @@ import { geocodeAddress, estimateTravelMinutes, type Coord } from "@/lib/geo"
 export const maxDuration = 60
 
 const MAX_ACTIVITIES = 15
+
+// The one interest whose events we also match by title (holidays are categorized by
+// activity type, not by the holiday name — see fetchUpcomingEvents).
+const FESTIVALS_INTEREST = "Festivals & fireworks"
+
+// Catch-all interest: matches events that match NO other interest (see fetchUpcomingEvents).
+const OTHERS_INTEREST = "Others"
 
 // ---- Date helpers (anchored to America/New_York) ----
 
@@ -125,11 +132,39 @@ async function fetchUpcomingEvents(interests: string[]): Promise<EventRow[]> {
     .lte("start_time", windowEndISO)
     .or(`end_time.gte.${windowStartISO},and(end_time.is.null,start_time.gte.${windowStartISO})`)
 
-  // Category pre-filter: keep only events whose category matches an interest keyword.
+  // Pre-filter: keep only events whose category matches an interest keyword.
   // When no interests are set, fall through and return the whole window.
-  const keywords = interestKeywords(interests)
-  if (keywords.length > 0) {
-    query = query.or(keywords.map((k) => `category.ilike.%${k}%`).join(","))
+  //
+  // Holiday/festival events are the exception: sources almost always categorize them by
+  // activity type ("Concerts", "Nature Programs", "America250", "Arts & Culture"), not by
+  // the holiday — so a July-4 concert or a Pride festival would never match on category.
+  // For the "Festivals & fireworks" interest we therefore ALSO match on the event title,
+  // where the holiday name reliably appears ("...4th of July Concert", "pridefest...").
+  // All conditions go into a single .or() so they combine as OR (chaining .or() would AND).
+  //
+  // "Others" is a catch-all with no keywords of its own: it matches events that match NO
+  // other interest. We express that as a nested and(...) of not.ilike over the FULL keyword
+  // universe (plus the festival title terms), which PostgREST ORs alongside the rest.
+  const selectableInterests = interests.filter((i) => i !== OTHERS_INTEREST)
+  const keywords = interestKeywords(selectableInterests)
+  const wantsOthers = interests.includes(OTHERS_INTEREST)
+  if (keywords.length > 0 || wantsOthers) {
+    const festivalKeywords = INTEREST_KEYWORDS[FESTIVALS_INTEREST] ?? []
+    const conditions = keywords.map((k) => `category.ilike.%${k}%`)
+    if (selectableInterests.includes(FESTIVALS_INTEREST)) {
+      for (const k of festivalKeywords) conditions.push(`title.ilike.%${k}%`)
+    }
+    if (wantsOthers) {
+      // Universe of every keyword across all real interests (excludes "Others" itself).
+      const universe = interestKeywords(INTEREST_OPTIONS.filter((i) => i !== OTHERS_INTEREST))
+      const negations = [
+        ...universe.map((k) => `category.not.ilike.%${k}%`),
+        // Festival matching also uses the title, so exclude those title hits too.
+        ...festivalKeywords.map((k) => `title.not.ilike.%${k}%`),
+      ]
+      conditions.push(`and(${negations.join(",")})`)
+    }
+    query = query.or(conditions.join(","))
   }
 
   const { data, error } = await query.order("start_time", { ascending: true }).limit(500)
