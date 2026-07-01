@@ -32,6 +32,7 @@ export const INTEREST_OPTIONS = [
   "Sports & games",
   "Volunteering",
   "Photography",
+  "Festivals & fireworks",
 ] as const
 
 export type Interest = (typeof INTEREST_OPTIONS)[number]
@@ -62,6 +63,17 @@ export const INTEREST_KEYWORDS: Record<string, string[]> = {
   "Sports & games": ["sport", "game", "basketball", "soccer", "tennis", "baseball", "volleyball", "chess", "pickleball"],
   Volunteering: ["volunteer", "cleanup", "charity", "stewardship"],
   Photography: ["photo", "photography", "camera"],
+  "Festivals & fireworks": [
+    "festival",
+    "fireworks",
+    "firework",
+    "celebration",
+    "parade",
+    "holiday",
+    "fourth of july",
+    "independence",
+    "new year",
+  ],
 }
 
 export interface Profile {
