@@ -21,6 +21,7 @@ import { flatironNomadSource } from "./flatiron-nomad"
 import { downtownNySource } from "./downtown-ny"
 import { unionSquareSource } from "./union-square"
 import { hudsonYardsSource } from "./hudson-yards"
+import { nycTourismWorldCupSource } from "./nyc-tourism-worldcup"
 
 // Registry of all event sources the ingest job pulls from.
 // To add a new free feed or official API later (e.g. Luma, Meetup), implement the
@@ -49,6 +50,7 @@ export const eventSources: EventSource[] = [
   downtownNySource,
   unionSquareSource,
   hudsonYardsSource,
+  nycTourismWorldCupSource,
 ]
 
 export type { EventSource, NormalizedEvent } from "./types"
