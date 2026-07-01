@@ -35,6 +35,10 @@ export const INTEREST_OPTIONS = [
   "Festivals & fireworks",
   "Family & kids",
   "Swimming & pools",
+  // Catch-all: events that don't match any other interest. Intentionally has NO entry in
+  // INTEREST_KEYWORDS — it's handled in the plan route by matching events that match nothing
+  // else (a negation of every other interest's keywords).
+  "Others",
 ] as const
 
 export type Interest = (typeof INTEREST_OPTIONS)[number]
