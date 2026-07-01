@@ -44,6 +44,21 @@ function clean(s: string): string {
     .trim()
 }
 
+// The venue is the heading text left over after the title. The proxy sometimes appends the
+// event's marketing blurb tail to it — typically a location/date phrase like
+// "… in New York on June 27" or "… on Jul 1". Trim at those fragments so we keep just the
+// venue name ("Le Poisson Rouge"), and drop it entirely if nothing sensible remains.
+function cleanVenue(s: string): string | null {
+  let v = s
+    .replace(/\s+in\s+New York\b.*$/i, "")
+    .replace(/\s+on\s+(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\b.*$/i, "")
+    .replace(/[\s,]+$/, "")
+    .trim()
+  // Guard against over-trimming to an empty/too-short scrap.
+  if (v.length < 2) return null
+  return v
+}
+
 // "6:14PM" / "10AM" -> "HH:MM" 24-hour, or null.
 function parseTime(token: string): string | null {
   const m = /\b(\d{1,2})(?::(\d{2}))?\s*([AaPp][Mm])\b/.exec(token)
@@ -126,7 +141,7 @@ export const downtownNySource: EventSource = {
       let venue: string | null = null
       if (alt && titleVenue.toLowerCase().startsWith(alt.toLowerCase())) {
         title = alt
-        venue = clean(titleVenue.slice(alt.length)) || null
+        venue = cleanVenue(clean(titleVenue.slice(alt.length)))
       }
       if (!title) continue
 
