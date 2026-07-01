@@ -112,25 +112,33 @@ export function isWorldCupViewing(
   description?: string | null,
   category?: string | null,
 ): boolean {
-  const text = `${title || ""} ${description || ""} ${category || ""}`.toLowerCase()
-  if (!text.trim()) return false
+  const titleCat = `${title || ""} ${category || ""}`.toLowerCase()
+  if (!titleCat.trim()) return false
 
-  // Must be about soccer / the World Cup. (NYC Parks tags its big-screen matches "Soccer".)
+  // Soccer context must appear in the TITLE or CATEGORY — never the description. Many sources
+  // share a boilerplate series/cross-promo blurb (e.g. NYC Parks' "Big Screen at The Battery"
+  // movie nights, or Pulsd deals) that mentions the World Cup even when the event itself is a
+  // movie or a generic party. Anchoring on the title/category avoids those false positives.
+  // (NYC Parks tags its actual big-screen matches with the "Soccer" category.)
   const hasSoccerContext =
-    /\b(world cup|fifa|soccer|f[úu]tbol|footy)\b/.test(text) || (category || "").toLowerCase() === "soccer"
+    /\b(world cup|fifa|soccer|f[úu]tbol|footy)\b/.test(titleCat) || (category || "").toLowerCase() === "soccer"
   if (!hasSoccerContext) return false
 
   // Exclude participation, kids clinics, American flag football, nature programs, and movies.
+  // Checked across all text so an excluding signal anywhere disqualifies the event.
+  const allText = `${titleCat} ${description || ""}`.toLowerCase()
   const isExcluded =
     /\b(flag football|nature world cup|fantasy soccer|world saving soccer|children'?s soccer|kids'? soccer|youth soccer|soccer (clinic|lesson|league|series|draft|practice)|learn to play|movies under the stars)\b/.test(
-      text,
+      allText,
     )
   if (isExcluded) return false
 
   // A viewing signal: watching/screening a match, a fan zone/village, or a bar watch party.
+  // The soccer gate above is already title/category-anchored, so it's safe to also honor a
+  // viewing phrase found in the description here.
   const hasViewingSignal =
     /\b(watch part(y|ies)|viewing part(y|ies)|watch (the )?(game|match|cup)|big screen|on the big|fan (zone|village|fest|festival)|screening|showing (the )?(world cup|game|match)|broadcast|telemundo|open bar)\b/.test(
-      text,
+      allText,
     )
 
   return hasViewingSignal || (category || "").toLowerCase() === "soccer"
