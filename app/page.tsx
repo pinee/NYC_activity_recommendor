@@ -153,13 +153,20 @@ export default function Page() {
             })
           } else if (msg.type === "result") {
             const activities = msg.activities ?? []
-            setPlan({ summary: msg.summary, activities, sources: msg.sources ?? [], filteredNote: msg.filteredNote })
-            if (activities.length === 0) {
+            setPlan({
+              summary: msg.summary,
+              activities,
+              sources: msg.sources ?? [],
+              filteredNote: msg.filteredNote,
+              worldCup: msg.worldCup,
+            })
+            const spotCount = msg.worldCup?.spots?.length ?? 0
+            if (activities.length === 0 && spotCount > 0) {
+              toast.success(`Found ${spotCount} World Cup viewing ${spotCount === 1 ? "spot" : "spots"}`)
+            } else if (activities.length === 0) {
               toast("No activities matched your interests this week")
             } else {
-              toast.success(
-                `${msg.cached ? "Loaded" : "Found"} ${activities.length} activities for your week`,
-              )
+              toast.success(`${msg.cached ? "Loaded" : "Found"} ${activities.length} activities for your week`)
             }
           }
         }
@@ -318,7 +325,26 @@ export default function Page() {
             </div>
           )}
 
-          {!generating && plan && <WeeklyPlanView plan={plan} />}
+          {!generating && plan && (
+            <div className="flex flex-col gap-6">
+              {plan.worldCup && plan.worldCup.spots.length > 0 && (
+                <section className="flex flex-col gap-4 rounded-xl border border-border bg-card p-5">
+                  <div className="flex items-center gap-2">
+                    <Trophy className="size-4 text-accent" />
+                    <h2 className="font-mono text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                      World Cup &amp; Soccer — viewing spots
+                    </h2>
+                  </div>
+                  <WorldCupSpotsView result={plan.worldCup} />
+                </section>
+              )}
+              {/* Skip the date-grouped list (and its "no activities" empty state) when the only
+                  results are World Cup spots — those are already shown above as locations. */}
+              {(plan.activities.length > 0 || !(plan.worldCup && plan.worldCup.spots.length > 0)) && (
+                <WeeklyPlanView plan={plan} />
+              )}
+            </div>
+          )}
         </div>
       </main>
     </div>
