@@ -32,8 +32,21 @@ function clean(s: string | null | undefined): string {
     .trim()
 }
 
+// The JSON-LD `image` can be a bare URL string or an ImageObject with a `url` field.
+function imageFrom(x: any): string | null {
+  const img = x?.image
+  if (typeof img === "string" && /^https?:\/\//i.test(img)) return img
+  if (img && typeof img === "object") {
+    const u = Array.isArray(img) ? img[0]?.url || img[0] : img.url
+    if (typeof u === "string" && /^https?:\/\//i.test(u)) return u
+  }
+  return null
+}
+
 // Read the ScreeningEvent JSON-LD from a screening detail page.
-async function fetchScreening(slug: string): Promise<{ name: string; date: string; time: string } | null> {
+async function fetchScreening(
+  slug: string,
+): Promise<{ name: string; date: string; time: string; image: string | null } | null> {
   try {
     const res = await fetch(`${ORIGIN}${slug}`, {
       headers: { Accept: "text/html,*/*", "User-Agent": BROWSER_UA, Referer: VENUE_PAGE },
@@ -48,7 +61,7 @@ async function fetchScreening(slug: string): Promise<{ name: string; date: strin
         for (const x of arr) {
           if (/screening|event/i.test(String(x["@type"] || "")) && x.startDate) {
             const m = String(x.startDate).match(/(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})/)
-            if (m) return { name: clean(x.name) || "Screening", date: m[1], time: m[2] }
+            if (m) return { name: clean(x.name) || "Screening", date: m[1], time: m[2], image: imageFrom(x) }
           }
         }
       } catch {
@@ -125,7 +138,7 @@ export const rooftopCinemaClubSource: EventSource = {
         // Ticketed, but the listing carries no machine-readable price.
         price: null,
         currency: null,
-        image_url: null,
+        image_url: info.image,
         approximate_location: false,
       })
     }
