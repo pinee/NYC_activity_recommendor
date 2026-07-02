@@ -26,6 +26,7 @@ type ParksRow = {
   categories?: string
   coordinates?: string
   parkids?: string
+  image?: string
 }
 
 // Pull the inner text of <tag> (or <ns:tag>), unwrapping CDATA and decoding the few
@@ -65,6 +66,8 @@ function parseItem(itemXml: string): ParksRow {
     location: tagText(itemXml, "event:location"),
     categories: tagText(itemXml, "event:categories"),
     coordinates: tagText(itemXml, "event:coordinates"),
+    // Event photos are served over http; upgrade to https so they load on our secure pages.
+    image: tagText(itemXml, "event:image")?.replace(/^http:\/\//i, "https://"),
   }
 }
 
@@ -167,7 +170,7 @@ export const nycParksSource: EventSource = {
         end_time: endTime,
         price: "Free", // NYC Parks public programming is free to attend.
         currency: "USD",
-        image_url: null,
+        image_url: r.image && /^https:\/\//i.test(r.image) ? r.image : null,
         // Exact when the feed gave real per-event coordinates. Rows missing coordinates
         // are flagged approximate (they may be geocoded during ingest, also approximate).
         approximate_location: lat === null || lng === null,

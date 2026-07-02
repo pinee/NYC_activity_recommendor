@@ -27,7 +27,10 @@ function SpotCard({ spot }: { spot: WorldCupSpot }) {
             alt={`Watching the World Cup at ${spot.name}`}
             className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
             loading="lazy"
-            crossOrigin="anonymous"
+            // No crossOrigin: this image is only displayed (never drawn to canvas), and forcing a
+            // CORS request breaks hosts that don't send Access-Control-Allow-Origin (e.g. Hudson
+            // River Park). referrerPolicy avoids leaking our URL and dodges hotlink protection.
+            referrerPolicy="no-referrer"
             onError={(e) => {
               const wrapper = (e.currentTarget as HTMLImageElement).parentElement
               if (wrapper) wrapper.style.display = "none"

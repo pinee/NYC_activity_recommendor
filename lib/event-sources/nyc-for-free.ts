@@ -38,6 +38,21 @@ type SquarespaceEvent = {
   }
 }
 
+// Squarespace `assetUrl`s are usually a real image file, but some records return a
+// folder-only URL ending in a numeric id + trailing slash (e.g. ".../1778607035803/"),
+// which 302s to an empty body and renders as a broken image. Accept a URL only when its
+// final path segment looks like an actual file (has an extension), otherwise drop it.
+function validImageUrl(url: string | null | undefined): string | null {
+  if (!url || !/^https?:\/\//i.test(url)) return null
+  try {
+    const path = new URL(url).pathname.replace(/\/+$/, "")
+    const last = path.slice(path.lastIndexOf("/") + 1)
+    return /\.[a-z0-9]{2,5}$/i.test(last) ? url : null
+  } catch {
+    return null
+  }
+}
+
 function stripHtml(s: string | null | undefined): string {
   if (!s) return ""
   return s
@@ -143,7 +158,7 @@ export const nycForFreeSource: EventSource = {
         end_time: typeof ev.endDate === "number" ? new Date(ev.endDate).toISOString() : null,
         price: "Free",
         currency: "USD",
-        image_url: ev.assetUrl || null,
+        image_url: validImageUrl(ev.assetUrl),
         approximate_location: !exact,
       })
     }

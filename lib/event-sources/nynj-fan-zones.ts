@@ -51,6 +51,9 @@ type FanZone = {
   // and as a sanity clamp for dates parsed off the page.
   fallbackStart: string
   fallbackEnd: string
+  // Verified hero image for this zone from the official page (used when the live per-section
+  // image can't be parsed). Confirmed to return HTTP 200 image/* at build time.
+  fallbackImage: string
 }
 
 const FAN_ZONES: FanZone[] = [
@@ -68,6 +71,7 @@ const FAN_ZONES: FanZone[] = [
     closeTime: "23:30",
     fallbackStart: "2026-06-11",
     fallbackEnd: "2026-07-19",
+    fallbackImage: "https://nynjfwc26.com/wp-content/uploads/2026/06/image-topaz-upscale-2.2x-1-scaled.webp",
   },
   {
     key: "staten-island",
@@ -83,6 +87,8 @@ const FAN_ZONES: FanZone[] = [
     closeTime: "23:30",
     fallbackStart: "2026-06-29",
     fallbackEnd: "2026-07-02",
+    fallbackImage:
+      "https://nynjfwc26.com/wp-content/uploads/2026/05/SIUH-Community-Park-Staten-Island-NYC-Courtesy.webp",
   },
   {
     key: "brooklyn",
@@ -98,6 +104,7 @@ const FAN_ZONES: FanZone[] = [
     closeTime: "23:30",
     fallbackStart: "2026-06-13",
     fallbackEnd: "2026-07-19",
+    fallbackImage: "https://nynjfwc26.com/wp-content/uploads/2026/06/brooklyn-topaz-upscale-2x-scaled.png",
   },
 ]
 
@@ -141,6 +148,22 @@ function sectionText(html: string, anchorId: string): string | null {
     .replace(/&nbsp;/g, " ")
     .replace(/\s+/g, " ")
     .trim()
+}
+
+// Extract the first real content image from a zone's RAW section HTML (before tags are
+// stripped). We look for an uploaded photo (…/wp-content/uploads/…) and skip inline SVG/logo
+// assets, so the returned URL is the zone's hero photo. Returns null when none is present.
+function extractSectionImage(html: string, anchorId: string): string | null {
+  const startIdx = html.indexOf(`id="${anchorId}"`)
+  if (startIdx < 0) return null
+  const rest = html.slice(startIdx + anchorId.length)
+  const nextIdx = rest.search(/id="[a-z0-9-]+"/i)
+  const section = nextIdx >= 0 ? rest.slice(0, nextIdx) : rest.slice(0, 6000)
+  for (const m of section.matchAll(/<img[^>]+(?:data-src|src)="([^"]+)"/gi)) {
+    const url = m[1]
+    if (/\/wp-content\/uploads\/.+\.(?:webp|jpe?g|png)(?:\?|$)/i.test(url)) return url
+  }
+  return null
 }
 
 // Parse an official date range like "June 29 - July 2, 2026" or "July 6 - 19, 2026" (second
@@ -203,6 +226,9 @@ export const nynjFanZonesSource: EventSource = {
       const endUtc = nyToUtcISO(rangeEnd, z.closeTime)
       if (!startUtc || !endUtc) continue
 
+      // Prefer the live per-section hero image; fall back to the verified official one.
+      const imageUrl = extractSectionImage(html, z.anchorId) ?? z.fallbackImage
+
       out.push({
         id: deterministicId([SOURCE_NAME, z.key, rangeStart]),
         source_event_id: `${z.key}:${rangeStart}..${rangeEnd}`,
@@ -225,7 +251,7 @@ export const nynjFanZonesSource: EventSource = {
         organizer: "NY/NJ World Cup 2026 Host Committee",
         price: "Free",
         currency: "USD",
-        image_url: null,
+        image_url: imageUrl,
         // Exact, verified venue coordinates — not a centroid.
         approximate_location: false,
         start_time: startUtc,
