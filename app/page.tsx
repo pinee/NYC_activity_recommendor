@@ -10,6 +10,7 @@ import { CalendarPanel } from "@/components/calendar-panel"
 import { WeatherStrip } from "@/components/weather-strip"
 import { SpecialRequests } from "@/components/special-requests"
 import { WeeklyPlanView } from "@/components/weekly-plan"
+import { WorldCupSpotsView } from "@/components/worldcup-spots"
 import { useLocalStorage } from "@/lib/use-local-storage"
 import {
   DEFAULT_PROFILE,
@@ -18,6 +19,7 @@ import {
   type SpecialRequest,
   type WeatherDay,
   type WeeklyPlan,
+  type WorldCupSpotsResult,
 } from "@/lib/types"
 
 export default function Page() {
@@ -34,7 +36,7 @@ export default function Page() {
   const [generating, setGenerating] = useState(false)
   const [progress, setProgress] = useState("")
 
-  const [worldCup, setWorldCup] = useState<WeeklyPlan | null>(null)
+  const [worldCup, setWorldCup] = useState<WorldCupSpotsResult | null>(null)
   const [wcLoading, setWcLoading] = useState(false)
 
   const loadCalendar = useCallback(async () => {
@@ -90,9 +92,9 @@ export default function Page() {
         toast.error(data.error)
         return
       }
-      setWorldCup(data as WeeklyPlan)
-      const n = (data.activities ?? []).length
-      toast.success(n > 0 ? `Showing all ${n} World Cup viewing events` : "No World Cup events found")
+      setWorldCup(data as WorldCupSpotsResult)
+      const n = (data.spots ?? []).length
+      toast.success(n > 0 ? `Showing all ${n} World Cup viewing spots` : "No World Cup spots found")
     } catch {
       toast.error("Could not load World Cup events. Please try again.")
     } finally {
@@ -284,10 +286,10 @@ export default function Page() {
               <div className="flex items-center gap-2">
                 <Trophy className="size-4 text-accent" />
                 <h2 className="font-mono text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                  World Cup &amp; Soccer — full list
+                  World Cup &amp; Soccer — viewing spots
                 </h2>
               </div>
-              <WeeklyPlanView plan={worldCup} />
+              <WorldCupSpotsView result={worldCup} />
             </section>
           )}
 

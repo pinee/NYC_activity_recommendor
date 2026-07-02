@@ -203,6 +203,35 @@ export interface PlanSource {
   host: string
 }
 
+// One physical viewing SPOT (venue), aggregating all of its World Cup sessions into a single
+// entry with a date span — used by the "Browse all World Cup viewing" list, which shows every
+// place with viewing rather than a day-by-day itinerary.
+export interface WorldCupSpot {
+  id: string
+  name: string // venue name, or the event title when no venue is set
+  venue: string
+  neighborhood: string
+  address: string
+  borough: string
+  firstDate: string // ISO date of the earliest session
+  lastDate: string // ISO date of the latest session (or multi-day end)
+  dateSpanLabel: string // human label, e.g. "Jul 1 – Jul 2" or "Through Jul 19"
+  sessions: number // how many individual viewing sessions map to this spot
+  priceLabel: string
+  indoor: boolean
+  url: string
+  imageUrl: string
+  travelFromHome: string
+  travelFromOffice: string
+  approximateLocation: boolean
+}
+
+export interface WorldCupSpotsResult {
+  summary: string
+  spots: WorldCupSpot[]
+  sources?: PlanSource[]
+}
+
 export interface WeeklyPlan {
   summary: string
   activities: Activity[]
