@@ -1,7 +1,23 @@
 import { createServiceClient } from "@/lib/supabase/server"
 import { eventSources, type NormalizedEvent } from "@/lib/event-sources"
-import { nyToUtcISO } from "@/lib/event-sources/util"
+import { nyToUtcISO, isWorldCupViewing, WORLD_CUP_CATEGORY } from "@/lib/event-sources/util"
 import { geocodeAddress } from "@/lib/geo"
+
+// Re-stamp World Cup / soccer viewing events (which arrive from many sources under many
+// categories — "Soccer", "Nightlife", "Others", "Food & dining", …) with one canonical
+// category so they all collect under the single "World Cup & Soccer" interest. The original
+// category is preserved in `tags` for reference. Mutates events in place.
+function reclassifyFootball(events: NormalizedEvent[]): void {
+  for (const e of events) {
+    if (e.category === WORLD_CUP_CATEGORY) continue
+    if (isWorldCupViewing(e.title, e.description, e.category)) {
+      if (e.category) {
+        e.tags = Array.from(new Set([...(e.tags ?? []), e.category]))
+      }
+      e.category = WORLD_CUP_CATEGORY
+    }
+  }
+}
 
 // Cap geocoding attempts per run so one ingest can't fan out into hundreds of
 // external requests. Events beyond the cap simply keep null coordinates.
@@ -76,6 +92,9 @@ async function ingest(): Promise<IngestResult> {
     return true
   })
   const duplicatesRemoved = collected.length - deduped.length
+
+  // Collect scattered World Cup / soccer viewing events under one canonical category.
+  reclassifyFootball(deduped)
 
   // Fill missing coordinates (e.g. SummerStage venues that arrive without geo) so the
   // app's deterministic travel-time filter can apply to them. Best-effort and capped.

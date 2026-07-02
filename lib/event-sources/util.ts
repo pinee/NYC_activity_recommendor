@@ -94,6 +94,56 @@ export function inferCategoryFromText(...parts: (string | null | undefined)[]): 
   return null
 }
 
+// Canonical category assigned to World Cup / soccer VIEWING events so they all collect under
+// the single "World Cup & Soccer" interest. Deliberately contains neither "soccer" nor
+// "football" nor "sport"/"game", so these events route ONLY to the new interest and are not
+// also swept up by the "Sports & games" interest keywords.
+export const WORLD_CUP_CATEGORY = "World Cup Viewing"
+
+// Detects genuine World Cup / soccer VIEWING events — watch parties, fan zones/villages,
+// big-screen match screenings, broadcast-at-a-bar events — as opposed to participation
+// (kids clinics, flag football), soccer-themed movies, or nature "world cup" ranger games.
+// Used at ingest to re-stamp such events with WORLD_CUP_CATEGORY. Conservative by design:
+// requires BOTH a soccer/World Cup reference AND a viewing signal (or the NYC Parks "Soccer"
+// big-screen category), so ambiguous or non-viewing soccer events are left in their original
+// category rather than mislabeled.
+export function isWorldCupViewing(
+  title: string | null | undefined,
+  description?: string | null,
+  category?: string | null,
+): boolean {
+  const titleCat = `${title || ""} ${category || ""}`.toLowerCase()
+  if (!titleCat.trim()) return false
+
+  // Soccer context must appear in the TITLE or CATEGORY — never the description. Many sources
+  // share a boilerplate series/cross-promo blurb (e.g. NYC Parks' "Big Screen at The Battery"
+  // movie nights, or Pulsd deals) that mentions the World Cup even when the event itself is a
+  // movie or a generic party. Anchoring on the title/category avoids those false positives.
+  // (NYC Parks tags its actual big-screen matches with the "Soccer" category.)
+  const hasSoccerContext =
+    /\b(world cup|fifa|soccer|f[úu]tbol|footy)\b/.test(titleCat) || (category || "").toLowerCase() === "soccer"
+  if (!hasSoccerContext) return false
+
+  // Exclude participation, kids clinics, American flag football, nature programs, and movies.
+  // Checked across all text so an excluding signal anywhere disqualifies the event.
+  const allText = `${titleCat} ${description || ""}`.toLowerCase()
+  const isExcluded =
+    /\b(flag football|nature world cup|fantasy soccer|world saving soccer|children'?s soccer|kids'? soccer|youth soccer|soccer (clinic|lesson|league|series|draft|practice)|learn to play|movies under the stars)\b/.test(
+      allText,
+    )
+  if (isExcluded) return false
+
+  // A viewing signal: watching/screening a match, a fan zone/village, or a bar watch party.
+  // The soccer gate above is already title/category-anchored, so it's safe to also honor a
+  // viewing phrase found in the description here.
+  const hasViewingSignal =
+    /\b(watch part(y|ies)|viewing part(y|ies)|watch (the )?(game|match|cup)|big screen|on the big|fan (zone|village|fest|festival)|screening|showing (the )?(world cup|game|match)|broadcast|telemundo|open bar)\b/.test(
+      allText,
+    )
+
+  return hasViewingSignal || (category || "").toLowerCase() === "soccer"
+}
+
 const MONTH_INDEX: Record<string, number> = {
   jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5,
   jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11,

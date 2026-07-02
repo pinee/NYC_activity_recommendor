@@ -30,6 +30,7 @@ export const INTEREST_OPTIONS = [
   "Talks & lectures",
   "Dance",
   "Sports & games",
+  "World Cup & Soccer",
   "Volunteering",
   "Photography",
   "Festivals & fireworks",
@@ -110,6 +111,11 @@ export const INTEREST_KEYWORDS: Record<string, string[]> = {
     "football",
     "recreation",
   ],
+  // Matches the canonical WORLD_CUP_CATEGORY ("World Cup Viewing") assigned at ingest to
+  // soccer/World Cup viewing events (watch parties, fan zones, big-screen screenings). The
+  // canonical category has no "soccer"/"football" substring, so these events collect ONLY
+  // here and are not double-listed under "Sports & games".
+  "World Cup & Soccer": ["world cup"],
   Volunteering: ["volunteer", "cleanup", "charity", "stewardship"],
   Photography: ["photo", "photography", "camera"],
   "Festivals & fireworks": [
