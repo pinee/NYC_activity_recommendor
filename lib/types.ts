@@ -203,6 +203,35 @@ export interface PlanSource {
   host: string
 }
 
+// One physical viewing SPOT (venue), aggregating all of its World Cup sessions into a single
+// entry with a date span — used by the "Browse all World Cup viewing" list, which shows every
+// place with viewing rather than a day-by-day itinerary.
+export interface WorldCupSpot {
+  id: string
+  name: string // venue name, or the event title when no venue is set
+  venue: string
+  neighborhood: string
+  address: string
+  borough: string
+  firstDate: string // ISO date of the earliest session
+  lastDate: string // ISO date of the latest session (or multi-day end)
+  dateSpanLabel: string // human label, e.g. "Jul 1 – Jul 2" or "Through Jul 19"
+  sessions: number // how many individual viewing sessions map to this spot
+  priceLabel: string
+  indoor: boolean
+  url: string
+  imageUrl: string
+  travelFromHome: string
+  travelFromOffice: string
+  approximateLocation: boolean
+}
+
+export interface WorldCupSpotsResult {
+  summary: string
+  spots: WorldCupSpot[]
+  sources?: PlanSource[]
+}
+
 export interface WeeklyPlan {
   summary: string
   activities: Activity[]
@@ -210,6 +239,10 @@ export interface WeeklyPlan {
   // Set when deterministic filters (budget / working hours / travel) removed events
   // the AI had otherwise selected, e.g. "3 events hidden: 2 too far, 1 over budget."
   filteredNote?: string
+  // Present when the user selected the "World Cup & Soccer" interest. World Cup viewing is
+  // location-first, not date-first, so these events are shown as aggregated viewing SPOTS
+  // (each with a date span) instead of date-grouped activity cards.
+  worldCup?: WorldCupSpotsResult
 }
 
 export const DEFAULT_PROFILE: Profile = {

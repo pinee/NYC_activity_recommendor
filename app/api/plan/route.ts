@@ -2,8 +2,12 @@ import { generateText, Output } from "ai"
 import { z } from "zod"
 import { type WeekDay, INTEREST_KEYWORDS, INTEREST_OPTIONS } from "@/lib/types"
 import { createServiceClient } from "@/lib/supabase/server"
-import { nyToUtcISO } from "@/lib/event-sources/util"
+import { nyToUtcISO, WORLD_CUP_CATEGORY } from "@/lib/event-sources/util"
 import { geocodeAddress, estimateTravelMinutes, type Coord } from "@/lib/geo"
+import { getWorldCupSpots } from "@/lib/worldcup"
+
+// The interest whose events are shown as location SPOTS instead of date-grouped cards.
+const WORLD_CUP_INTEREST = "World Cup & Soccer"
 
 export const maxDuration = 60
 
@@ -268,16 +272,29 @@ const curatedSchema = z.object({
 async function buildPlan(body: any) {
   const { profile, weather, events: busy, requests } = body
   const dates = upcomingDates()
+  const interests: string[] = profile.interests || []
+
+  // World Cup viewing is location-first, not date-first (fans already know match times), so
+  // when the user selects that interest we surface it as aggregated viewing SPOTS with date
+  // spans — never as date-grouped activity cards. Fetched via the same helper the standalone
+  // browse endpoint uses, so the two always agree.
+  const worldCup = interests.includes(WORLD_CUP_INTEREST) ? await getWorldCupSpots(profile) : undefined
 
   // 1) Read the catalog from the database (no live web search), pre-filtered to interests.
-  const rows = await fetchUpcomingEvents(profile.interests || [])
+  const allRows = await fetchUpcomingEvents(interests)
+  // Keep World Cup events out of the date-grouped list — they're shown as spots above, so
+  // including them here would both duplicate them and reintroduce the date-level display.
+  const rows = allRows.filter((r) => r.category !== WORLD_CUP_CATEGORY)
 
   if (rows.length === 0) {
     return {
       summary:
-        "No events are in the catalog yet. The daily ingestion job collects fresh NYC events each morning — please check back soon.",
+        worldCup && worldCup.spots.length > 0
+          ? "World Cup & soccer viewing is location-based — here are all the spots across NYC where you can catch the matches."
+          : "No events are in the catalog yet. The daily ingestion job collects fresh NYC events each morning — please check back soon.",
       activities: [],
       sources: [],
+      worldCup,
     }
   }
 
@@ -380,7 +397,6 @@ ${eventLines}
   } catch (err) {
     // AI curator unavailable — serve the catalog directly with a deterministic interest filter.
     console.log("[v0] curation unavailable, using deterministic fallback:", err instanceof Error ? err.message : err)
-    const interests = profile.interests || []
     picks = rows
       .filter((r) => matchesInterest(r.category, interests))
       .map((r) => ({
@@ -546,7 +562,7 @@ ${eventLines}
     ).values(),
   )
 
-  return { summary, activities, sources, filteredNote: filteredNote || undefined }
+  return { summary, activities, sources, filteredNote: filteredNote || undefined, worldCup }
 }
 
 export async function POST(req: Request) {
