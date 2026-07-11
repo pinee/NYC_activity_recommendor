@@ -79,7 +79,7 @@ const CATEGORY_PATTERNS: { category: string; re: RegExp }[] = [
   // BEFORE "Hiking & parks" so a "Hudson River Kayaking" event routes here, not to parks.
   {
     category: "Swimming & Water Activities",
-    re: /\b(swim|swimming|aquatics?|kayak\w*|canoe\w*|paddle\s?board\w*|paddling|paddle|row(?:ing|boat)|sail\w*|boat\w*|rafting|raft|surf\w*|fishing|snorkel\w*|scuba|dive|diving)\b/i,
+    re: /\b(swim|swimming|aquatics?|kayak\w*|canoe\w*|paddle\s?board\w*|paddling|paddle|row(?:ing|boat)|sail(?:ing|boat)?|boat\w*|rafting|raft|surf(?:ing|board)|fishing|angling|snorkel\w*|scuba)\b/i,
   },
   { category: "Hiking & parks", re: /\b(hike|hiking|trail|nature|birding)\b/i },
   { category: "Markets & shopping", re: /\b(market|bazaar|flea|pop-?up|vendor)\b/i },
