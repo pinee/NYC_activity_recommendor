@@ -25,6 +25,8 @@ import { nycTourismWorldCupSource } from "./nyc-tourism-worldcup"
 import { nynjFanZonesSource } from "./nynj-fan-zones"
 import { whitneySource } from "./whitney"
 import { japanSocietySource } from "./japan-society"
+import { nycDotBikeSource } from "./nyc-dot-bike"
+import { nyccSource } from "./nycc"
 
 // Registry of all event sources the ingest job pulls from.
 // To add a new free feed or official API later (e.g. Luma, Meetup), implement the
@@ -57,6 +59,8 @@ export const eventSources: EventSource[] = [
   nynjFanZonesSource,
   whitneySource,
   japanSocietySource,
+  nycDotBikeSource,
+  nyccSource,
 ]
 
 export type { EventSource, NormalizedEvent } from "./types"
