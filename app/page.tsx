@@ -11,6 +11,7 @@ import { WeatherStrip } from "@/components/weather-strip"
 import { SpecialRequests } from "@/components/special-requests"
 import { WeeklyPlanView } from "@/components/weekly-plan"
 import { WorldCupSpotsView } from "@/components/worldcup-spots"
+import { WorldCupSchedule } from "@/components/worldcup-schedule"
 import { useLocalStorage } from "@/lib/use-local-storage"
 import {
   DEFAULT_PROFILE,
@@ -296,6 +297,7 @@ export default function Page() {
                   World Cup &amp; Soccer — viewing spots
                 </h2>
               </div>
+              <WorldCupSchedule />
               <WorldCupSpotsView result={worldCup} />
             </section>
           )}
