@@ -30,6 +30,8 @@ import { nyccSource } from "./nycc"
 import { bikeNycSource } from "./bike-nyc"
 import { photostrollSource } from "./photostroll"
 import { mmccSource } from "./mmcc"
+import { fadMarketSource } from "./fad-market"
+import { grandBazaarSource } from "./grand-bazaar"
 
 // Registry of all event sources the ingest job pulls from.
 // To add a new free feed or official API later (e.g. Luma, Meetup), implement the
@@ -67,6 +69,8 @@ export const eventSources: EventSource[] = [
   bikeNycSource,
   photostrollSource,
   mmccSource,
+  fadMarketSource,
+  grandBazaarSource,
 ]
 
 export type { EventSource, NormalizedEvent } from "./types"
