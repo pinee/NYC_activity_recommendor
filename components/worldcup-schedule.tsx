@@ -1,8 +1,8 @@
 "use client"
 
-import { CalendarClock, MapPin, Star } from "lucide-react"
+import { CalendarClock, CheckCircle2, MapPin, Star } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-import { WORLD_CUP_MATCHES, upcomingMatches, type WorldCupMatch } from "@/lib/worldcup-schedule"
+import { WORLD_CUP_MATCHES, type WorldCupMatch } from "@/lib/worldcup-schedule"
 
 // Format the kickoff for a NYC audience: weekday, date, and time in Eastern.
 function formatKickoff(iso: string): { day: string; time: string } {
@@ -24,6 +24,8 @@ function formatKickoff(iso: string): { day: string; time: string } {
 
 function MatchRow({ match }: { match: WorldCupMatch }) {
   const { day, time } = formatKickoff(match.kickoff)
+  const isCompleted = match.status === "completed"
+  const [homeScore, awayScore] = match.score ?? [null, null]
   return (
     <li
       className={`flex flex-col gap-2 rounded-lg border px-4 py-3 sm:flex-row sm:items-center sm:justify-between ${
@@ -35,6 +37,11 @@ function MatchRow({ match }: { match: WorldCupMatch }) {
           <Badge variant="secondary" className="font-mono text-[10px] uppercase tracking-wider">
             {match.round}
           </Badge>
+          {isCompleted && (
+            <span className="inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground">
+              <CheckCircle2 className="size-3" /> Full time
+            </span>
+          )}
           {match.local && (
             <span className="inline-flex items-center gap-1 text-[11px] font-medium text-accent">
               <Star className="size-3" /> Local
@@ -42,7 +49,15 @@ function MatchRow({ match }: { match: WorldCupMatch }) {
           )}
         </div>
         <p className="text-pretty text-sm font-semibold leading-snug">
-          {match.home} <span className="text-muted-foreground">vs</span> {match.away}
+          <span className={isCompleted && homeScore! > awayScore! ? "text-foreground" : ""}>{match.home}</span>
+          {isCompleted && homeScore !== null ? (
+            <span className="mx-1.5 rounded bg-muted px-1.5 py-0.5 font-mono text-xs tabular-nums text-foreground">
+              {homeScore}–{awayScore}
+            </span>
+          ) : (
+            <span className="text-muted-foreground"> vs </span>
+          )}
+          <span className={isCompleted && awayScore! > homeScore! ? "text-foreground" : ""}>{match.away}</span>
         </p>
         <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
           <MapPin className="size-3 shrink-0" />
@@ -58,24 +73,21 @@ function MatchRow({ match }: { match: WorldCupMatch }) {
 }
 
 // Match-times schedule shown at the top of the "Browse all World Cup viewing" section.
-// Prefers upcoming fixtures; falls back to the full list once the tournament is over.
+// Shows the full knockout stage from the quarter-finals on, with results for completed matches.
 export function WorldCupSchedule() {
-  const upcoming = upcomingMatches()
-  const matches = upcoming.length > 0 ? upcoming : WORLD_CUP_MATCHES
-
   return (
     <section className="flex flex-col gap-3 rounded-xl border border-border bg-secondary/40 p-4">
       <div className="flex items-center gap-2">
         <CalendarClock className="size-4 text-accent" />
         <h3 className="font-mono text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-          {upcoming.length > 0 ? "Upcoming match times" : "Match schedule"}
+          2026 World Cup knockout schedule
         </h3>
       </div>
       <p className="text-xs leading-relaxed text-muted-foreground">
-        Kickoff times shown in Eastern (New York) time. Plan your viewing around the fixtures below.
+        Kickoff times shown in Eastern (New York) time. Quarter-final matchups are set — plan your viewing below.
       </p>
       <ul className="flex flex-col gap-2">
-        {matches.map((m) => (
+        {WORLD_CUP_MATCHES.map((m) => (
           <MatchRow key={m.id} match={m} />
         ))}
       </ul>

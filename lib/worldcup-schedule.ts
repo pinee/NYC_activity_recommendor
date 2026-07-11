@@ -1,11 +1,11 @@
-// Static schedule of remaining 2026 FIFA World Cup matches, with kickoff times shown in
-// New York (Eastern) time. The tournament runs June 11 – July 19, 2026; this list covers the
-// knockout rounds so NYC fans know exactly when to be in front of a screen. Kickoff times are
-// stored as ISO strings with an explicit -04:00 (EDT) offset so they render consistently
-// regardless of the viewer's own timezone.
+// Static schedule of the 2026 FIFA World Cup knockout stage from the quarter-finals onward,
+// with kickoff times shown in New York (Eastern) time. Kickoff times are stored as ISO strings
+// with an explicit Eastern offset (-04:00, EDT) so they render consistently regardless of the
+// viewer's own timezone.
 //
-// Team matchups for the knockout bracket are not fixed until each prior round finishes, so we
-// use bracket-position labels (e.g. "Winner QF1") rather than inventing results.
+// The quarter-final matchups are now decided, so actual teams (and results for completed
+// matches) are listed. Later-round opponents that depend on unfinished matches use
+// bracket-position labels (e.g. "Winner QF3") until they are confirmed.
 
 export interface WorldCupMatch {
   id: string
@@ -15,6 +15,9 @@ export interface WorldCupMatch {
   kickoff: string // ISO with -04:00 (Eastern Daylight) offset
   venue: string
   city: string
+  status: "completed" | "scheduled"
+  // Final score for completed matches, home-away (e.g. [2, 0]).
+  score?: [number, number]
   // Highlight matches hosted in the NY/NJ metro area (MetLife Stadium) — the local final.
   local: boolean
 }
@@ -23,51 +26,58 @@ export const WORLD_CUP_MATCHES: WorldCupMatch[] = [
   {
     id: "qf1",
     round: "Quarter-final",
-    home: "Winner R16-1",
-    away: "Winner R16-2",
-    kickoff: "2026-07-09T18:00:00-04:00",
-    venue: "SoFi Stadium",
-    city: "Los Angeles",
+    home: "France",
+    away: "Morocco",
+    kickoff: "2026-07-09T15:00:00-04:00",
+    venue: "Gillette Stadium",
+    city: "Boston (Foxborough)",
+    status: "completed",
+    score: [2, 0],
     local: false,
   },
   {
     id: "qf2",
     round: "Quarter-final",
-    home: "Winner R16-3",
-    away: "Winner R16-4",
-    kickoff: "2026-07-10T18:00:00-04:00",
-    venue: "Arrowhead Stadium",
-    city: "Kansas City",
+    home: "Spain",
+    away: "Belgium",
+    kickoff: "2026-07-10T15:00:00-04:00",
+    venue: "SoFi Stadium",
+    city: "Los Angeles",
+    status: "completed",
+    score: [2, 1],
     local: false,
   },
   {
     id: "qf3",
     round: "Quarter-final",
-    home: "Winner R16-5",
-    away: "Winner R16-6",
-    kickoff: "2026-07-11T12:00:00-04:00",
+    home: "Norway",
+    away: "England",
+    kickoff: "2026-07-11T17:00:00-04:00",
     venue: "Hard Rock Stadium",
     city: "Miami",
+    status: "scheduled",
     local: false,
   },
   {
     id: "qf4",
     round: "Quarter-final",
-    home: "Winner R16-7",
-    away: "Winner R16-8",
-    kickoff: "2026-07-11T16:00:00-04:00",
-    venue: "Gillette Stadium",
-    city: "Boston",
+    home: "Argentina",
+    away: "Switzerland",
+    kickoff: "2026-07-11T21:00:00-04:00",
+    venue: "Arrowhead Stadium",
+    city: "Kansas City",
+    status: "scheduled",
     local: false,
   },
   {
     id: "sf1",
     round: "Semi-final",
-    home: "Winner QF1",
-    away: "Winner QF2",
+    home: "France",
+    away: "Spain",
     kickoff: "2026-07-14T15:00:00-04:00",
     venue: "AT&T Stadium",
     city: "Dallas",
+    status: "scheduled",
     local: false,
   },
   {
@@ -78,6 +88,7 @@ export const WORLD_CUP_MATCHES: WorldCupMatch[] = [
     kickoff: "2026-07-15T15:00:00-04:00",
     venue: "Mercedes-Benz Stadium",
     city: "Atlanta",
+    status: "scheduled",
     local: false,
   },
   {
@@ -88,6 +99,7 @@ export const WORLD_CUP_MATCHES: WorldCupMatch[] = [
     kickoff: "2026-07-18T15:00:00-04:00",
     venue: "Hard Rock Stadium",
     city: "Miami",
+    status: "scheduled",
     local: false,
   },
   {
@@ -98,6 +110,7 @@ export const WORLD_CUP_MATCHES: WorldCupMatch[] = [
     kickoff: "2026-07-19T15:00:00-04:00",
     venue: "MetLife Stadium",
     city: "New York / New Jersey",
+    status: "scheduled",
     local: true,
   },
 ]
