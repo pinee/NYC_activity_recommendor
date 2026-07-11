@@ -35,7 +35,7 @@ export const INTEREST_OPTIONS = [
   "Photography",
   "Festivals & fireworks",
   "Family & kids",
-  "Swimming & pools",
+  "Swimming & Water Activities",
   // Catch-all: events that don't match any other interest. Intentionally has NO entry in
   // INTEREST_KEYWORDS — it's handled in the plan route by matching events that match nothing
   // else (a negation of every other interest's keywords).
@@ -84,9 +84,6 @@ export const INTEREST_KEYWORDS: Record<string, string[]> = {
     "bird",
     "audubon",
     "waterfront",
-    "fishing",
-    "kayak",
-    "canoe",
     "climbing",
     "adventure",
     "tour",
@@ -130,7 +127,24 @@ export const INTEREST_KEYWORDS: Record<string, string[]> = {
     "new year",
   ],
   "Family & kids": ["kids", "kid", "family", "children", "child", "youth", "toddler", "teen", "seniors"],
-  "Swimming & pools": ["swim", "swimming", "aquatic", "aquatics", "pool"],
+  "Swimming & Water Activities": [
+    "swim",
+    "aquatic",
+    "pool",
+    "water",
+    "kayak",
+    "canoe",
+    "paddle",
+    "rowing",
+    "sail",
+    "boat",
+    "raft",
+    "surf",
+    "fishing",
+    "snorkel",
+    "scuba",
+    "diving",
+  ],
 }
 
 export interface Profile {

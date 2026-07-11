@@ -75,8 +75,13 @@ const CATEGORY_PATTERNS: { category: string; re: RegExp }[] = [
   { category: "Yoga & wellness", re: /\b(yoga|wellness|meditation|mindfulness|pilates|tai chi)\b/i },
   { category: "Running & fitness", re: /\b(run|running|fitness|workout|bootcamp|marathon|weightlifting|strength)\b/i },
   { category: "Cycling", re: /\b(cycling|bike|bicycle)\b/i },
-  { category: "Swimming & pools", re: /\b(swim|swimming|aquatics?)\b/i },
-  { category: "Hiking & parks", re: /\b(hike|hiking|trail|nature|birding|kayak|canoe|fishing)\b/i },
+  // Swimming plus on-the-water activities (river/harbor paddling, boating, fishing). Checked
+  // BEFORE "Hiking & parks" so a "Hudson River Kayaking" event routes here, not to parks.
+  {
+    category: "Swimming & Water Activities",
+    re: /\b(swim|swimming|aquatics?|kayak\w*|canoe\w*|paddle\s?board\w*|paddling|paddle|row(?:ing|boat)|sail\w*|boat\w*|rafting|raft|surf\w*|fishing|snorkel\w*|scuba|dive|diving)\b/i,
+  },
+  { category: "Hiking & parks", re: /\b(hike|hiking|trail|nature|birding)\b/i },
   { category: "Markets & shopping", re: /\b(market|bazaar|flea|pop-?up|vendor)\b/i },
   { category: "Tech & startups", re: /\b(tech|startup|coding|hackathon|developer)\b/i },
   { category: "Sports & games", re: /\b(basketball|soccer|tennis|baseball|volleyball|chess|pickleball|tournament)\b/i },
