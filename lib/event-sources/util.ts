@@ -144,6 +144,26 @@ export function isWorldCupViewing(
   return hasViewingSignal || (category || "").toLowerCase() === "soccer"
 }
 
+// Canonical category assigned at ingest to any event aimed at children/families, so kids
+// programming collects under the single "Family & kids" interest instead of scattering into
+// "Sports & games" (a kids soccer clinic), "Live music" (a kids concert), etc. Matches the
+// "Family & kids" entry in INTEREST_OPTIONS exactly.
+export const FAMILY_KIDS_CATEGORY = "Family & kids"
+
+// Detects events aimed at children/families. Anchored on the TITLE and CATEGORY only — never
+// the description — because many sources add boilerplate like "family-friendly" or "kids
+// welcome" to otherwise adult events; requiring the signal in the title/category keeps this
+// conservative. Used at ingest to re-stamp such events with FAMILY_KIDS_CATEGORY.
+export function isKidsEvent(title: string | null | undefined, category?: string | null): boolean {
+  const hay = `${title || ""} ${category || ""}`.toLowerCase()
+  if (!hay.trim()) return false
+  // "family" excludes the dining term "family style"; "baby/babies", "toddler", "kids",
+  // "children", "youth", "preschool", "storytime", etc. are all strong child-oriented signals.
+  return /\b(kids?|kid'?s|children'?s?|toddlers?|preschool(?:ers)?|pre-?k|infants?|babies|baby|youth|family(?![- ]?style)|families|storytime|story time)\b/.test(
+    hay,
+  )
+}
+
 const MONTH_INDEX: Record<string, number> = {
   jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5,
   jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11,
