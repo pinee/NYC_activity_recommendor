@@ -71,7 +71,6 @@ const CATEGORY_PATTERNS: { category: string; re: RegExp }[] = [
   { category: "Art & galleries", re: /\b(gallery|exhibit|painting|sculpture|mural|artist|drawing|printmaking)\b/i },
   { category: "Museums", re: /\b(museum|curator|curatorial|docent)\b/i },
   { category: "Food & dining", re: /\b(food|dining|tasting|culinary|cooking|brunch|dinner|chef|wine|beer|cocktail)\b/i },
-  { category: "Coffee & cafes", re: /\b(coffee|espresso|cafe|café)\b/i },
   { category: "Yoga & wellness", re: /\b(yoga|wellness|meditation|mindfulness|pilates|tai chi)\b/i },
   { category: "Running & fitness", re: /\b(run|running|fitness|workout|bootcamp|marathon|weightlifting|strength)\b/i },
   { category: "Cycling", re: /\b(cycling|bike|bicycle)\b/i },
@@ -83,7 +82,10 @@ const CATEGORY_PATTERNS: { category: string; re: RegExp }[] = [
   },
   { category: "Hiking & parks", re: /\b(hike|hiking|trail|nature|birding)\b/i },
   { category: "Markets & shopping", re: /\b(market|bazaar|flea|pop-?up|vendor)\b/i },
-  { category: "Tech & startups", re: /\b(tech|startup|coding|hackathon|developer)\b/i },
+  // Tech/startup events on these sources are almost always talks, panels, and demos, so they
+  // fold into "Talks & lectures" (there is no dedicated tech interest). Placed AFTER the
+  // "Talks & lectures" rule above, so it only catches tech items lacking explicit talk words.
+  { category: "Talks & lectures", re: /\b(tech|startup|coding|hackathon|developer)\b/i },
   { category: "Sports & games", re: /\b(basketball|soccer|tennis|baseball|volleyball|chess|pickleball|tournament)\b/i },
   { category: "Photography", re: /\b(photography|photo walk|photographer)\b/i },
   { category: "Family & kids", re: /\b(kids?|family|children|toddler|storytime)\b/i },
