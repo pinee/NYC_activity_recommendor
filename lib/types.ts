@@ -16,7 +16,6 @@ export const INTEREST_OPTIONS = [
   "Theater",
   "Museums",
   "Food & dining",
-  "Coffee & cafes",
   "Nightlife",
   "Running & fitness",
   "Yoga & wellness",
@@ -25,7 +24,6 @@ export const INTEREST_OPTIONS = [
   "Comedy",
   "Film & cinema",
   "Markets & shopping",
-  "Tech & startups",
   "Books & readings",
   "Talks & lectures",
   "Dance",
@@ -35,7 +33,7 @@ export const INTEREST_OPTIONS = [
   "Photography",
   "Festivals & fireworks",
   "Family & kids",
-  "Swimming & pools",
+  "Swimming & Water Activities",
   // Catch-all: events that don't match any other interest. Intentionally has NO entry in
   // INTEREST_KEYWORDS — it's handled in the plan route by matching events that match nothing
   // else (a negation of every other interest's keywords).
@@ -54,7 +52,6 @@ export const INTEREST_KEYWORDS: Record<string, string[]> = {
   Theater: ["theater", "theatre", "play", "drama", "musical", "broadway", "performance"],
   Museums: ["museum", "exhibit", "gallery", "history", "historic", "science", "astronomy"],
   "Food & dining": ["food", "dining", "tasting", "culinary", "cooking", "brunch"],
-  "Coffee & cafes": ["coffee", "cafe", "espresso", "tea"],
   Nightlife: ["nightlife", "club", "party", "dance"],
   "Running & fitness": [
     "run",
@@ -84,9 +81,6 @@ export const INTEREST_KEYWORDS: Record<string, string[]> = {
     "bird",
     "audubon",
     "waterfront",
-    "fishing",
-    "kayak",
-    "canoe",
     "climbing",
     "adventure",
     "tour",
@@ -94,7 +88,6 @@ export const INTEREST_KEYWORDS: Record<string, string[]> = {
   Comedy: ["comedy", "comedian", "standup", "improv"],
   "Film & cinema": ["film", "cinema", "movie", "screening"],
   "Markets & shopping": ["market", "shopping", "bazaar", "fair", "flea", "vendor"],
-  "Tech & startups": ["tech", "startup", "coding", "hackathon", "developer"],
   "Books & readings": ["book", "reading", "author", "poetry", "literature", "library"],
   "Talks & lectures": ["talk", "lecture", "seminar", "panel", "discussion", "conversation", "keynote", "symposium"],
   Dance: ["dance", "ballet", "salsa", "tango", "choreography"],
@@ -130,7 +123,24 @@ export const INTEREST_KEYWORDS: Record<string, string[]> = {
     "new year",
   ],
   "Family & kids": ["kids", "kid", "family", "children", "child", "youth", "toddler", "teen", "seniors"],
-  "Swimming & pools": ["swim", "swimming", "aquatic", "aquatics", "pool"],
+  "Swimming & Water Activities": [
+    "swim",
+    "aquatic",
+    "pool",
+    "water",
+    "kayak",
+    "canoe",
+    "paddle",
+    "rowing",
+    "sail",
+    "boat",
+    "raft",
+    "surf",
+    "fishing",
+    "snorkel",
+    "scuba",
+    "diving",
+  ],
 }
 
 export interface Profile {

@@ -61,7 +61,7 @@ const SLUG_TO_INTEREST: Record<string, string> = {
   design: "Art & galleries",
   music: "Film & cinema", // TG's "Performing Arts/Film" bucket
   "food-drink": "Food & dining",
-  science: "Tech & startups",
+  science: "Talks & lectures",
   history: "Museums",
 }
 

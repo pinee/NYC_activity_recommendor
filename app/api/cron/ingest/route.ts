@@ -1,6 +1,12 @@
 import { createServiceClient } from "@/lib/supabase/server"
 import { eventSources, type NormalizedEvent } from "@/lib/event-sources"
-import { nyToUtcISO, isWorldCupViewing, WORLD_CUP_CATEGORY } from "@/lib/event-sources/util"
+import {
+  nyToUtcISO,
+  isWorldCupViewing,
+  WORLD_CUP_CATEGORY,
+  isKidsEvent,
+  FAMILY_KIDS_CATEGORY,
+} from "@/lib/event-sources/util"
 import { geocodeAddress } from "@/lib/geo"
 
 // Re-stamp World Cup / soccer viewing events (which arrive from many sources under many
@@ -15,6 +21,23 @@ function reclassifyFootball(events: NormalizedEvent[]): void {
         e.tags = Array.from(new Set([...(e.tags ?? []), e.category]))
       }
       e.category = WORLD_CUP_CATEGORY
+    }
+  }
+}
+
+// Re-stamp kids/family events (which arrive under many categories — "Sports & games" for a
+// kids soccer clinic, "Live music" for a children's concert, "Others", …) with one canonical
+// category so all child-oriented programming collects under the single "Family & kids"
+// interest. The original category is preserved in `tags`. World Cup viewing events are left
+// alone (they're already canonicalized). Mutates events in place.
+function reclassifyKids(events: NormalizedEvent[]): void {
+  for (const e of events) {
+    if (e.category === FAMILY_KIDS_CATEGORY || e.category === WORLD_CUP_CATEGORY) continue
+    if (isKidsEvent(e.title, e.category)) {
+      if (e.category) {
+        e.tags = Array.from(new Set([...(e.tags ?? []), e.category]))
+      }
+      e.category = FAMILY_KIDS_CATEGORY
     }
   }
 }
@@ -95,6 +118,10 @@ async function ingest(): Promise<IngestResult> {
 
   // Collect scattered World Cup / soccer viewing events under one canonical category.
   reclassifyFootball(deduped)
+
+  // Collect scattered kids/family events under the single "Family & kids" category so they
+  // no longer surface under "Sports & games" and other interests.
+  reclassifyKids(deduped)
 
   // Fill missing coordinates (e.g. SummerStage venues that arrive without geo) so the
   // app's deterministic travel-time filter can apply to them. Best-effort and capped.

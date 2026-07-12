@@ -71,14 +71,21 @@ const CATEGORY_PATTERNS: { category: string; re: RegExp }[] = [
   { category: "Art & galleries", re: /\b(gallery|exhibit|painting|sculpture|mural|artist|drawing|printmaking)\b/i },
   { category: "Museums", re: /\b(museum|curator|curatorial|docent)\b/i },
   { category: "Food & dining", re: /\b(food|dining|tasting|culinary|cooking|brunch|dinner|chef|wine|beer|cocktail)\b/i },
-  { category: "Coffee & cafes", re: /\b(coffee|espresso|cafe|café)\b/i },
   { category: "Yoga & wellness", re: /\b(yoga|wellness|meditation|mindfulness|pilates|tai chi)\b/i },
   { category: "Running & fitness", re: /\b(run|running|fitness|workout|bootcamp|marathon|weightlifting|strength)\b/i },
   { category: "Cycling", re: /\b(cycling|bike|bicycle)\b/i },
-  { category: "Swimming & pools", re: /\b(swim|swimming|aquatics?)\b/i },
-  { category: "Hiking & parks", re: /\b(hike|hiking|trail|nature|birding|kayak|canoe|fishing)\b/i },
+  // Swimming plus on-the-water activities (river/harbor paddling, boating, fishing). Checked
+  // BEFORE "Hiking & parks" so a "Hudson River Kayaking" event routes here, not to parks.
+  {
+    category: "Swimming & Water Activities",
+    re: /\b(swim|swimming|aquatics?|kayak\w*|canoe\w*|paddle\s?board\w*|paddling|paddle|row(?:ing|boat)|sail(?:ing|boat)?|boat\w*|rafting|raft|surf(?:ing|board)|fishing|angling|snorkel\w*|scuba)\b/i,
+  },
+  { category: "Hiking & parks", re: /\b(hike|hiking|trail|nature|birding)\b/i },
   { category: "Markets & shopping", re: /\b(market|bazaar|flea|pop-?up|vendor)\b/i },
-  { category: "Tech & startups", re: /\b(tech|startup|coding|hackathon|developer)\b/i },
+  // Tech/startup events on these sources are almost always talks, panels, and demos, so they
+  // fold into "Talks & lectures" (there is no dedicated tech interest). Placed AFTER the
+  // "Talks & lectures" rule above, so it only catches tech items lacking explicit talk words.
+  { category: "Talks & lectures", re: /\b(tech|startup|coding|hackathon|developer)\b/i },
   { category: "Sports & games", re: /\b(basketball|soccer|tennis|baseball|volleyball|chess|pickleball|tournament)\b/i },
   { category: "Photography", re: /\b(photography|photo walk|photographer)\b/i },
   { category: "Family & kids", re: /\b(kids?|family|children|toddler|storytime)\b/i },
@@ -142,6 +149,26 @@ export function isWorldCupViewing(
     )
 
   return hasViewingSignal || (category || "").toLowerCase() === "soccer"
+}
+
+// Canonical category assigned at ingest to any event aimed at children/families, so kids
+// programming collects under the single "Family & kids" interest instead of scattering into
+// "Sports & games" (a kids soccer clinic), "Live music" (a kids concert), etc. Matches the
+// "Family & kids" entry in INTEREST_OPTIONS exactly.
+export const FAMILY_KIDS_CATEGORY = "Family & kids"
+
+// Detects events aimed at children/families. Anchored on the TITLE and CATEGORY only — never
+// the description — because many sources add boilerplate like "family-friendly" or "kids
+// welcome" to otherwise adult events; requiring the signal in the title/category keeps this
+// conservative. Used at ingest to re-stamp such events with FAMILY_KIDS_CATEGORY.
+export function isKidsEvent(title: string | null | undefined, category?: string | null): boolean {
+  const hay = `${title || ""} ${category || ""}`.toLowerCase()
+  if (!hay.trim()) return false
+  // "family" excludes the dining term "family style"; "baby/babies", "toddler", "kids",
+  // "children", "youth", "preschool", "storytime", etc. are all strong child-oriented signals.
+  return /\b(kids?|kid'?s|children'?s?|toddlers?|preschool(?:ers)?|pre-?k|infants?|babies|baby|youth|family(?![- ]?style)|families|storytime|story time)\b/.test(
+    hay,
+  )
 }
 
 const MONTH_INDEX: Record<string, number> = {
