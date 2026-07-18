@@ -82,7 +82,6 @@ function cacheKey(profile: any, requests: any, weekStart: string) {
     office: profile.officeAddress || "",
     travel: profile.maxTravelMinutes,
     budget: profile.budget,
-    diversity: profile.diversity,
     workDays: profile.workDays,
     includeApprox: profile.includeApproximateLocations !== false,
     requests: (requests || []).map((r: any) => r.text),
@@ -439,7 +438,6 @@ USER PROFILE
 - Office: ${profile.officeAddress || "not provided"}
 - Working hours: ${profile.workStart}–${profile.workEnd} on ${(profile.workDays || []).join(", ") || "weekdays"}
 - Interests: ${(profile.interests || []).join(", ") || "none selected — rely on the description below"}
-- Variety preference (1=stick to favorites, 5=lots of variety): ${profile.diversity}
 - Max travel time one-way: ${profile.maxTravelMinutes} minutes
 - Budget: ${profile.budget}
 
