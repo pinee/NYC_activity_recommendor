@@ -128,7 +128,7 @@ export function ProfileForm({ profile, onChange }: Props) {
       {/* Interests */}
       <section className="flex flex-col gap-3">
         <Label className="flex items-center gap-2 text-xs uppercase tracking-wide text-muted-foreground">
-          <Compass className="size-3.5" /> Interests
+          <Compass className="size-3.5" /> Interests <span className="normal-case tracking-normal text-muted-foreground/70">(optional)</span>
         </Label>
         <div className="flex flex-wrap gap-2">
           {INTEREST_OPTIONS.map((interest) => (

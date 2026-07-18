@@ -111,8 +111,9 @@ export default function Page() {
   }
 
   const generate = async () => {
-    if (profile.interests.length === 0) {
-      toast.error("Pick at least one interest first")
+    const hasDescription = requests.some((r) => r.text.trim().length > 0)
+    if (profile.interests.length === 0 && !hasDescription) {
+      toast.error("Pick at least one interest, or describe what you feel like doing")
       return
     }
     setGenerating(true)
@@ -237,8 +238,12 @@ export default function Page() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide">
-                <Sparkles className="size-4 text-accent" /> Special requests
+                <Sparkles className="size-4 text-accent" /> What do you feel like doing?
               </CardTitle>
+              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                Describe the kind of week you want in your own words — no need to pick interests. You can also add
+                specific constraints like times or neighborhoods.
+              </p>
             </CardHeader>
             <CardContent>
               <SpecialRequests
@@ -320,8 +325,8 @@ export default function Page() {
               <div className="max-w-sm">
                 <p className="text-pretty font-medium">Your week, curated</p>
                 <p className="mt-1 text-pretty text-sm text-muted-foreground">
-                  Set your interests, connect your calendar, add any special requests, then generate a
-                  personalized list of real activities happening across NYC this week.
+                  Pick a few interests or just describe what you feel like doing, connect your calendar, then
+                  generate a personalized list of real activities happening across NYC this week.
                 </p>
               </div>
             </div>

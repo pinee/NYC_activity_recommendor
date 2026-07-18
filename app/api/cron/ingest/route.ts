@@ -8,6 +8,7 @@ import {
   FAMILY_KIDS_CATEGORY,
 } from "@/lib/event-sources/util"
 import { geocodeAddress } from "@/lib/geo"
+import { embedMissingEvents } from "@/lib/embed-events"
 
 // Re-stamp World Cup / soccer viewing events (which arrive from many sources under many
 // categories — "Soccer", "Nightlife", "Others", "Food & dining", …) with one canonical
@@ -79,12 +80,17 @@ export const maxDuration = 300
 // rolling window always stays full between daily runs.
 const INGEST_HORIZON_DAYS = 14
 
+// Cap embedding work per run so one ingest can't fan out into thousands of embedding calls.
+// New events always get embedded promptly; a large first-time backlog drains over a few runs.
+const MAX_EMBED_PER_RUN = 300
+
 type IngestResult = {
   found: number // total events returned by all sources (after de-dup)
   upserted: number
   rowsAdded: number
   duplicatesRemoved: number
   rowsTotal: number
+  embedded: number // events that received a semantic-search embedding this run
   perSource: Record<string, number>
 }
 
@@ -161,12 +167,25 @@ async function ingest(): Promise<IngestResult> {
       `and(end_time.not.is.null,end_time.lt.${startOfTodayUTC}),and(end_time.is.null,start_time.lt.${startOfTodayUTC})`,
     )
 
+  // Generate semantic-search embeddings for any events that lack one (freshly ingested rows,
+  // plus a slice of any older backlog). Capped per run to bound cost/time; the rest drain on
+  // subsequent runs. Runs in its own pass AFTER the upsert so existing embeddings are never
+  // overwritten. Best-effort: a failure here must not fail the whole ingest.
+  let embedded = 0
+  try {
+    const res = await embedMissingEvents(MAX_EMBED_PER_RUN)
+    embedded = res.embedded
+  } catch (err) {
+    console.log("[v0] embedding pass failed:", err instanceof Error ? err.message : err)
+  }
+
   return {
     found: deduped.length,
     upserted,
     rowsAdded,
     duplicatesRemoved,
     rowsTotal: deduped.length,
+    embedded,
     perSource,
   }
 }
