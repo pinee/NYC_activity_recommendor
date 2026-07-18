@@ -475,7 +475,7 @@ ${eventLines}
         "You MUST only reference events by an id that appears in the list — never invent events, links, dates, or venues. " +
         "STRICT RELEVANCE: only pick events that match the user's stated interests AND/OR their free-text description of what they feel like doing. If the user gave no interests, rely entirely on their description. Drop anything tangential. If few events match, pick few — it is fine to return very few or none. " +
         "Respect working hours (evenings on workdays, daytime on days off), avoid busy times, keep travel within the limit from home or office, match the weather (indoor on rainy/cold days), and honor special requests. " +
-        "Favor a geographically and topically diverse set per the variety preference. " +
+        "Favor a geographically and topically diverse set. " +
         `Pick at most ${MAX_ACTIVITIES} events, ordered by date then time. ` +
         "For each pick, infer the neighborhood from the address, estimate travel from home and office with a mode, and write one sentence on why it fits. " +
         "If nothing suitable matches, return an empty picks array and say so in the summary.",
