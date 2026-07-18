@@ -130,74 +130,109 @@ function interestKeywords(interests: string[]): string[] {
 const EVENT_COLUMNS =
   "id,title,description,category,start_time,end_time,venue_name,address,latitude,longitude,event_url,source,price,image_url,neighborhood,approximate_location"
 
-// How many nearest events the semantic search returns before deterministic filtering.
+// How many nearest events the semantic search returns after the hard filters are applied.
 const SEMANTIC_MATCH_COUNT = 80
+
+// Postgres extract(dow): Sunday=0 … Saturday=6. Maps profile.workDays (full weekday names).
+const DOW_BY_NAME: Record<string, number> = {
+  sunday: 0,
+  monday: 1,
+  tuesday: 2,
+  wednesday: 3,
+  thursday: 4,
+  friday: 5,
+  saturday: 6,
+}
+
+// The hard filters (budget / working hours / travel / approximate location), resolved from the
+// user's profile ONCE and pushed down into the SQL search functions so they run BEFORE the
+// semantic fetch and the LLM ranking — never after.
+type EventFilters = {
+  budgetCap: number | null // max acceptable price in USD (null = no cap)
+  includeApprox: boolean // keep events whose coordinates are only estimated?
+  homeLat: number | null
+  homeLng: number | null
+  officeLat: number | null
+  officeLng: number | null
+  maxTravel: number | null // max one-way minutes from the closer of home/office
+  workdayDows: number[] // work days as Postgres dow ints
+  workStartMin: number | null // work start, minutes since midnight (NY)
+  workEndMin: number | null // work end, minutes since midnight (NY)
+}
 
 // Build the candidate event pool for the next 7 days, combining up to two retrieval paths:
 //
-//   A. INTEREST KEYWORDS — the category-based pre-filter (unchanged) used when the user has
-//      selected one or more interests.
+//   A. INTEREST KEYWORDS — the category-based filter used when the user selected interests.
 //   B. SEMANTIC SEARCH — when the user typed a free-text description of what they feel like
 //      doing, we embed it and pull the closest events by cosine similarity (match_events()).
 //      This is what lets someone get relevant recommendations WITHOUT selecting any interest.
 //
-// When both are provided the two result sets are UNIONED (deduped by id), so the description
-// can surface fitting events the category filter would have missed, and vice-versa. If neither
-// is usable (e.g. the embedding call failed and no interests were set) we return the whole
-// week's window so the app can still produce something.
-async function fetchUpcomingEvents(interests: string[], queryText: string): Promise<EventRow[]> {
+// BOTH paths now apply the hard filters (budget / hours / travel / approximate location) IN SQL,
+// so only events the user can actually attend are ever fetched, embedded-ranked, or sent to the
+// LLM. When both are provided the two result sets are UNIONED (deduped by id). If neither is
+// usable (no interests, embedding failed) we return the whole filtered week's window.
+async function fetchUpcomingEvents(
+  interests: string[],
+  queryText: string,
+  filters: EventFilters,
+): Promise<EventRow[]> {
   const supabase = createServiceClient()
   const todayNY = new Date().toLocaleString("sv-SE", { timeZone: "America/New_York" }).slice(0, 10)
   const windowStartISO = nyToUtcISO(todayNY, "00:00") ?? new Date().toISOString()
   const windowEndISO = new Date(new Date(windowStartISO).getTime() + 7 * 86400000).toISOString()
 
-  // Base predicate: an event's span overlaps the next 7 days (includes ongoing multi-day
-  // events that began earlier). Reused by both the keyword path and the whole-window fallback.
-  const inWindow = (q: any) =>
-    q
-      .lte("start_time", windowEndISO)
-      .or(`end_time.gte.${windowStartISO},and(end_time.is.null,start_time.gte.${windowStartISO})`)
+  // Filter args shared by BOTH search functions (identical parameter names in SQL).
+  const filterArgs = {
+    p_window_start: windowStartISO,
+    p_window_end: windowEndISO,
+    p_budget_cap: filters.budgetCap,
+    p_include_approx: filters.includeApprox,
+    p_home_lat: filters.homeLat,
+    p_home_lng: filters.homeLng,
+    p_office_lat: filters.officeLat,
+    p_office_lng: filters.officeLng,
+    p_max_travel: filters.maxTravel,
+    p_workday_dows: filters.workdayDows,
+    p_work_start_min: filters.workStartMin,
+    p_work_end_min: filters.workEndMin,
+  }
 
   const byId = new Map<string, EventRow>()
 
-  // ---- Path A: interest keyword pre-filter (category-based) ----
+  // ---- Path A: interest keyword filter (category-based) ----
   //
   // Holiday/festival events are the exception: sources almost always categorize them by
   // activity type ("Concerts", "Nature Programs", "America250", "Arts & Culture"), not by
   // the holiday — so a July-4 concert or a Pride festival would never match on category.
-  // For the "Festivals & fireworks" interest we therefore ALSO match on the event title,
-  // where the holiday name reliably appears ("...4th of July Concert", "pridefest...").
-  // All conditions go into a single .or() so they combine as OR (chaining .or() would AND).
+  // For the "Festivals & fireworks" interest we therefore ALSO match on the event title.
   //
   // "Others" is a catch-all with no keywords of its own: it matches events that match NO
-  // other interest. We express that as a nested and(...) of not.ilike over the FULL keyword
-  // universe (plus the festival title terms), which PostgREST ORs alongside the rest.
+  // other interest — expressed as an exclusion list over the FULL keyword universe. All of
+  // this is passed to filter_events() as %-wrapped ILIKE pattern arrays.
   const selectableInterests = interests.filter((i) => i !== OTHERS_INTEREST)
   const keywords = interestKeywords(selectableInterests)
   const wantsOthers = interests.includes(OTHERS_INTEREST)
   const hasInterestFilter = keywords.length > 0 || wantsOthers
+  const festivalKeywords = INTEREST_KEYWORDS[FESTIVALS_INTEREST] ?? []
 
   if (hasInterestFilter) {
-    let query = inWindow(supabase.from("events").select("*"))
-    const festivalKeywords = INTEREST_KEYWORDS[FESTIVALS_INTEREST] ?? []
-    const conditions = keywords.map((k) => `category.ilike.%${k}%`)
-    if (selectableInterests.includes(FESTIVALS_INTEREST)) {
-      for (const k of festivalKeywords) conditions.push(`title.ilike.%${k}%`)
-    }
-    if (wantsOthers) {
-      // Universe of every keyword across all real interests (excludes "Others" itself).
-      const universe = interestKeywords(INTEREST_OPTIONS.filter((i) => i !== OTHERS_INTEREST))
-      const negations = [
-        ...universe.map((k) => `category.not.ilike.%${k}%`),
-        // Festival matching also uses the title, so exclude those title hits too.
-        ...festivalKeywords.map((k) => `title.not.ilike.%${k}%`),
-      ]
-      conditions.push(`and(${negations.join(",")})`)
-    }
-    query = query.or(conditions.join(","))
-    const { data, error } = await query.order("start_time", { ascending: true }).limit(500)
+    const universe = interestKeywords(INTEREST_OPTIONS.filter((i) => i !== OTHERS_INTEREST))
+    const { data, error } = await supabase
+      .rpc("filter_events", {
+        ...filterArgs,
+        p_limit: 500,
+        p_no_keyword: false,
+        p_cat_patterns: keywords.map((k) => `%${k}%`),
+        p_title_patterns: selectableInterests.includes(FESTIVALS_INTEREST)
+          ? festivalKeywords.map((k) => `%${k}%`)
+          : [],
+        p_others: wantsOthers,
+        p_exclude_cat_patterns: universe.map((k) => `%${k}%`),
+        p_exclude_title_patterns: festivalKeywords.map((k) => `%${k}%`),
+      })
+      .select(EVENT_COLUMNS)
     if (error) throw new Error(error.message)
-    for (const r of (data as EventRow[]) || []) byId.set(r.id, r)
+    for (const r of (data as unknown as EventRow[]) || []) byId.set(r.id, r)
   }
 
   // ---- Path B: semantic search over the free-text description ----
@@ -206,10 +241,9 @@ async function fetchUpcomingEvents(interests: string[], queryText: string): Prom
     if (embedding) {
       const { data, error } = await supabase
         .rpc("match_events", {
-          query_embedding: embedding,
-          match_count: SEMANTIC_MATCH_COUNT,
-          window_start: windowStartISO,
-          window_end: windowEndISO,
+          p_query_embedding: embedding,
+          p_match_count: SEMANTIC_MATCH_COUNT,
+          ...filterArgs,
         })
         .select(EVENT_COLUMNS)
       if (error) throw new Error(error.message)
@@ -217,49 +251,35 @@ async function fetchUpcomingEvents(interests: string[], queryText: string): Prom
     }
   }
 
-  // ---- Path C: nothing usable → return the whole window ----
+  // ---- Path C: nothing usable → the whole (still filtered) window ----
   if (byId.size === 0 && !hasInterestFilter && !queryText.trim()) {
-    const { data, error } = await inWindow(supabase.from("events").select("*"))
-      .order("start_time", { ascending: true })
-      .limit(500)
+    const { data, error } = await supabase
+      .rpc("filter_events", {
+        ...filterArgs,
+        p_limit: 500,
+        p_no_keyword: true,
+        p_cat_patterns: [],
+        p_title_patterns: [],
+        p_others: false,
+        p_exclude_cat_patterns: [],
+        p_exclude_title_patterns: [],
+      })
+      .select(EVENT_COLUMNS)
     if (error) throw new Error(error.message)
-    for (const r of (data as EventRow[]) || []) byId.set(r.id, r)
+    for (const r of (data as unknown as EventRow[]) || []) byId.set(r.id, r)
   }
 
-  // Drop events that have already begun, so a search at (say) 8 PM only surfaces events
-  // starting LATER than right now — not ones that already started earlier today. The DB
-  // window is anchored to the start of today (to fetch ongoing multi-day events), so this
-  // "now" cutoff is applied here in JS. Exception: multi-day events (festivals, exhibitions)
-  // stay visible for their whole run, since they remain attend-able after their opening day.
-  const now = Date.now()
-  const rows = [...byId.values()].filter((r) => {
-    const start = new Date(r.start_time).getTime()
-    if (start >= now) return true // starts in the future — always eligible
-    const startDay = nyDateOf(r.start_time)
-    const endDay = r.end_time ? nyDateOf(r.end_time) : null
-    const isMultiDay = !!endDay && endDay !== startDay
-    // Already started: keep only if it's a multi-day event that hasn't ended yet.
-    return isMultiDay && new Date(r.end_time as string).getTime() >= now
-  })
-  // Time-order the combined pool and keep it bounded for the model.
+  // The "already started today" cutoff and all hard filters were applied in SQL, so just
+  // time-order the combined pool and keep it bounded for the model.
+  const rows = [...byId.values()]
   rows.sort((a, b) => a.start_time.localeCompare(b.start_time))
   return rows.slice(0, 500)
 }
 
-// ---- Deterministic filter helpers (budget / working hours / travel) ----
-
-// Parse a free-text price into the cheapest dollar figure it implies.
-// "Free" -> 0, "$25" -> 25, "$10–$40" -> 10 (lowest), unknown/blank -> null (can't judge).
-function parsePriceUSD(price: string | null): number | null {
-  if (!price) return null
-  const text = price.toLowerCase()
-  if (text.includes("free") || text.includes("no charge")) return 0
-  const nums = (price.match(/\d+(?:\.\d+)?/g) || []).map(Number)
-  if (nums.length === 0) return null
-  return Math.min(...nums)
-}
+// ---- Filter helpers ----
 
 // Map the user's budget preference to a maximum acceptable price (null = no cap).
+// Mirrors public.parse_price_usd() semantics on the SQL side.
 function budgetCapUSD(budget: string): number | null {
   switch (budget) {
     case "free":
@@ -342,9 +362,34 @@ async function buildPlan(body: any) {
   // browse endpoint uses, so the two always agree.
   const worldCup = interests.includes(WORLD_CUP_INTEREST) ? await getWorldCupSpots(profile) : undefined
 
-  // 1) Read the catalog from the database (no live web search): interest keyword pre-filter
+  // Geocode home/office ONCE, up front, so the hard filters (travel especially) can run in
+  // SQL before the fetch. Also reused later for the travel-time display labels. Best-effort:
+  // if geocoding fails the coords are null and the travel filter is simply skipped.
+  const [homeCoord, officeCoord] = await Promise.all([
+    geocodeAddress(profile.homeAddress),
+    geocodeAddress(profile.officeAddress),
+  ])
+
+  // Resolve every hard filter from the profile, to be pushed into the SQL search functions.
+  const filters: EventFilters = {
+    budgetCap: budgetCapUSD(profile.budget),
+    includeApprox: profile.includeApproximateLocations !== false,
+    homeLat: homeCoord?.lat ?? null,
+    homeLng: homeCoord?.lng ?? null,
+    officeLat: officeCoord?.lat ?? null,
+    officeLng: officeCoord?.lng ?? null,
+    maxTravel: typeof profile.maxTravelMinutes === "number" ? profile.maxTravelMinutes : null,
+    workdayDows: ((profile.workDays as string[]) || [])
+      .map((d) => DOW_BY_NAME[(d || "").toLowerCase()])
+      .filter((n): n is number => typeof n === "number"),
+    workStartMin: clockToMinutes(profile.workStart),
+    workEndMin: clockToMinutes(profile.workEnd),
+  }
+
+  // 1) Read the catalog from the database (no live web search). The hard filters are applied
+  //    IN SQL here, so only attendable events come back — via the interest keyword filter
   //    and/or semantic search over the user's free-text description.
-  const allRows = await fetchUpcomingEvents(interests, queryText)
+  const allRows = await fetchUpcomingEvents(interests, queryText, filters)
   // Keep World Cup events out of the date-grouped list — they're shown as spots above, so
   // including them here would both duplicate them and reintroduce the date-level display.
   const rows = allRows.filter((r) => r.category !== WORLD_CUP_CATEGORY)
@@ -487,24 +532,11 @@ ${eventLines}
   const weekdayByIso = new Map(dates.map((d) => [d.iso, d.weekday as WeekDay]))
   const todayIso = dates[0].iso
 
-  // Geocode home/office once for deterministic travel filtering (free, cached, best-effort).
-  const [homeCoord, officeCoord] = await Promise.all([
-    geocodeAddress(profile.homeAddress),
-    geocodeAddress(profile.officeAddress),
-  ])
-
-  // Deterministic constraints, applied AFTER the AI has chosen relevant events.
-  const cap = budgetCapUSD(profile.budget)
-  const maxTravel = typeof profile.maxTravelMinutes === "number" ? profile.maxTravelMinutes : null
-  const workStartMin = clockToMinutes(profile.workStart)
-  const workEndMin = clockToMinutes(profile.workEnd)
-  const workDays: string[] = profile.workDays || []
-  // Default to including approximate-location events unless the user opts out.
-  const includeApproximate = profile.includeApproximateLocations !== false
-  const removed = { budget: 0, hours: 0, travel: 0, approx: 0 }
-
-  // 3) Merge curation with authoritative DB fields. DB owns title/date/url/price; meta owns why/travel/etc.
-  const enriched = picks
+  // 3) Merge curation with authoritative DB fields. DB owns title/date/url/price; meta owns
+  //    why/travel/etc. The hard filters (budget / hours / travel / approximate location) were
+  //    already applied in SQL before the fetch, so there is no post-LLM filtering here — we
+  //    only compute the straight-line travel estimates used for the display labels.
+  const kept = picks
     .map(({ row, meta }) => {
       const startDate = nyDateOf(row.start_time)
       const endDate = row.end_time ? nyDateOf(row.end_time) : null
@@ -517,60 +549,33 @@ ${eventLines}
       // rely on the "Runs through" range label instead. End time only for single-day.
       const startTime = isOpeningDay ? nyClockOf(row.start_time) : ""
       const endTime = !multiDay && row.end_time ? nyClockOf(row.end_time) : ""
-      return { row, meta, date: displayDate, endDate, startTime, endTime, weekday: weekdayByIso.get(displayDate) }
+
+      // Travel-time display estimate (SQL already enforced the max-travel filter).
+      let detHome: number | null = null
+      let detOffice: number | null = null
+      const eventCoord: Coord | null =
+        typeof row.latitude === "number" && typeof row.longitude === "number"
+          ? { lat: row.latitude, lng: row.longitude }
+          : null
+      if (eventCoord) {
+        if (homeCoord) detHome = estimateTravelMinutes(homeCoord, eventCoord)
+        if (officeCoord) detOffice = estimateTravelMinutes(officeCoord, eventCoord)
+      }
+
+      return {
+        row,
+        meta,
+        date: displayDate,
+        endDate,
+        startTime,
+        endTime,
+        weekday: weekdayByIso.get(displayDate),
+        detHome,
+        detOffice,
+      }
     })
     // Defensive: only show events that fall within the next 7 days.
     .filter((x) => validIso.has(x.date))
-
-  // 4) Apply the deterministic budget / working-hours / travel filters.
-  const kept: (typeof enriched[number] & { detHome: number | null; detOffice: number | null })[] = []
-  for (const x of enriched) {
-    // Approximate location: when the user opts out, drop events whose coordinates are
-    // only an approximation (neighborhood/org centroid or geocoded), since their travel
-    // times can't be trusted.
-    if (!includeApproximate && x.row.approximate_location) {
-      removed.approx++
-      continue
-    }
-
-    // Budget: drop only when we can parse a price AND it exceeds the cap. Unknown/free pass.
-    if (cap !== null) {
-      const priceUSD = parsePriceUSD(x.row.price)
-      if (priceUSD !== null && priceUSD > cap) {
-        removed.budget++
-        continue
-      }
-    }
-
-    // Working hours: drop events that start during the user's working hours on a workday.
-    if (x.startTime && x.weekday && workDays.includes(x.weekday) && workStartMin !== null && workEndMin !== null) {
-      const startMin = clockToMinutes(x.startTime)
-      if (startMin !== null && startMin >= workStartMin && startMin < workEndMin) {
-        removed.hours++
-        continue
-      }
-    }
-
-    // Travel: estimate one-way minutes from home and office (straight-line). Keep the
-    // closer of the two. Only filter when we have BOTH an event location and an origin.
-    let detHome: number | null = null
-    let detOffice: number | null = null
-    const eventCoord: Coord | null =
-      typeof x.row.latitude === "number" && typeof x.row.longitude === "number"
-        ? { lat: x.row.latitude, lng: x.row.longitude }
-        : null
-    if (eventCoord) {
-      if (homeCoord) detHome = estimateTravelMinutes(homeCoord, eventCoord)
-      if (officeCoord) detOffice = estimateTravelMinutes(officeCoord, eventCoord)
-    }
-    const bestTravel = [detHome, detOffice].filter((n): n is number => n !== null).sort((a, b) => a - b)[0] ?? null
-    if (maxTravel !== null && bestTravel !== null && bestTravel > maxTravel) {
-      removed.travel++
-      continue
-    }
-
-    kept.push({ ...x, detHome, detOffice })
-  }
 
   const activities = kept
     .sort((a, b) => (a.date === b.date ? a.startTime.localeCompare(b.startTime) : a.date.localeCompare(b.date)))
@@ -599,18 +604,6 @@ ${eventLines}
       approximateLocation: x.row.approximate_location ?? false,
     }))
 
-  // Note describing what the deterministic filters removed (shown to the user).
-  const totalRemoved = removed.budget + removed.hours + removed.travel + removed.approx
-  let filteredNote = ""
-  if (totalRemoved > 0) {
-    const parts: string[] = []
-    if (removed.travel) parts.push(`${removed.travel} too far`)
-    if (removed.budget) parts.push(`${removed.budget} over budget`)
-    if (removed.hours) parts.push(`${removed.hours} during working hours`)
-    if (removed.approx) parts.push(`${removed.approx} with approximate locations`)
-    filteredNote = `${totalRemoved} ${totalRemoved === 1 ? "event" : "events"} hidden: ${parts.join(", ")}.`
-  }
-
   // Build a de-duplicated source list from the events actually shown.
   const sources = Array.from(
     new Map(
@@ -629,7 +622,7 @@ ${eventLines}
     ).values(),
   )
 
-  return { summary, activities, sources, filteredNote: filteredNote || undefined, worldCup }
+  return { summary, activities, sources, worldCup }
 }
 
 export async function POST(req: Request) {

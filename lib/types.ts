@@ -246,9 +246,6 @@ export interface WeeklyPlan {
   summary: string
   activities: Activity[]
   sources?: PlanSource[]
-  // Set when deterministic filters (budget / working hours / travel) removed events
-  // the AI had otherwise selected, e.g. "3 events hidden: 2 too far, 1 over budget."
-  filteredNote?: string
   // Present when the user selected the "World Cup & Soccer" interest. World Cup viewing is
   // location-first, not date-first, so these events are shown as aggregated viewing SPOTS
   // (each with a date span) instead of date-grouped activity cards.

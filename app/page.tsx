@@ -159,7 +159,6 @@ export default function Page() {
               summary: msg.summary,
               activities,
               sources: msg.sources ?? [],
-              filteredNote: msg.filteredNote,
               worldCup: msg.worldCup,
             })
             const spotCount = msg.worldCup?.spots?.length ?? 0
