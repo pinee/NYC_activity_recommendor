@@ -27,7 +27,7 @@ export async function embedMissingEvents(limit: number): Promise<{ embedded: num
     const chunk = rows.slice(i, i + EMBED_BATCH)
     const texts = chunk.map((r) => eventEmbeddingText(r))
     const vectors = await embedEventTexts(texts)
-    if (!vectors) continue // batch failed (e.g. rate limit) — leave these for a later run
+    if (!vectors) break // batch failed even after backoff — stop and let a later run resume
 
     await Promise.all(
       chunk.map((r, idx) =>

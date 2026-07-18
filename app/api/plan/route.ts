@@ -460,6 +460,9 @@ ${eventLines}
   } catch (err) {
     // AI curator unavailable — serve the catalog directly with a deterministic interest filter.
     console.log("[v0] curation unavailable, using deterministic fallback:", err instanceof Error ? err.message : err)
+    // With no interests selected the rows are already the semantic-search results for the
+    // user's description (relevance-ordered by the embedding), so keep them as-is.
+    const hasInterests = interests.length > 0
     picks = rows
       .filter((r) => matchesInterest(r.category, interests))
       .map((r) => ({
@@ -470,12 +473,13 @@ ${eventLines}
           travelFromHome: "",
           travelFromOffice: "",
           travelNote: "",
-          why: r.category ? `Matches your interest in ${r.category}.` : "",
+          why: hasInterests && r.category ? `Matches your interest in ${r.category}.` : "",
         },
       }))
+    const basis = hasInterests ? "your interests" : "your description"
     summary =
       picks.length > 0
-        ? "Here are upcoming NYC events from the catalog that match your interests, sorted by date. (Smart ranking was temporarily unavailable.)"
+        ? `Here are upcoming NYC events from the catalog that match ${basis}, sorted by date. (Smart ranking was temporarily unavailable.)`
         : "No catalog events matched your interests or description for the next 7 days. Try adding an interest, rephrasing what you feel like doing, or check back after the next daily update."
   }
 

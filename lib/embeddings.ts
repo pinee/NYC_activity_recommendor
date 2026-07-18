@@ -48,13 +48,30 @@ export async function embedQuery(text: string): Promise<number[] | null> {
 
 // Embed many event texts at once (used at ingest / backfill). Returns embeddings aligned
 // to the input order, or null on failure so the caller can skip this batch and retry later.
+//
+// The AI Gateway FREE TIER rate-limits embedding requests aggressively (a few per minute),
+// so we retry with exponential backoff on the "rate-limited" / 429 error before giving up.
+// `maxRetries: 4` lets the SDK also handle transient network errors.
 export async function embedEventTexts(texts: string[]): Promise<number[][] | null> {
   if (texts.length === 0) return []
-  try {
-    const { embeddings } = await embedMany({ model: EMBEDDING_MODEL, values: texts })
-    return embeddings
-  } catch (err) {
-    console.log("[v0] embedEventTexts failed:", err instanceof Error ? err.message : err)
-    return null
+  const maxAttempts = 5
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    try {
+      const { embeddings } = await embedMany({ model: EMBEDDING_MODEL, values: texts, maxRetries: 4 })
+      return embeddings
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err)
+      const rateLimited = /rate.?limit|429|too many|quota/i.test(message)
+      if (rateLimited && attempt < maxAttempts - 1) {
+        // 4s, 8s, 16s, 32s — long enough to clear the free-tier per-minute window.
+        const waitMs = 4000 * 2 ** attempt
+        console.log(`[v0] embed rate-limited, backing off ${waitMs}ms (attempt ${attempt + 1})`)
+        await new Promise((r) => setTimeout(r, waitMs))
+        continue
+      }
+      console.log("[v0] embedEventTexts failed:", message)
+      return null
+    }
   }
+  return null
 }
