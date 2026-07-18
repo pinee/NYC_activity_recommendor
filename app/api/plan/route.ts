@@ -5,6 +5,7 @@ import { createServiceClient } from "@/lib/supabase/server"
 import { nyToUtcISO, WORLD_CUP_CATEGORY } from "@/lib/event-sources/util"
 import { geocodeAddress, estimateTravelMinutes, type Coord } from "@/lib/geo"
 import { getWorldCupSpots } from "@/lib/worldcup"
+import { embedQuery } from "@/lib/embeddings"
 
 // The interest whose events are shown as location SPOTS instead of date-grouped cards.
 const WORLD_CUP_INTEREST = "World Cup & Soccer"
@@ -124,20 +125,42 @@ function interestKeywords(interests: string[]): string[] {
 // always relevant rather than just "the earliest N events". This includes ongoing
 // multi-day events that began earlier: an event is in-window if it starts on/before the
 // window end AND it either ends on/after the window start, or (single-day) starts after it.
-async function fetchUpcomingEvents(interests: string[]): Promise<EventRow[]> {
+// Columns needed downstream (everything except the large `embedding` vector). Used when
+// selecting from the semantic-search RPC so we don't ship 1536 floats per row over the wire.
+const EVENT_COLUMNS =
+  "id,title,description,category,start_time,end_time,venue_name,address,latitude,longitude,event_url,source,price,image_url,neighborhood,approximate_location"
+
+// How many nearest events the semantic search returns before deterministic filtering.
+const SEMANTIC_MATCH_COUNT = 80
+
+// Build the candidate event pool for the next 7 days, combining up to two retrieval paths:
+//
+//   A. INTEREST KEYWORDS — the category-based pre-filter (unchanged) used when the user has
+//      selected one or more interests.
+//   B. SEMANTIC SEARCH — when the user typed a free-text description of what they feel like
+//      doing, we embed it and pull the closest events by cosine similarity (match_events()).
+//      This is what lets someone get relevant recommendations WITHOUT selecting any interest.
+//
+// When both are provided the two result sets are UNIONED (deduped by id), so the description
+// can surface fitting events the category filter would have missed, and vice-versa. If neither
+// is usable (e.g. the embedding call failed and no interests were set) we return the whole
+// week's window so the app can still produce something.
+async function fetchUpcomingEvents(interests: string[], queryText: string): Promise<EventRow[]> {
   const supabase = createServiceClient()
   const todayNY = new Date().toLocaleString("sv-SE", { timeZone: "America/New_York" }).slice(0, 10)
   const windowStartISO = nyToUtcISO(todayNY, "00:00") ?? new Date().toISOString()
   const windowEndISO = new Date(new Date(windowStartISO).getTime() + 7 * 86400000).toISOString()
 
-  let query = supabase
-    .from("events")
-    .select("*")
-    .lte("start_time", windowEndISO)
-    .or(`end_time.gte.${windowStartISO},and(end_time.is.null,start_time.gte.${windowStartISO})`)
+  // Base predicate: an event's span overlaps the next 7 days (includes ongoing multi-day
+  // events that began earlier). Reused by both the keyword path and the whole-window fallback.
+  const inWindow = (q: any) =>
+    q
+      .lte("start_time", windowEndISO)
+      .or(`end_time.gte.${windowStartISO},and(end_time.is.null,start_time.gte.${windowStartISO})`)
 
-  // Pre-filter: keep only events whose category matches an interest keyword.
-  // When no interests are set, fall through and return the whole window.
+  const byId = new Map<string, EventRow>()
+
+  // ---- Path A: interest keyword pre-filter (category-based) ----
   //
   // Holiday/festival events are the exception: sources almost always categorize them by
   // activity type ("Concerts", "Nature Programs", "America250", "Arts & Culture"), not by
@@ -152,7 +175,10 @@ async function fetchUpcomingEvents(interests: string[]): Promise<EventRow[]> {
   const selectableInterests = interests.filter((i) => i !== OTHERS_INTEREST)
   const keywords = interestKeywords(selectableInterests)
   const wantsOthers = interests.includes(OTHERS_INTEREST)
-  if (keywords.length > 0 || wantsOthers) {
+  const hasInterestFilter = keywords.length > 0 || wantsOthers
+
+  if (hasInterestFilter) {
+    let query = inWindow(supabase.from("events").select("*"))
     const festivalKeywords = INTEREST_KEYWORDS[FESTIVALS_INTEREST] ?? []
     const conditions = keywords.map((k) => `category.ilike.%${k}%`)
     if (selectableInterests.includes(FESTIVALS_INTEREST)) {
@@ -169,10 +195,36 @@ async function fetchUpcomingEvents(interests: string[]): Promise<EventRow[]> {
       conditions.push(`and(${negations.join(",")})`)
     }
     query = query.or(conditions.join(","))
+    const { data, error } = await query.order("start_time", { ascending: true }).limit(500)
+    if (error) throw new Error(error.message)
+    for (const r of (data as EventRow[]) || []) byId.set(r.id, r)
   }
 
-  const { data, error } = await query.order("start_time", { ascending: true }).limit(500)
-  if (error) throw new Error(error.message)
+  // ---- Path B: semantic search over the free-text description ----
+  if (queryText.trim()) {
+    const embedding = await embedQuery(queryText)
+    if (embedding) {
+      const { data, error } = await supabase
+        .rpc("match_events", {
+          query_embedding: embedding,
+          match_count: SEMANTIC_MATCH_COUNT,
+          window_start: windowStartISO,
+          window_end: windowEndISO,
+        })
+        .select(EVENT_COLUMNS)
+      if (error) throw new Error(error.message)
+      for (const r of (data as unknown as EventRow[]) || []) byId.set(r.id, r)
+    }
+  }
+
+  // ---- Path C: nothing usable → return the whole window ----
+  if (byId.size === 0 && !hasInterestFilter && !queryText.trim()) {
+    const { data, error } = await inWindow(supabase.from("events").select("*"))
+      .order("start_time", { ascending: true })
+      .limit(500)
+    if (error) throw new Error(error.message)
+    for (const r of (data as EventRow[]) || []) byId.set(r.id, r)
+  }
 
   // Drop events that have already begun, so a search at (say) 8 PM only surfaces events
   // starting LATER than right now — not ones that already started earlier today. The DB
@@ -180,7 +232,7 @@ async function fetchUpcomingEvents(interests: string[]): Promise<EventRow[]> {
   // "now" cutoff is applied here in JS. Exception: multi-day events (festivals, exhibitions)
   // stay visible for their whole run, since they remain attend-able after their opening day.
   const now = Date.now()
-  const rows = ((data as EventRow[]) || []).filter((r) => {
+  const rows = [...byId.values()].filter((r) => {
     const start = new Date(r.start_time).getTime()
     if (start >= now) return true // starts in the future — always eligible
     const startDay = nyDateOf(r.start_time)
@@ -189,7 +241,9 @@ async function fetchUpcomingEvents(interests: string[]): Promise<EventRow[]> {
     // Already started: keep only if it's a multi-day event that hasn't ended yet.
     return isMultiDay && new Date(r.end_time as string).getTime() >= now
   })
-  return rows
+  // Time-order the combined pool and keep it bounded for the model.
+  rows.sort((a, b) => a.start_time.localeCompare(b.start_time))
+  return rows.slice(0, 500)
 }
 
 // ---- Deterministic filter helpers (budget / working hours / travel) ----
@@ -273,6 +327,14 @@ async function buildPlan(body: any) {
   const { profile, weather, events: busy, requests } = body
   const dates = upcomingDates()
   const interests: string[] = profile.interests || []
+  // The user's free-text description of what they feel like doing (the repurposed "special
+  // requests"). Drives semantic search when no interests are selected, and is always handed
+  // to the model as intent to honor.
+  const queryText: string = (requests || [])
+    .map((r: any) => (r?.text || "").trim())
+    .filter(Boolean)
+    .join(". ")
+    .trim()
 
   // World Cup viewing is location-first, not date-first (fans already know match times), so
   // when the user selects that interest we surface it as aggregated viewing SPOTS with date
@@ -280,8 +342,9 @@ async function buildPlan(body: any) {
   // browse endpoint uses, so the two always agree.
   const worldCup = interests.includes(WORLD_CUP_INTEREST) ? await getWorldCupSpots(profile) : undefined
 
-  // 1) Read the catalog from the database (no live web search), pre-filtered to interests.
-  const allRows = await fetchUpcomingEvents(interests)
+  // 1) Read the catalog from the database (no live web search): interest keyword pre-filter
+  //    and/or semantic search over the user's free-text description.
+  const allRows = await fetchUpcomingEvents(interests, queryText)
   // Keep World Cup events out of the date-grouped list — they're shown as spots above, so
   // including them here would both duplicate them and reintroduce the date-level display.
   const rows = allRows.filter((r) => r.category !== WORLD_CUP_CATEGORY)
@@ -330,7 +393,7 @@ USER PROFILE
 - Home: ${profile.homeAddress || "not provided (assume Manhattan)"}
 - Office: ${profile.officeAddress || "not provided"}
 - Working hours: ${profile.workStart}–${profile.workEnd} on ${(profile.workDays || []).join(", ") || "weekdays"}
-- Interests: ${(profile.interests || []).join(", ") || "general culture"}
+- Interests: ${(profile.interests || []).join(", ") || "none selected — rely on the description below"}
 - Variety preference (1=stick to favorites, 5=lots of variety): ${profile.diversity}
 - Max travel time one-way: ${profile.maxTravelMinutes} minutes
 - Budget: ${profile.budget}
@@ -346,8 +409,8 @@ ${(weather || [])
 ALREADY BUSY (do NOT pick events overlapping these)
 ${(busy || []).map((e: any) => `- ${e.day} ${e.start}–${e.end}: ${e.title}`).join("\n") || "- Calendar is open"}
 
-SPECIAL REQUESTS (honor these)
-${(requests || []).map((r: any) => `- ${r.text}`).join("\n") || "- None"}
+WHAT THE USER FEELS LIKE DOING / SPECIAL REQUESTS (this is their own words — treat it as a primary signal for what to pick, and honor any constraints in it)
+${(requests || []).map((r: any) => `- ${r.text}`).join("\n") || "- Nothing specified"}
 
 AVAILABLE EVENTS (choose ONLY from these — reference each by its id):
 ${eventLines}
@@ -367,7 +430,7 @@ ${eventLines}
       system:
         "You are an NYC concierge. From the AVAILABLE EVENTS list, choose the best ones for this user. " +
         "You MUST only reference events by an id that appears in the list — never invent events, links, dates, or venues. " +
-        "STRICT RELEVANCE: only pick events that directly belong to one of the user's stated interest categories. Drop anything tangential. If few events match, pick few — it is fine to return very few or none. " +
+        "STRICT RELEVANCE: only pick events that match the user's stated interests AND/OR their free-text description of what they feel like doing. If the user gave no interests, rely entirely on their description. Drop anything tangential. If few events match, pick few — it is fine to return very few or none. " +
         "Respect working hours (evenings on workdays, daytime on days off), avoid busy times, keep travel within the limit from home or office, match the weather (indoor on rainy/cold days), and honor special requests. " +
         "Favor a geographically and topically diverse set per the variety preference. " +
         `Pick at most ${MAX_ACTIVITIES} events, ordered by date then time. ` +
@@ -397,6 +460,9 @@ ${eventLines}
   } catch (err) {
     // AI curator unavailable — serve the catalog directly with a deterministic interest filter.
     console.log("[v0] curation unavailable, using deterministic fallback:", err instanceof Error ? err.message : err)
+    // With no interests selected the rows are already the semantic-search results for the
+    // user's description (relevance-ordered by the embedding), so keep them as-is.
+    const hasInterests = interests.length > 0
     picks = rows
       .filter((r) => matchesInterest(r.category, interests))
       .map((r) => ({
@@ -407,13 +473,14 @@ ${eventLines}
           travelFromHome: "",
           travelFromOffice: "",
           travelNote: "",
-          why: r.category ? `Matches your interest in ${r.category}.` : "",
+          why: hasInterests && r.category ? `Matches your interest in ${r.category}.` : "",
         },
       }))
+    const basis = hasInterests ? "your interests" : "your description"
     summary =
       picks.length > 0
-        ? "Here are upcoming NYC events from the catalog that match your interests, sorted by date. (Smart ranking was temporarily unavailable.)"
-        : "No catalog events matched your interests for the next 7 days. Try adding more interests or check back after the next daily update."
+        ? `Here are upcoming NYC events from the catalog that match ${basis}, sorted by date. (Smart ranking was temporarily unavailable.)`
+        : "No catalog events matched your interests or description for the next 7 days. Try adding an interest, rephrasing what you feel like doing, or check back after the next daily update."
   }
 
   const validIso = new Set(dates.map((d) => d.iso))

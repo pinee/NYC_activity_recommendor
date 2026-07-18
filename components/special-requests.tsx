@@ -13,10 +13,11 @@ interface Props {
 }
 
 const SUGGESTIONS = [
-  "Need to meet a friend this Thursday evening",
-  "Want one outdoor activity this weekend",
-  "Find a date-night spot Friday",
-  "Something free on a weeknight",
+  "I feel like being outdoors and active this week",
+  "Something chill and artsy after work",
+  "A fun date-night spot on Friday",
+  "Live music somewhere cozy in Brooklyn",
+  "Free things to do on a weeknight",
 ]
 
 export function SpecialRequests({ requests, onAdd, onRemove }: Props) {
@@ -32,7 +33,7 @@ export function SpecialRequests({ requests, onAdd, onRemove }: Props) {
   return (
     <div className="flex flex-col gap-3">
       <Textarea
-        placeholder="Tell your concierge anything specific… e.g. I need to meet a friend this Thursday near Midtown."
+        placeholder="Describe what you feel like doing… e.g. I want a relaxed, artsy week with a nice dinner out — and I need to meet a friend near Midtown on Thursday."
         value={text}
         onChange={(e) => setText(e.target.value)}
         rows={2}
