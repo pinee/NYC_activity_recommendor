@@ -1,7 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useState } from "react"
-import { Sparkles, Loader2, CalendarRange, MapPinned, Wand2, Trophy } from "lucide-react"
+import { Sparkles, Loader2, CalendarRange, MapPinned, Wand2, Trophy, CloudSun } from "lucide-react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -206,6 +206,36 @@ export default function Page() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide">
+                <CloudSun className="size-4 text-accent" /> 7-day NYC forecast
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <WeatherStrip days={weather} />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide">
+                <Sparkles className="size-4 text-accent" /> What do you feel like doing?
+              </CardTitle>
+              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                Describe the kind of week you want in your own words — no need to pick interests. You can also add
+                specific constraints like times or neighborhoods.
+              </p>
+            </CardHeader>
+            <CardContent>
+              <SpecialRequests
+                requests={requests}
+                onAdd={(r) => setRequests((prev) => [...prev, r])}
+                onRemove={(id) => setRequests((prev) => prev.filter((x) => x.id !== id))}
+              />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide">
                 <MapPinned className="size-4 text-accent" /> Your profile
               </CardTitle>
             </CardHeader>
@@ -234,25 +264,6 @@ export default function Page() {
               />
             </CardContent>
           </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide">
-                <Sparkles className="size-4 text-accent" /> What do you feel like doing?
-              </CardTitle>
-              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                Describe the kind of week you want in your own words — no need to pick interests. You can also add
-                specific constraints like times or neighborhoods.
-              </p>
-            </CardHeader>
-            <CardContent>
-              <SpecialRequests
-                requests={requests}
-                onAdd={(r) => setRequests((prev) => [...prev, r])}
-                onRemove={(id) => setRequests((prev) => prev.filter((x) => x.id !== id))}
-              />
-            </CardContent>
-          </Card>
         </div>
 
         {/* Output column */}
@@ -260,11 +271,10 @@ export default function Page() {
           <section className="flex flex-col gap-4 rounded-xl border border-border bg-card p-5">
             <div className="flex items-center justify-between gap-3">
               <h2 className="font-mono text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                7-day NYC forecast
+                Build your week
               </h2>
             </div>
-            <WeatherStrip days={weather} />
-            <Button size="lg" onClick={generate} disabled={generating} className="mt-1 w-full">
+            <Button size="lg" onClick={generate} disabled={generating} className="w-full">
               {generating ? (
                 <>
                   <Loader2 className="size-4 animate-spin" /> {progress || "Working…"}
