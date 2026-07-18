@@ -1,29 +1,17 @@
 "use client"
 
-import { useState } from "react"
-import { CalendarCheck, Plus, X, RefreshCw, Link2 } from "lucide-react"
+import { CalendarCheck, RefreshCw, Link2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import { WEEK_DAYS, type CalendarEvent, type WeekDay } from "@/lib/types"
+import { type CalendarEvent } from "@/lib/types"
 
 interface Props {
   configured: boolean
   connected: boolean
   loading: boolean
   googleEvents: CalendarEvent[]
-  manualEvents: CalendarEvent[]
   onRefresh: () => void
   onDisconnect: () => void
-  onAddManual: (e: CalendarEvent) => void
-  onRemoveManual: (id: string) => void
 }
 
 export function CalendarPanel({
@@ -31,29 +19,9 @@ export function CalendarPanel({
   connected,
   loading,
   googleEvents,
-  manualEvents,
   onRefresh,
   onDisconnect,
-  onAddManual,
-  onRemoveManual,
 }: Props) {
-  const [title, setTitle] = useState("")
-  const [day, setDay] = useState<WeekDay>("Thursday")
-  const [start, setStart] = useState("18:00")
-  const [end, setEnd] = useState("20:00")
-
-  const addManual = () => {
-    onAddManual({
-      id: `manual-${Date.now()}`,
-      title: title.trim() || "Busy",
-      day,
-      start,
-      end,
-      source: "manual",
-    })
-    setTitle("")
-  }
-
   return (
     <div className="flex flex-col gap-5">
       {/* Google connection */}
@@ -95,15 +63,15 @@ export function CalendarPanel({
             To enable Google Calendar, add{" "}
             <code className="rounded bg-muted px-1 py-0.5 text-foreground">GOOGLE_CLIENT_ID</code> and{" "}
             <code className="rounded bg-muted px-1 py-0.5 text-foreground">GOOGLE_CLIENT_SECRET</code>{" "}
-            in Project Settings. You can also just add busy times manually below.
+            in Project Settings.
           </p>
         )}
       </div>
 
-      {/* Combined event list */}
-      {(googleEvents.length > 0 || manualEvents.length > 0) && (
+      {/* Google event list */}
+      {googleEvents.length > 0 && (
         <ul className="flex flex-col gap-1.5">
-          {[...googleEvents, ...manualEvents].map((e) => (
+          {googleEvents.map((e) => (
             <li
               key={e.id}
               className="flex items-center justify-between gap-2 rounded-md border border-border bg-card px-3 py-2 text-sm"
@@ -118,68 +86,14 @@ export function CalendarPanel({
                 <span className="tabular-nums text-muted-foreground">
                   {e.start}–{e.end}
                 </span>
-                {e.source === "manual" ? (
-                  <button
-                    type="button"
-                    onClick={() => onRemoveManual(e.id)}
-                    className="text-muted-foreground hover:text-destructive"
-                    aria-label="Remove busy block"
-                  >
-                    <X className="size-3.5" />
-                  </button>
-                ) : (
-                  <Badge variant="outline" className="font-normal text-accent">
-                    Google
-                  </Badge>
-                )}
+                <Badge variant="outline" className="font-normal text-accent">
+                  Google
+                </Badge>
               </div>
             </li>
           ))}
         </ul>
       )}
-
-      {/* Add manual busy block */}
-      <div className="rounded-lg border border-dashed border-border p-3">
-        <p className="mb-3 text-xs uppercase tracking-wide text-muted-foreground">Add a busy block</p>
-        <div className="flex flex-col gap-2">
-          <Input
-            placeholder="What is it? e.g. Dinner with Sam"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
-          <div className="flex flex-wrap items-center gap-2">
-            <Select value={day} onValueChange={(v) => setDay(v as WeekDay)}>
-              <SelectTrigger className="w-32">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {WEEK_DAYS.map((d) => (
-                  <SelectItem key={d} value={d}>
-                    {d}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Input
-              type="time"
-              aria-label="Busy start"
-              value={start}
-              onChange={(e) => setStart(e.target.value)}
-              className="w-28"
-            />
-            <Input
-              type="time"
-              aria-label="Busy end"
-              value={end}
-              onChange={(e) => setEnd(e.target.value)}
-              className="w-28"
-            />
-            <Button variant="secondary" size="icon" onClick={addManual} aria-label="Add busy block">
-              <Plus className="size-4" />
-            </Button>
-          </div>
-        </div>
-      </div>
     </div>
   )
 }

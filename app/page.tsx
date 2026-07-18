@@ -25,7 +25,6 @@ import {
 
 export default function Page() {
   const [profile, setProfile] = useLocalStorage<Profile>("nyc.profile", DEFAULT_PROFILE)
-  const [manualEvents, setManualEvents] = useLocalStorage<CalendarEvent[]>("nyc.manualEvents", [])
   const [requests, setRequests] = useLocalStorage<SpecialRequest[]>("nyc.requests", [])
 
   const [weather, setWeather] = useState<WeatherDay[]>([])
@@ -126,7 +125,7 @@ export default function Page() {
         body: JSON.stringify({
           profile,
           weather,
-          events: [...googleEvents, ...manualEvents],
+          events: googleEvents,
           requests,
         }),
       })
@@ -159,7 +158,6 @@ export default function Page() {
               summary: msg.summary,
               activities,
               sources: msg.sources ?? [],
-              filteredNote: msg.filteredNote,
               worldCup: msg.worldCup,
             })
             const spotCount = msg.worldCup?.spots?.length ?? 0
@@ -256,11 +254,8 @@ export default function Page() {
                 connected={cal.connected}
                 loading={calLoading}
                 googleEvents={googleEvents}
-                manualEvents={manualEvents}
                 onRefresh={loadCalendar}
                 onDisconnect={disconnect}
-                onAddManual={(e) => setManualEvents((prev) => [...prev, e])}
-                onRemoveManual={(id) => setManualEvents((prev) => prev.filter((m) => m.id !== id))}
               />
             </CardContent>
           </Card>

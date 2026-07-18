@@ -150,8 +150,6 @@ export interface Profile {
   workEnd: string // "17:00"
   workDays: WeekDay[]
   interests: string[]
-  // 1 = stick to my core interests, 5 = surprise me with variety
-  diversity: number
   maxTravelMinutes: number
   budget: "free" | "low" | "medium" | "any"
   // When false, events whose location/travel time is only approximate (e.g. mapped to a
@@ -165,7 +163,7 @@ export interface CalendarEvent {
   day: WeekDay
   start: string // "18:30"
   end: string // "20:00"
-  source: "google" | "manual"
+  source: "google"
 }
 
 export interface SpecialRequest {
@@ -246,9 +244,6 @@ export interface WeeklyPlan {
   summary: string
   activities: Activity[]
   sources?: PlanSource[]
-  // Set when deterministic filters (budget / working hours / travel) removed events
-  // the AI had otherwise selected, e.g. "3 events hidden: 2 too far, 1 over budget."
-  filteredNote?: string
   // Present when the user selected the "World Cup & Soccer" interest. World Cup viewing is
   // location-first, not date-first, so these events are shown as aggregated viewing SPOTS
   // (each with a date span) instead of date-grouped activity cards.
@@ -262,7 +257,6 @@ export const DEFAULT_PROFILE: Profile = {
   workEnd: "17:00",
   workDays: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
   interests: ["Live music", "Food & dining", "Art & galleries", "Running & fitness"],
-  diversity: 3,
   maxTravelMinutes: 40,
   budget: "any",
   includeApproximateLocations: true,

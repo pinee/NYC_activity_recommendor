@@ -64,8 +64,6 @@ export function ProfileForm({ profile, onChange }: Props) {
     })
   }
 
-  const diversityLabels = ["My favorites", "Mostly familiar", "Balanced", "Adventurous", "Surprise me"]
-
   return (
     <div className="flex flex-col gap-7">
       {/* Locations */}
@@ -141,25 +139,6 @@ export function ProfileForm({ profile, onChange }: Props) {
             </Chip>
           ))}
         </div>
-      </section>
-
-      {/* Diversity */}
-      <section className="flex flex-col gap-3">
-        <div className="flex items-baseline justify-between">
-          <Label className="text-xs uppercase tracking-wide text-muted-foreground">
-            Variety of activities
-          </Label>
-          <span className="text-sm font-medium text-foreground">
-            {diversityLabels[profile.diversity - 1]}
-          </span>
-        </div>
-        <Slider
-          min={1}
-          max={5}
-          step={1}
-          value={[profile.diversity]}
-          onValueChange={(v) => onChange({ ...profile, diversity: Array.isArray(v) ? v[0] : v })}
-        />
       </section>
 
       {/* Travel + budget */}
