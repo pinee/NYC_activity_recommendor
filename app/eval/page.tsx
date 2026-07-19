@@ -290,8 +290,8 @@ export default function EvalPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="week">Next 7 days (production)</SelectItem>
-                    <SelectItem value="all">Whole catalog</SelectItem>
+                    <SelectItem value="week">Next 7 days (matches app)</SelectItem>
+                    <SelectItem value="all">Whole catalog (eval-only, not app behavior)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
