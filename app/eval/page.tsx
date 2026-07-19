@@ -47,6 +47,32 @@ type EvalResult = {
   events: EvalEvent[]
 }
 
+// One curated pick from the LLM ranking stage (a subset of the Activity shape + rank).
+type EvalActivity = {
+  rank: number
+  id: string
+  title: string
+  category: string
+  date: string
+  endDate?: string
+  startTime: string
+  endTime: string
+  venue: string
+  neighborhood: string
+  address: string
+  priceLabel: string
+  url: string
+  why: string
+}
+
+type LlmResult = {
+  query: string
+  generatedAt: string
+  summary: string
+  count: number
+  activities: EvalActivity[]
+}
+
 // Columns exported to CSV, in order.
 const CSV_COLUMNS: (keyof EvalEvent)[] = [
   "rank",
@@ -73,10 +99,28 @@ function csvCell(value: unknown): string {
   return s
 }
 
-function toCsv(events: EvalEvent[]): string {
-  const header = CSV_COLUMNS.join(",")
-  const rows = events.map((e) => CSV_COLUMNS.map((c) => csvCell(e[c])).join(","))
-  return [header, ...rows].join("\r\n")
+// Columns exported for the LLM top-15 CSV, in order.
+const ACTIVITY_CSV_COLUMNS: (keyof EvalActivity)[] = [
+  "rank",
+  "id",
+  "title",
+  "category",
+  "date",
+  "endDate",
+  "startTime",
+  "endTime",
+  "venue",
+  "neighborhood",
+  "address",
+  "priceLabel",
+  "why",
+  "url",
+]
+
+function toCsv<T>(rows: T[], columns: (keyof T)[]): string {
+  const header = columns.join(",")
+  const body = rows.map((r) => columns.map((c) => csvCell(r[c])).join(","))
+  return [header, ...body].join("\r\n")
 }
 
 // Build a filesystem-friendly slug from the prompt for the download filename.
@@ -108,6 +152,8 @@ export default function EvalPage() {
   const [scope, setScope] = useState<"week" | "all">("week")
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<EvalResult | null>(null)
+  const [llmLoading, setLlmLoading] = useState(false)
+  const [llmResult, setLlmResult] = useState<LlmResult | null>(null)
 
   const run = async () => {
     if (!query.trim()) {
@@ -136,9 +182,40 @@ export default function EvalPage() {
     }
   }
 
+  const runLlm = async () => {
+    if (!query.trim()) {
+      toast.error("Enter a prompt first")
+      return
+    }
+    setLlmLoading(true)
+    setLlmResult(null)
+    try {
+      const res = await fetch("/api/eval/plan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        toast.error(data.error || "Curation failed")
+        return
+      }
+      setLlmResult(data as LlmResult)
+      toast.success(`LLM picked ${data.count} events`)
+    } catch {
+      toast.error("Request failed. Please try again.")
+    } finally {
+      setLlmLoading(false)
+    }
+  }
+
   const downloadCsv = () => {
     if (!result) return
-    download(`embeddings-${slug(result.query)}-top${result.returned}.csv`, toCsv(result.events), "text/csv")
+    download(
+      `embeddings-${slug(result.query)}-top${result.returned}.csv`,
+      toCsv(result.events, CSV_COLUMNS),
+      "text/csv",
+    )
   }
 
   const downloadJson = () => {
@@ -148,6 +225,20 @@ export default function EvalPage() {
       JSON.stringify(result, null, 2),
       "application/json",
     )
+  }
+
+  const downloadLlmCsv = () => {
+    if (!llmResult) return
+    download(
+      `llm-top15-${slug(llmResult.query)}.csv`,
+      toCsv(llmResult.activities, ACTIVITY_CSV_COLUMNS),
+      "text/csv",
+    )
+  }
+
+  const downloadLlmJson = () => {
+    if (!llmResult) return
+    download(`llm-top15-${slug(llmResult.query)}.json`, JSON.stringify(llmResult, null, 2), "application/json")
   }
 
   return (
@@ -204,15 +295,26 @@ export default function EvalPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <Button onClick={run} disabled={loading} className="ml-auto">
-                {loading ? (
-                  <>
-                    <Loader2 className="size-4 animate-spin" /> Retrieving…
-                  </>
-                ) : (
-                  "Retrieve matches"
-                )}
-              </Button>
+              <div className="ml-auto flex items-center gap-2">
+                <Button onClick={run} disabled={loading} variant="outline">
+                  {loading ? (
+                    <>
+                      <Loader2 className="size-4 animate-spin" /> Retrieving…
+                    </>
+                  ) : (
+                    "Retrieve top-K (embeddings)"
+                  )}
+                </Button>
+                <Button onClick={runLlm} disabled={llmLoading}>
+                  {llmLoading ? (
+                    <>
+                      <Loader2 className="size-4 animate-spin" /> Curating…
+                    </>
+                  ) : (
+                    "Get LLM top 15"
+                  )}
+                </Button>
+              </div>
             </div>
             <p className="text-xs leading-relaxed text-muted-foreground">
               Runs the embedding stage only (embed prompt → <code>match_events</code>). Hard profile filters are left
@@ -270,6 +372,62 @@ export default function EvalPage() {
                             hour: "numeric",
                             minute: "2-digit",
                           })}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {llmResult && (
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between gap-3">
+              <CardTitle className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide">
+                LLM top 15
+                <Badge variant="secondary" className="font-normal">
+                  {llmResult.count} events
+                </Badge>
+              </CardTitle>
+              <div className="flex items-center gap-2">
+                <Button size="sm" variant="outline" onClick={downloadLlmCsv}>
+                  <Download className="size-4" /> CSV
+                </Button>
+                <Button size="sm" variant="outline" onClick={downloadLlmJson}>
+                  <Download className="size-4" /> JSON
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-4">
+              <p className="rounded-md bg-secondary px-3 py-2 text-xs leading-relaxed text-muted-foreground">
+                Runs the full production pipeline (filter → semantic fetch → <code>gpt-5-mini</code> curation),
+                bypassing the plan cache so every click re-invokes the model. Because the model is not deterministic,
+                the exact picks and ordering can vary between runs for the same prompt — run it a few times to gauge
+                stability.
+              </p>
+              <div className="overflow-x-auto rounded-md border border-border">
+                <table className="w-full text-left text-sm">
+                  <thead className="bg-secondary text-xs uppercase tracking-wide text-muted-foreground">
+                    <tr>
+                      <th className="px-3 py-2 font-medium">#</th>
+                      <th className="px-3 py-2 font-medium">Title</th>
+                      <th className="px-3 py-2 font-medium">Category</th>
+                      <th className="px-3 py-2 font-medium">Venue</th>
+                      <th className="px-3 py-2 font-medium">Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {llmResult.activities.map((a) => (
+                      <tr key={`${a.rank}-${a.id}`} className="border-t border-border align-top">
+                        <td className="px-3 py-2 tabular-nums text-muted-foreground">{a.rank}</td>
+                        <td className="px-3 py-2">{a.title}</td>
+                        <td className="px-3 py-2 text-muted-foreground">{a.category || "—"}</td>
+                        <td className="px-3 py-2 text-muted-foreground">{a.venue || "—"}</td>
+                        <td className="px-3 py-2 tabular-nums text-muted-foreground">
+                          {a.date}
+                          {a.endDate && a.endDate !== a.date ? ` → ${a.endDate}` : ""}
                         </td>
                       </tr>
                     ))}
