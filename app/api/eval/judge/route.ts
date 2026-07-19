@@ -1,29 +1,27 @@
 import { createServiceClient } from "@/lib/supabase/server"
 import { nyToUtcISO } from "@/lib/event-sources/util"
 import { embedQuery } from "@/lib/embeddings"
-import { buildPlan } from "@/app/api/plan/route"
 import { generateText, Output } from "ai"
 import * as z from "zod"
 
-// Judge-based eval endpoint. An INDEPENDENT model (Anthropic Claude — different from the app's
-// OpenAI embedder + OpenAI curation LLM) grades events for relevance to the prompt, giving us an
-// unbiased ground truth to score:
-//   • recall@{10,25,50,80}  — for the EMBEDDING model (over the full 7-day window universe)
-//   • best-event inclusion  — are the judge's "perfect" (score 3) events inside the top 80?
-//   • retrieval diversity   — category / neighborhood coverage of the top 80
-//   • precision@15          — for the LLM curation stage (the real buildPlan pipeline)
+// Recall@80 eval for the EMBEDDING model, using an INDEPENDENT judge (Anthropic Claude — different
+// from the app's OpenAI embedder) as ground truth.
 //
-// True recall requires the FULL universe, not just the retrieved 80. All 810 in-window series
-// have embeddings, so calling match_events with a large count + permissive filters returns the
-// entire window ranked by cosine distance — both the ranking AND the denominator in one call.
+//   recall@80 = (relevant events in the embedding's top 80) / (ALL relevant events in the window)
+//
+// True recall needs the full universe as denominator, not just the retrieved 80. Every in-window
+// series has an embedding, so calling match_events with a huge count + permissive filters returns
+// the entire 7-day window ranked by cosine distance — the ranking AND the denominator in one call.
+// Claude then grades every event, and we report recall@80 plus the relevant events the embedding
+// model MISSED (relevant per Claude but outside the top 80).
 
 export const maxDuration = 300
 
-// Independent judge. Fully separate from the OpenAI embedder and gpt-5-mini curation LLM.
+// Independent judge. Fully separate from the OpenAI embedding model under test.
 const JUDGE_MODEL = "anthropic/claude-sonnet-4.6"
-// score >= this is treated as "relevant" for recall/precision. 0=irrelevant,1=tangential,2=relevant,3=perfect.
+// score >= this is treated as "relevant". 0=irrelevant, 1=tangential, 2=relevant, 3=perfect.
 const RELEVANT_THRESHOLD = 2
-const RECALL_KS = [10, 25, 50, 80]
+const TOP_K = 80
 const JUDGE_BATCH = 50 // events per Claude call
 const JUDGE_CONCURRENCY = 4 // parallel Claude calls
 
@@ -106,20 +104,6 @@ async function judgeAll(query: string, events: UniverseEvent[]): Promise<Map<str
   return scoreById
 }
 
-function normalizedCategoryEntropy(cats: string[], universeDistinct: number): number {
-  if (cats.length === 0 || universeDistinct <= 1) return 0
-  const counts = new Map<string, number>()
-  for (const c of cats) counts.set(c, (counts.get(c) || 0) + 1)
-  const n = cats.length
-  let h = 0
-  for (const c of counts.values()) {
-    const p = c / n
-    h -= p * Math.log(p)
-  }
-  // Normalize by the maximum achievable given how many distinct categories exist in the universe.
-  return Math.min(1, h / Math.log(universeDistinct))
-}
-
 export async function POST(req: Request) {
   let body: { query?: string }
   try {
@@ -160,108 +144,36 @@ export async function POST(req: Request) {
   const ranked = ((data as unknown as UniverseEvent[]) || []).filter((e) => e.id)
   if (ranked.length === 0) return Response.json({ error: "No events in the window." }, { status: 404 })
 
+  // rank (1-based) each event carries its embedding-cosine position in the full window.
+  const rankById = new Map<string, number>()
+  ranked.forEach((e, i) => rankById.set(e.id, i + 1))
+
   // 2) Judge the entire universe with the independent model.
   const scoreById = await judgeAll(query, ranked)
 
-  // 3) Recall@k for the embedding model. Denominator = all relevant events in the window.
-  const relevantIds = new Set(ranked.filter((e) => (scoreById.get(e.id) ?? 0) >= RELEVANT_THRESHOLD).map((e) => e.id))
-  const perfectIds = new Set(ranked.filter((e) => (scoreById.get(e.id) ?? 0) === 3).map((e) => e.id))
-  const totalRelevant = relevantIds.size
+  // 3) recall@80 for the embedding model. Denominator = ALL relevant events in the window.
+  const top80Ids = new Set(ranked.slice(0, TOP_K).map((e) => e.id))
+  const relevantEvents = ranked
+    .filter((e) => (scoreById.get(e.id) ?? 0) >= RELEVANT_THRESHOLD)
+    .map((e) => ({
+      id: e.id,
+      title: e.title,
+      category: e.category,
+      venue_name: e.venue_name,
+      neighborhood: e.neighborhood,
+      score: scoreById.get(e.id) ?? 0,
+      rank: rankById.get(e.id) ?? null, // position in the embedding ranking
+      inTop80: top80Ids.has(e.id),
+    }))
+    // Highest judge score first, then by embedding rank.
+    .sort((a, b) => b.score - a.score || (a.rank ?? 1e9) - (b.rank ?? 1e9))
 
-  const recallAtK = RECALL_KS.map((k) => {
-    const topK = ranked.slice(0, k)
-    const hits = topK.filter((e) => relevantIds.has(e.id)).length
-    return { k, hits, recall: totalRelevant > 0 ? +(hits / totalRelevant).toFixed(4) : null }
-  })
+  const totalRelevant = relevantEvents.length
+  const capturedInTop80 = relevantEvents.filter((e) => e.inTop80).length
+  const recallAt80 = totalRelevant > 0 ? +(capturedInTop80 / totalRelevant).toFixed(4) : null
 
-  // 4) Best-event inclusion — what fraction of the judge's "perfect" events land in the top 80?
-  const top80Ids = new Set(ranked.slice(0, 80).map((e) => e.id))
-  const perfectInTop80 = [...perfectIds].filter((id) => top80Ids.has(id)).length
-  const bestEventInclusion = {
-    perfectCount: perfectIds.size,
-    perfectInTop80,
-    inclusionRate: perfectIds.size > 0 ? +(perfectInTop80 / perfectIds.size).toFixed(4) : null,
-  }
-
-  // 5) Retrieval diversity of the top 80.
-  const universeDistinctCats = new Set(ranked.map((e) => e.category || "Uncategorized")).size
-  const top80 = ranked.slice(0, 80)
-  const diversity = {
-    categoriesCovered: new Set(top80.map((e) => e.category || "Uncategorized")).size,
-    universeCategories: universeDistinctCats,
-    neighborhoodsCovered: new Set(top80.map((e) => e.neighborhood || "Unknown")).size,
-    categoryEntropyNormalized: +normalizedCategoryEntropy(
-      top80.map((e) => e.category || "Uncategorized"),
-      universeDistinctCats,
-    ).toFixed(4),
-  }
-
-  // 6) Precision@15 for the LLM curation stage — run the REAL pipeline (permissive profile), then
-  //    judge its picks with the same rubric (dedup picks by id first).
-  const planBody = {
-    profile: {
-      interests: [],
-      homeAddress: "",
-      officeAddress: "",
-      budget: "any",
-      workDays: [],
-      workStart: "09:00",
-      workEnd: "17:00",
-      maxTravelMinutes: 999,
-      includeApproximateLocations: true,
-    },
-    weather: [],
-    events: [],
-    requests: query ? [{ text: query }] : [],
-  }
-  let llmPrecision: {
-    picked: number
-    relevant: number
-    precision: number | null
-    picks: { rank: number; id: string; title: string; category: string; score: number }[]
-  } = { picked: 0, relevant: 0, precision: null, picks: [] }
-
-  try {
-    const plan = await buildPlan(planBody)
-    const seen = new Set<string>()
-    const picks = (plan.activities || []).filter((a: { id: string }) => {
-      if (seen.has(a.id)) return false
-      seen.add(a.id)
-      return true
-    })
-    if (picks.length > 0) {
-      // Judge the picks directly (same rubric) so ids that differ from the universe reps still score.
-      const pickEvents: UniverseEvent[] = picks.map((a: any) => ({
-        id: a.id,
-        title: a.title,
-        category: a.category,
-        venue_name: a.venue,
-        neighborhood: a.neighborhood,
-        description: a.why || "",
-        series_key: null,
-      }))
-      const pickScoresByIdx = await judgeBatch(query, pickEvents)
-      const scored = picks.map((a: any, i: number) => ({
-        rank: i + 1,
-        id: a.id,
-        title: a.title,
-        category: a.category || "",
-        score: pickScoresByIdx.get(i + 1) ?? 0,
-      }))
-      const relevant = scored.filter((p) => p.score >= RELEVANT_THRESHOLD).length
-      llmPrecision = {
-        picked: scored.length,
-        relevant,
-        precision: +(relevant / scored.length).toFixed(4),
-        picks: scored,
-      }
-    }
-  } catch (err) {
-    console.log("[v0] judge precision@15 failed:", err instanceof Error ? err.message : err)
-  }
-
-  // Per-event judged rows (ranked) for download / auditing.
-  const judged = ranked.map((e, i) => ({
+  // 4) The embedding model's top 80 (what the app would feed the LLM), with judge scores attached.
+  const top80 = ranked.slice(0, TOP_K).map((e, i) => ({
     rank: i + 1,
     id: e.id,
     title: e.title,
@@ -272,15 +184,21 @@ export async function POST(req: Request) {
     relevant: (scoreById.get(e.id) ?? 0) >= RELEVANT_THRESHOLD,
   }))
 
+  // 5) Misses — relevant per Claude but NOT in the embedding top 80 (the recall gap).
+  const misses = relevantEvents.filter((e) => !e.inTop80)
+
   return Response.json({
     query,
     judgeModel: JUDGE_MODEL,
     relevantThreshold: RELEVANT_THRESHOLD,
+    topK: TOP_K,
     generatedAt: new Date().toISOString(),
     universeSize: ranked.length,
     totalRelevant,
-    embedding: { recallAtK, bestEventInclusion, diversity },
-    llm: llmPrecision,
-    judged,
+    capturedInTop80,
+    recallAt80,
+    top80,
+    relevantEvents,
+    misses,
   })
 }

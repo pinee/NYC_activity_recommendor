@@ -381,7 +381,7 @@ const curatedSchema = z.object({
   picks: z.array(pickSchema),
 })
 
-export async function buildPlan(body: any) {
+async function buildPlan(body: any) {
   const { profile, weather, events: busy, requests } = body
   const dates = upcomingDates()
   const interests: string[] = profile.interests || []
