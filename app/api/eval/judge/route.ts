@@ -71,37 +71,70 @@ function eventLine(e: UniverseEvent, i: number): string {
 }
 
 // Grade one batch of events; returns index->score for the batch (indices are batch-local, 1-based).
+// Retries on rate-limit with exponential backoff (the AI Gateway free tier limits requests
+// aggressively). Throws if it ultimately fails, so the caller can distinguish a genuine
+// "no relevant events" result from a judging failure — never conflate the two.
 async function judgeBatch(query: string, events: UniverseEvent[]): Promise<Map<number, number>> {
   const list = events.map((e, i) => eventLine(e, i)).join("\n")
-  const { output } = await generateText({
-    model: JUDGE_MODEL,
-    output: Output.object({ schema: judgeSchema }),
-    system: RUBRIC,
-    prompt: `USER REQUEST:\n"${query}"\n\nEVENTS (${events.length}):\n${list}\n\nScore every event.`,
-    maxRetries: 3,
-  })
-  const map = new Map<number, number>()
-  for (const j of output.judgements) map.set(j.index, j.score)
-  return map
+  const maxAttempts = 5
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    try {
+      const { output } = await generateText({
+        model: JUDGE_MODEL,
+        output: Output.object({ schema: judgeSchema }),
+        system: RUBRIC,
+        prompt: `USER REQUEST:\n"${query}"\n\nEVENTS (${events.length}):\n${list}\n\nScore every event.`,
+        maxRetries: 3,
+      })
+      const map = new Map<number, number>()
+      for (const j of output.judgements) map.set(j.index, j.score)
+      return map
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err)
+      const rateLimited = /rate.?limit|429|too many|quota|overloaded|503/i.test(message)
+      if (rateLimited && attempt < maxAttempts - 1) {
+        const waitMs = 2000 * 2 ** attempt // 2s, 4s, 8s, 16s
+        console.log(`[v0] judgeBatch rate-limited, backing off ${waitMs}ms (attempt ${attempt + 1})`)
+        await new Promise((r) => setTimeout(r, waitMs))
+        continue
+      }
+      throw err
+    }
+  }
+  throw new Error("judgeBatch exhausted retries")
 }
 
-// Grade the whole universe with bounded concurrency. Returns id->score (missing => 0).
-async function judgeAll(query: string, events: UniverseEvent[]): Promise<Map<string, number>> {
+// Grade the whole universe with bounded concurrency. Returns id->score plus the number of
+// batches that failed even after retries, so the caller can reject partial/invalid results
+// rather than silently reporting missed events as "irrelevant" (score 0).
+async function judgeAll(
+  query: string,
+  events: UniverseEvent[],
+): Promise<{ scoreById: Map<string, number>; failedBatches: number }> {
   const batches: UniverseEvent[][] = []
   for (let i = 0; i < events.length; i += JUDGE_BATCH) batches.push(events.slice(i, i + JUDGE_BATCH))
 
   const scoreById = new Map<string, number>()
+  let failedBatches = 0
   for (let i = 0; i < batches.length; i += JUDGE_CONCURRENCY) {
     const slice = batches.slice(i, i + JUDGE_CONCURRENCY)
     const results = await Promise.all(
-      slice.map((b) => judgeBatch(query, b).catch(() => new Map<number, number>())),
+      slice.map((b) =>
+        judgeBatch(query, b)
+          .then((m) => ({ ok: true as const, m }))
+          .catch(() => ({ ok: false as const, m: new Map<number, number>() })),
+      ),
     )
-    results.forEach((batchScores, bi) => {
+    results.forEach((res, bi) => {
+      if (!res.ok) {
+        failedBatches++
+        return // leave these events unscored; do NOT default them to 0
+      }
       const batch = slice[bi]
-      batch.forEach((e, idx) => scoreById.set(e.id, batchScores.get(idx + 1) ?? 0))
+      batch.forEach((e, idx) => scoreById.set(e.id, res.m.get(idx + 1) ?? 0))
     })
   }
-  return scoreById
+  return { scoreById, failedBatches }
 }
 
 export async function POST(req: Request) {
@@ -117,7 +150,15 @@ export async function POST(req: Request) {
   // 1) Embed + retrieve the FULL ranked window universe (permissive filters = model in isolation).
   const embedding = await embedQuery(query)
   if (!embedding) {
-    return Response.json({ error: "Embedding failed (model unavailable or rate-limited)." }, { status: 502 })
+    return Response.json(
+      {
+        error:
+          "Embedding request failed. The most common cause is an exhausted AI Gateway credit balance " +
+          "(HTTP 402) — add credits in your Vercel project's AI settings and retry. It can also be a " +
+          "transient rate-limit or model outage.",
+      },
+      { status: 502 },
+    )
   }
   const { start, end } = weekWindow()
   const supabase = createServiceClient()
@@ -149,7 +190,17 @@ export async function POST(req: Request) {
   ranked.forEach((e, i) => rankById.set(e.id, i + 1))
 
   // 2) Judge the entire universe with the independent model.
-  const scoreById = await judgeAll(query, ranked)
+  const { scoreById, failedBatches } = await judgeAll(query, ranked)
+  // If any batch failed even after retries, the denominator would be wrong — surface an error
+  // instead of reporting a misleading recall built on partially-judged data.
+  if (failedBatches > 0) {
+    return Response.json(
+      {
+        error: `Judge model rate-limited: ${failedBatches} batch(es) failed after retries. Recall would be inaccurate — please retry in a minute.`,
+      },
+      { status: 502 },
+    )
+  }
 
   // 3) recall@80 for the embedding model. Denominator = ALL relevant events in the window.
   const top80Ids = new Set(ranked.slice(0, TOP_K).map((e) => e.id))
