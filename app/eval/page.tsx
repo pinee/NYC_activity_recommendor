@@ -73,6 +73,55 @@ type LlmResult = {
   activities: EvalActivity[]
 }
 
+// One judged event row (from the independent Claude judge) for the downloadable CSV.
+type JudgedEvent = {
+  rank: number
+  id: string
+  title: string | null
+  category: string | null
+  venue_name: string | null
+  neighborhood: string | null
+  score: number
+  relevant: boolean
+}
+
+type JudgeResult = {
+  query: string
+  judgeModel: string
+  relevantThreshold: number
+  generatedAt: string
+  universeSize: number
+  totalRelevant: number
+  embedding: {
+    recallAtK: { k: number; hits: number; recall: number | null }[]
+    bestEventInclusion: { perfectCount: number; perfectInTop80: number; inclusionRate: number | null }
+    diversity: {
+      categoriesCovered: number
+      universeCategories: number
+      neighborhoodsCovered: number
+      categoryEntropyNormalized: number
+    }
+  }
+  llm: {
+    picked: number
+    relevant: number
+    precision: number | null
+    picks: { rank: number; id: string; title: string; category: string; score: number }[]
+  }
+  judged: JudgedEvent[]
+}
+
+const JUDGED_CSV_COLUMNS: (keyof JudgedEvent)[] = [
+  "rank",
+  "id",
+  "title",
+  "category",
+  "venue_name",
+  "neighborhood",
+  "score",
+  "relevant",
+]
+
 // Columns exported to CSV, in order.
 const CSV_COLUMNS: (keyof EvalEvent)[] = [
   "rank",
@@ -154,6 +203,8 @@ export default function EvalPage() {
   const [result, setResult] = useState<EvalResult | null>(null)
   const [llmLoading, setLlmLoading] = useState(false)
   const [llmResult, setLlmResult] = useState<LlmResult | null>(null)
+  const [judgeLoading, setJudgeLoading] = useState(false)
+  const [judgeResult, setJudgeResult] = useState<JudgeResult | null>(null)
 
   const run = async () => {
     if (!query.trim()) {
@@ -209,6 +260,33 @@ export default function EvalPage() {
     }
   }
 
+  const runJudge = async () => {
+    if (!query.trim()) {
+      toast.error("Enter a prompt first")
+      return
+    }
+    setJudgeLoading(true)
+    setJudgeResult(null)
+    try {
+      const res = await fetch("/api/eval/judge", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        toast.error(data.error || "Judge failed")
+        return
+      }
+      setJudgeResult(data as JudgeResult)
+      toast.success(`Judged ${data.universeSize} events`)
+    } catch {
+      toast.error("Request failed. Please try again.")
+    } finally {
+      setJudgeLoading(false)
+    }
+  }
+
   const downloadCsv = () => {
     if (!result) return
     download(
@@ -216,6 +294,16 @@ export default function EvalPage() {
       toCsv(result.events, CSV_COLUMNS),
       "text/csv",
     )
+  }
+
+  const downloadJudgeCsv = () => {
+    if (!judgeResult) return
+    download(`judge-${slug(judgeResult.query)}.csv`, toCsv(judgeResult.judged, JUDGED_CSV_COLUMNS), "text/csv")
+  }
+
+  const downloadJudgeJson = () => {
+    if (!judgeResult) return
+    download(`judge-${slug(judgeResult.query)}.json`, JSON.stringify(judgeResult, null, 2), "application/json")
   }
 
   const downloadJson = () => {
@@ -305,13 +393,22 @@ export default function EvalPage() {
                     "Retrieve top-K (embeddings)"
                   )}
                 </Button>
-                <Button onClick={runLlm} disabled={llmLoading}>
+                <Button onClick={runLlm} disabled={llmLoading} variant="outline">
                   {llmLoading ? (
                     <>
                       <Loader2 className="size-4 animate-spin" /> Curating…
                     </>
                   ) : (
                     "Get LLM top 15"
+                  )}
+                </Button>
+                <Button onClick={runJudge} disabled={judgeLoading}>
+                  {judgeLoading ? (
+                    <>
+                      <Loader2 className="size-4 animate-spin" /> Judging…
+                    </>
+                  ) : (
+                    "Judge with Claude"
                   )}
                 </Button>
               </div>
@@ -433,6 +530,121 @@ export default function EvalPage() {
                     ))}
                   </tbody>
                 </table>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {judgeResult && (
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between gap-3">
+              <CardTitle className="flex flex-wrap items-center gap-2 text-sm font-semibold uppercase tracking-wide">
+                Judge scorecard
+                <Badge variant="secondary" className="font-normal normal-case">
+                  {judgeResult.judgeModel}
+                </Badge>
+                <Badge variant="outline" className="font-normal normal-case">
+                  {judgeResult.totalRelevant} relevant / {judgeResult.universeSize} in window
+                </Badge>
+              </CardTitle>
+              <div className="flex items-center gap-2">
+                <Button size="sm" variant="outline" onClick={downloadJudgeCsv}>
+                  <Download className="size-4" /> CSV
+                </Button>
+                <Button size="sm" variant="outline" onClick={downloadJudgeJson}>
+                  <Download className="size-4" /> JSON
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-5">
+              <p className="rounded-md bg-secondary px-3 py-2 text-xs leading-relaxed text-muted-foreground">
+                An independent model (<code>{judgeResult.judgeModel}</code>) graded every event in the next-7-day
+                window 0–3 for relevance. Recall uses the full window as denominator (an event counts as relevant at
+                score ≥ {judgeResult.relevantThreshold}). Precision@15 judges the real pipeline&apos;s LLM picks.
+                Download the CSV to recompute metrics at any threshold.
+              </p>
+
+              {/* Embedding: recall@k */}
+              <div className="flex flex-col gap-2">
+                <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Embedding recall@k
+                </h3>
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  {judgeResult.embedding.recallAtK.map((r) => (
+                    <div key={r.k} className="rounded-md border border-border p-3">
+                      <div className="text-xs text-muted-foreground">recall@{r.k}</div>
+                      <div className="text-xl font-semibold tabular-nums">
+                        {r.recall === null ? "—" : `${(r.recall * 100).toFixed(1)}%`}
+                      </div>
+                      <div className="text-xs text-muted-foreground tabular-nums">
+                        {r.hits}/{judgeResult.totalRelevant} relevant
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Embedding: best-event inclusion + diversity */}
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className="rounded-md border border-border p-3">
+                  <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    Best-event inclusion (top 80)
+                  </div>
+                  <div className="mt-1 text-xl font-semibold tabular-nums">
+                    {judgeResult.embedding.bestEventInclusion.inclusionRate === null
+                      ? "—"
+                      : `${(judgeResult.embedding.bestEventInclusion.inclusionRate * 100).toFixed(1)}%`}
+                  </div>
+                  <div className="text-xs text-muted-foreground tabular-nums">
+                    {judgeResult.embedding.bestEventInclusion.perfectInTop80}/
+                    {judgeResult.embedding.bestEventInclusion.perfectCount} perfect (score 3) events retrieved
+                  </div>
+                </div>
+                <div className="rounded-md border border-border p-3">
+                  <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    Top-80 diversity
+                  </div>
+                  <div className="mt-1 text-sm tabular-nums">
+                    {judgeResult.embedding.diversity.categoriesCovered}/
+                    {judgeResult.embedding.diversity.universeCategories} categories ·{" "}
+                    {judgeResult.embedding.diversity.neighborhoodsCovered} neighborhoods
+                  </div>
+                  <div className="text-xs text-muted-foreground tabular-nums">
+                    category entropy {(judgeResult.embedding.diversity.categoryEntropyNormalized * 100).toFixed(0)}%
+                    (evenness)
+                  </div>
+                </div>
+              </div>
+
+              {/* LLM: precision@15 */}
+              <div className="flex flex-col gap-2">
+                <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  LLM precision@15
+                </h3>
+                <div className="rounded-md border border-border p-3">
+                  <div className="text-xl font-semibold tabular-nums">
+                    {judgeResult.llm.precision === null ? "—" : `${(judgeResult.llm.precision * 100).toFixed(1)}%`}
+                  </div>
+                  <div className="text-xs text-muted-foreground tabular-nums">
+                    {judgeResult.llm.relevant}/{judgeResult.llm.picked} curated picks judged relevant
+                  </div>
+                  {judgeResult.llm.picks.length > 0 && (
+                    <ul className="mt-2 flex flex-col gap-1">
+                      {judgeResult.llm.picks.map((p) => (
+                        <li key={p.id} className="flex items-center gap-2 text-xs">
+                          <Badge
+                            variant={p.score >= judgeResult.relevantThreshold ? "secondary" : "outline"}
+                            className="font-normal tabular-nums"
+                          >
+                            {p.score}
+                          </Badge>
+                          <span className="truncate">{p.title}</span>
+                          <span className="text-muted-foreground">{p.category ? `· ${p.category}` : ""}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
               </div>
             </CardContent>
           </Card>
