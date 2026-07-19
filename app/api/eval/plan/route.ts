@@ -45,7 +45,15 @@ export async function POST(req: Request) {
 
   try {
     const plan = await buildPlan(planBody)
-    const activities = (plan.activities || []).map((a, i) => ({ rank: i + 1, ...a }))
+    // The model can occasionally emit the same event id twice; collapse to unique events
+    // (preserving the LLM's ordering) so the downloaded set is a clean top-N for eval scoring.
+    const seen = new Set<string>()
+    const unique = (plan.activities || []).filter((a: { id: string }) => {
+      if (seen.has(a.id)) return false
+      seen.add(a.id)
+      return true
+    })
+    const activities = unique.map((a, i) => ({ rank: i + 1, ...a }))
     return Response.json({
       query,
       generatedAt: new Date().toISOString(),
