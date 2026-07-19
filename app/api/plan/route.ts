@@ -107,6 +107,7 @@ type EventRow = {
   image_url: string | null
   neighborhood: string | null
   approximate_location: boolean | null
+  series_key: string | null
 }
 
 // Build the set of category keywords for the user's interests (deduped, lowercased).
@@ -127,7 +128,7 @@ function interestKeywords(interests: string[]): string[] {
 // Columns needed downstream (everything except the large `embedding` vector). Used when
 // selecting from the semantic-search RPC so we don't ship 1536 floats per row over the wire.
 const EVENT_COLUMNS =
-  "id,title,description,category,start_time,end_time,venue_name,address,latitude,longitude,event_url,source,price,image_url,neighborhood,approximate_location"
+  "id,title,description,category,start_time,end_time,venue_name,address,latitude,longitude,event_url,source,price,image_url,neighborhood,approximate_location,series_key"
 
 // How many nearest events the semantic search returns after the hard filters are applied.
 const SEMANTIC_MATCH_COUNT = 80
@@ -273,6 +274,44 @@ async function fetchUpcomingEvents(
   const rows = [...byId.values()]
   rows.sort((a, b) => a.start_time.localeCompare(b.start_time))
   return rows.slice(0, 500)
+}
+
+// The search functions return ONE representative occurrence per series (the earliest/closest),
+// so a recurring show made of separate per-night rows only knows its own single date. To render
+// the "Runs through …" range correctly we look up the true span of each picked series — the
+// earliest start and latest end across ALL of its occurrences (still-relevant ones). For a
+// single spanning row this simply echoes its own start/end; for per-night series it recovers the
+// full run so an event that began in a prior week and is still running shows its real end date.
+async function fetchSeriesSpans(
+  seriesKeys: string[],
+): Promise<Map<string, { start: string; end: string | null }>> {
+  const out = new Map<string, { start: string; end: string | null }>()
+  const keys = [...new Set(seriesKeys.filter(Boolean))]
+  if (keys.length === 0) return out
+  const supabase = createServiceClient()
+  const nowISO = new Date().toISOString()
+  // Only occurrences that haven't fully finished, so a long-past first night doesn't matter and
+  // the latest end reflects when the run actually stops.
+  const { data, error } = await supabase
+    .from("events")
+    .select("series_key,start_time,end_time")
+    .in("series_key", keys)
+    .or(`end_time.gte.${nowISO},and(end_time.is.null,start_time.gte.${nowISO})`)
+  if (error || !data) return out
+  for (const r of data as { series_key: string | null; start_time: string; end_time: string | null }[]) {
+    if (!r.series_key) continue
+    const prev = out.get(r.series_key)
+    const end = r.end_time ?? r.start_time
+    if (!prev) {
+      out.set(r.series_key, { start: r.start_time, end })
+    } else {
+      out.set(r.series_key, {
+        start: r.start_time < prev.start ? r.start_time : prev.start,
+        end: prev.end === null || end > prev.end ? end : prev.end,
+      })
+    }
+  }
+  return out
 }
 
 // ---- Filter helpers ----
@@ -530,14 +569,24 @@ ${eventLines}
   const weekdayByIso = new Map(dates.map((d) => [d.iso, d.weekday as WeekDay]))
   const todayIso = dates[0].iso
 
+  // Recover the true run span for each picked series (see fetchSeriesSpans). Needed so that
+  // recurring shows stored as separate per-night rows get an accurate "Runs through" end date,
+  // not just the single representative night the search function returned.
+  const seriesSpans = await fetchSeriesSpans(picks.map((p) => p.row.series_key).filter((k): k is string => !!k))
+
   // 3) Merge curation with authoritative DB fields. DB owns title/date/url/price; meta owns
   //    why/travel/etc. The hard filters (budget / hours / travel / approximate location) were
   //    already applied in SQL before the fetch, so there is no post-LLM filtering here — we
   //    only compute the straight-line travel estimates used for the display labels.
   const kept = picks
     .map(({ row, meta }) => {
-      const startDate = nyDateOf(row.start_time)
-      const endDate = row.end_time ? nyDateOf(row.end_time) : null
+      // Prefer the whole-series span over the single representative occurrence, so recurring
+      // per-night shows report the full run (start of the run through the last performance).
+      const span = row.series_key ? seriesSpans.get(row.series_key) : undefined
+      const startSource = span?.start ?? row.start_time
+      const endSource = span?.end ?? row.end_time
+      const startDate = nyDateOf(startSource)
+      const endDate = endSource ? nyDateOf(endSource) : null
       const multiDay = !!endDate && endDate !== startDate
       // Ongoing events started before today are anchored to today so they still
       // surface in the week view; otherwise we use their real start day.
@@ -545,8 +594,8 @@ ${eventLines}
       const isOpeningDay = displayDate === startDate
       // Show a clock time only on the event's actual start day. For ongoing days we
       // rely on the "Runs through" range label instead. End time only for single-day.
-      const startTime = isOpeningDay ? nyClockOf(row.start_time) : ""
-      const endTime = !multiDay && row.end_time ? nyClockOf(row.end_time) : ""
+      const startTime = isOpeningDay ? nyClockOf(startSource) : ""
+      const endTime = !multiDay && endSource ? nyClockOf(endSource) : ""
 
       // Travel-time display estimate (SQL already enforced the max-travel filter).
       let detHome: number | null = null
