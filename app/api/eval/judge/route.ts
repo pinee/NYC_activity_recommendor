@@ -18,7 +18,9 @@ import * as z from "zod"
 export const maxDuration = 300
 
 // Independent judge. Fully separate from the OpenAI embedding model under test.
-const JUDGE_MODEL = "anthropic/claude-sonnet-4.6"
+// Haiku is ~10x cheaper than Sonnet per run and well-suited to relevance grading, so a single
+// AI Gateway top-up covers many more recall@80 evals. Still fully independent of OpenAI.
+const JUDGE_MODEL = "anthropic/claude-haiku-4.5"
 // score >= this is treated as "relevant". 0=irrelevant, 1=tangential, 2=relevant, 3=perfect.
 const RELEVANT_THRESHOLD = 2
 const TOP_K = 80
