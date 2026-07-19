@@ -34,16 +34,49 @@ export function eventEmbeddingText(e: {
 
 // Embed a single free-text query (the user's description of what they feel like doing).
 // Returns null on failure so callers can gracefully fall back to keyword matching.
+//
+// The AI Gateway FREE TIER rate-limits embedding requests aggressively, so a single
+// transient 429 shouldn't kill the request. We retry with exponential backoff on
+// rate-limit errors (and let the SDK's maxRetries handle transient network blips)
+// before giving up.
 export async function embedQuery(text: string): Promise<number[] | null> {
   const value = (text || "").trim()
   if (!value) return null
-  try {
-    const { embedding } = await embed({ model: EMBEDDING_MODEL, value: value.slice(0, 6000) })
-    return embedding
-  } catch (err) {
-    console.log("[v0] embedQuery failed:", err instanceof Error ? err.message : err)
-    return null
+  const maxAttempts = 5
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    try {
+      const { embedding } = await embed({
+        model: EMBEDDING_MODEL,
+        value: value.slice(0, 6000),
+        maxRetries: 4,
+      })
+      return embedding
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err)
+      // A 402 / "positive credit balance" is a billing issue — retrying never helps, so bail fast.
+      if (isCreditError(message)) {
+        console.log("[v0] embedQuery failed (billing):", message)
+        return null
+      }
+      const rateLimited = /rate.?limit|429|too many|quota/i.test(message)
+      if (rateLimited && attempt < maxAttempts - 1) {
+        // 2s, 4s, 8s, 16s — enough to clear the free-tier per-minute window.
+        const waitMs = 2000 * 2 ** attempt
+        console.log(`[v0] embedQuery rate-limited, backing off ${waitMs}ms (attempt ${attempt + 1})`)
+        await new Promise((r) => setTimeout(r, waitMs))
+        continue
+      }
+      console.log("[v0] embedQuery failed:", message)
+      return null
+    }
   }
+  return null
+}
+
+// True when an AI Gateway error is due to an exhausted credit balance (HTTP 402). These are
+// billing failures that no amount of retrying will fix — the user must add credits.
+export function isCreditError(message: string): boolean {
+  return /402|positive credit balance|add credits|payment required|insufficient/i.test(message)
 }
 
 // Embed many event texts at once (used at ingest / backfill). Returns embeddings aligned

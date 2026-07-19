@@ -1,443 +1,75 @@
 "use client"
 
-import { useState } from "react"
-import { Loader2, Download, FlaskConical } from "lucide-react"
-import { toast } from "sonner"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Textarea } from "@/components/ui/textarea"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import useSWR from "swr"
+import { FlaskConical } from "lucide-react"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-
-type EvalEvent = {
-  rank: number
-  id: string
-  title: string
-  description: string | null
-  category: string | null
-  start_time: string
-  end_time: string | null
-  venue_name: string | null
-  address: string | null
-  latitude: number | null
-  longitude: number | null
-  event_url: string | null
-  source: string | null
-  price: string | null
-  image_url: string | null
-  neighborhood: string | null
-  approximate_location: boolean | null
-  series_key: string | null
-}
-
-type EvalResult = {
-  query: string
-  scope: string
-  matchCount: number
-  returned: number
-  generatedAt: string
-  events: EvalEvent[]
-}
-
-// One curated pick from the LLM ranking stage (a subset of the Activity shape + rank).
-type EvalActivity = {
-  rank: number
-  id: string
-  title: string
-  category: string
-  date: string
-  endDate?: string
-  startTime: string
-  endTime: string
-  venue: string
-  neighborhood: string
-  address: string
-  priceLabel: string
-  url: string
-  why: string
-}
-
-type LlmResult = {
-  query: string
-  generatedAt: string
-  summary: string
-  count: number
-  activities: EvalActivity[]
-}
-
-// Columns exported to CSV, in order.
-const CSV_COLUMNS: (keyof EvalEvent)[] = [
-  "rank",
-  "id",
-  "title",
-  "category",
-  "venue_name",
-  "neighborhood",
-  "address",
-  "start_time",
-  "end_time",
-  "price",
-  "source",
-  "series_key",
-  "event_url",
-  "description",
-]
-
-function csvCell(value: unknown): string {
-  if (value === null || value === undefined) return ""
-  const s = String(value)
-  // Escape per RFC 4180: wrap in quotes if it contains a comma, quote, or newline.
-  if (/[",\n\r]/.test(s)) return `"${s.replace(/"/g, '""')}"`
-  return s
-}
-
-// Columns exported for the LLM top-15 CSV, in order.
-const ACTIVITY_CSV_COLUMNS: (keyof EvalActivity)[] = [
-  "rank",
-  "id",
-  "title",
-  "category",
-  "date",
-  "endDate",
-  "startTime",
-  "endTime",
-  "venue",
-  "neighborhood",
-  "address",
-  "priceLabel",
-  "why",
-  "url",
-]
-
-function toCsv<T>(rows: T[], columns: (keyof T)[]): string {
-  const header = columns.join(",")
-  const body = rows.map((r) => columns.map((c) => csvCell(r[c])).join(","))
-  return [header, ...body].join("\r\n")
-}
-
-// Build a filesystem-friendly slug from the prompt for the download filename.
-function slug(query: string): string {
-  return (
-    query
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "")
-      .slice(0, 40) || "prompt"
-  )
-}
-
-function download(filename: string, content: string, type: string) {
-  const blob = new Blob([content], { type })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement("a")
-  a.href = url
-  a.download = filename
-  document.body.appendChild(a)
-  a.click()
-  a.remove()
-  URL.revokeObjectURL(url)
-}
+import { BuildSection } from "@/components/eval/build-section"
+import { AuditSection } from "@/components/eval/audit-section"
+import { EvaluateSection } from "@/components/eval/evaluate-section"
+import type { GoldSetSummary } from "./types"
+import { fetcher } from "./types"
 
 export default function EvalPage() {
-  const [query, setQuery] = useState("")
-  const [matchCount, setMatchCount] = useState(80)
-  const [scope, setScope] = useState<"week" | "all">("week")
-  const [loading, setLoading] = useState(false)
-  const [result, setResult] = useState<EvalResult | null>(null)
-  const [llmLoading, setLlmLoading] = useState(false)
-  const [llmResult, setLlmResult] = useState<LlmResult | null>(null)
-
-  const run = async () => {
-    if (!query.trim()) {
-      toast.error("Enter a prompt first")
-      return
-    }
-    setLoading(true)
-    setResult(null)
-    try {
-      const res = await fetch("/api/eval/embeddings", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query, matchCount, scope }),
-      })
-      const data = await res.json()
-      if (!res.ok) {
-        toast.error(data.error || "Retrieval failed")
-        return
-      }
-      setResult(data as EvalResult)
-      toast.success(`Retrieved ${data.returned} events`)
-    } catch {
-      toast.error("Request failed. Please try again.")
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const runLlm = async () => {
-    if (!query.trim()) {
-      toast.error("Enter a prompt first")
-      return
-    }
-    setLlmLoading(true)
-    setLlmResult(null)
-    try {
-      const res = await fetch("/api/eval/plan", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query }),
-      })
-      const data = await res.json()
-      if (!res.ok) {
-        toast.error(data.error || "Curation failed")
-        return
-      }
-      setLlmResult(data as LlmResult)
-      toast.success(`LLM picked ${data.count} events`)
-    } catch {
-      toast.error("Request failed. Please try again.")
-    } finally {
-      setLlmLoading(false)
-    }
-  }
-
-  const downloadCsv = () => {
-    if (!result) return
-    download(
-      `embeddings-${slug(result.query)}-top${result.returned}.csv`,
-      toCsv(result.events, CSV_COLUMNS),
-      "text/csv",
-    )
-  }
-
-  const downloadJson = () => {
-    if (!result) return
-    download(
-      `embeddings-${slug(result.query)}-top${result.returned}.json`,
-      JSON.stringify(result, null, 2),
-      "application/json",
-    )
-  }
-
-  const downloadLlmCsv = () => {
-    if (!llmResult) return
-    download(
-      `llm-top15-${slug(llmResult.query)}.csv`,
-      toCsv(llmResult.activities, ACTIVITY_CSV_COLUMNS),
-      "text/csv",
-    )
-  }
-
-  const downloadLlmJson = () => {
-    if (!llmResult) return
-    download(`llm-top15-${slug(llmResult.query)}.json`, JSON.stringify(llmResult, null, 2), "application/json")
-  }
+  const { data, mutate, isLoading } = useSWR<{ goldSets: GoldSetSummary[] }>("/api/eval/gold", fetcher)
+  const goldSets = data?.goldSets ?? []
+  const frozenCount = goldSets.filter((g) => g.status === "frozen").length
+  const refresh = () => mutate()
 
   return (
-    <div className="min-h-svh">
-      <header className="border-b border-border">
-        <div className="mx-auto flex max-w-5xl items-center gap-2.5 px-5 py-5 sm:px-8">
-          <div className="flex size-8 items-center justify-center rounded-md bg-foreground text-background">
-            <FlaskConical className="size-4" />
-          </div>
-          <div className="leading-tight">
-            <p className="font-mono text-sm font-bold uppercase tracking-widest">Embedding Eval</p>
-            <p className="text-xs text-muted-foreground">Download top-K semantic matches per prompt</p>
-          </div>
+    <main className="mx-auto flex min-h-screen max-w-5xl flex-col gap-6 px-4 py-8 sm:px-6">
+      <header className="flex items-center gap-3">
+        <div className="flex size-9 items-center justify-center rounded-lg bg-foreground text-background">
+          <FlaskConical className="size-5" />
+        </div>
+        <div>
+          <p className="font-mono text-sm font-bold uppercase tracking-widest">Embedding Recall Benchmark</p>
+          <p className="text-xs text-muted-foreground">
+            Frozen, audited gold sets · recall@80 = the app&apos;s production retrieval ceiling
+          </p>
         </div>
       </header>
 
-      <main className="mx-auto flex max-w-5xl flex-col gap-6 px-5 py-8 sm:px-8">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm font-semibold uppercase tracking-wide">Prompt</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-4">
-            <Textarea
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="e.g. something chill and artsy after work in Brooklyn"
-              rows={3}
-              className="resize-y"
-            />
-            <div className="flex flex-wrap items-end gap-4">
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="matchCount" className="text-xs uppercase tracking-wide text-muted-foreground">
-                  Top K
-                </Label>
-                <Input
-                  id="matchCount"
-                  type="number"
-                  min={1}
-                  max={500}
-                  value={matchCount}
-                  onChange={(e) => setMatchCount(Number(e.target.value))}
-                  className="w-28"
-                />
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <Label className="text-xs uppercase tracking-wide text-muted-foreground">Scope</Label>
-                <Select value={scope} onValueChange={(v) => setScope(v as "week" | "all")}>
-                  <SelectTrigger className="w-52">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="week">Next 7 days (matches app)</SelectItem>
-                    <SelectItem value="all">Whole catalog (eval-only, not app behavior)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="ml-auto flex items-center gap-2">
-                <Button onClick={run} disabled={loading} variant="outline">
-                  {loading ? (
-                    <>
-                      <Loader2 className="size-4 animate-spin" /> Retrieving…
-                    </>
-                  ) : (
-                    "Retrieve top-K (embeddings)"
-                  )}
-                </Button>
-                <Button onClick={runLlm} disabled={llmLoading}>
-                  {llmLoading ? (
-                    <>
-                      <Loader2 className="size-4 animate-spin" /> Curating…
-                    </>
-                  ) : (
-                    "Get LLM top 15"
-                  )}
-                </Button>
-              </div>
-            </div>
-            <p className="text-xs leading-relaxed text-muted-foreground">
-              Runs the embedding stage only (embed prompt → <code>match_events</code>). Hard profile filters are left
-              permissive so this measures the embedding model in isolation. Results are one row per logical event
-              (deduped by <code>series_key</code>), ranked by cosine similarity.
-            </p>
-          </CardContent>
-        </Card>
+      <section className="rounded-lg border border-border bg-muted/30 px-4 py-3 text-xs leading-relaxed text-muted-foreground">
+        Your app embeds a user&apos;s free-text request and feeds the top 80 <code>match_events</code>{" "}
+        results to the LLM. This benchmark reproduces that exact path: a strong independent judge (Sonnet)
+        labels every event in the window once, you audit and freeze the labels, then recall is computed
+        deterministically — so the number reflects the embedding model, not judge noise.
+      </section>
 
-        {result && (
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between gap-3">
-              <CardTitle className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide">
-                Results
-                <Badge variant="secondary" className="font-normal">
-                  {result.returned} events
-                </Badge>
-                <Badge variant="outline" className="font-normal">
-                  {result.scope === "all" ? "Whole catalog" : "Next 7 days"}
-                </Badge>
-              </CardTitle>
-              <div className="flex items-center gap-2">
-                <Button size="sm" variant="outline" onClick={downloadCsv}>
-                  <Download className="size-4" /> CSV
-                </Button>
-                <Button size="sm" variant="outline" onClick={downloadJson}>
-                  <Download className="size-4" /> JSON
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="overflow-x-auto rounded-md border border-border">
-                <table className="w-full text-left text-sm">
-                  <thead className="bg-secondary text-xs uppercase tracking-wide text-muted-foreground">
-                    <tr>
-                      <th className="px-3 py-2 font-medium">#</th>
-                      <th className="px-3 py-2 font-medium">Title</th>
-                      <th className="px-3 py-2 font-medium">Category</th>
-                      <th className="px-3 py-2 font-medium">Venue</th>
-                      <th className="px-3 py-2 font-medium">Start</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {result.events.map((e) => (
-                      <tr key={e.id} className="border-t border-border align-top">
-                        <td className="px-3 py-2 tabular-nums text-muted-foreground">{e.rank}</td>
-                        <td className="px-3 py-2">{e.title}</td>
-                        <td className="px-3 py-2 text-muted-foreground">{e.category ?? "—"}</td>
-                        <td className="px-3 py-2 text-muted-foreground">{e.venue_name ?? "—"}</td>
-                        <td className="px-3 py-2 tabular-nums text-muted-foreground">
-                          {new Date(e.start_time).toLocaleString("en-US", {
-                            timeZone: "America/New_York",
-                            month: "short",
-                            day: "numeric",
-                            hour: "numeric",
-                            minute: "2-digit",
-                          })}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+      <Tabs defaultValue="build" className="w-full">
+        <TabsList>
+          <TabsTrigger value="build">
+            Build
+            {goldSets.length > 0 && (
+              <Badge variant="secondary" className="ml-2 font-normal">
+                {goldSets.length}
+              </Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="audit">Audit</TabsTrigger>
+          <TabsTrigger value="evaluate">
+            Evaluate
+            {frozenCount > 0 && (
+              <Badge variant="secondary" className="ml-2 font-normal">
+                {frozenCount}
+              </Badge>
+            )}
+          </TabsTrigger>
+        </TabsList>
 
-        {llmResult && (
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between gap-3">
-              <CardTitle className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide">
-                LLM top 15
-                <Badge variant="secondary" className="font-normal">
-                  {llmResult.count} events
-                </Badge>
-              </CardTitle>
-              <div className="flex items-center gap-2">
-                <Button size="sm" variant="outline" onClick={downloadLlmCsv}>
-                  <Download className="size-4" /> CSV
-                </Button>
-                <Button size="sm" variant="outline" onClick={downloadLlmJson}>
-                  <Download className="size-4" /> JSON
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-4">
-              <p className="rounded-md bg-secondary px-3 py-2 text-xs leading-relaxed text-muted-foreground">
-                Runs the full production pipeline (filter → semantic fetch → <code>gpt-5-mini</code> curation),
-                bypassing the plan cache so every click re-invokes the model. Because the model is not deterministic,
-                the exact picks and ordering can vary between runs for the same prompt — run it a few times to gauge
-                stability.
-              </p>
-              <div className="overflow-x-auto rounded-md border border-border">
-                <table className="w-full text-left text-sm">
-                  <thead className="bg-secondary text-xs uppercase tracking-wide text-muted-foreground">
-                    <tr>
-                      <th className="px-3 py-2 font-medium">#</th>
-                      <th className="px-3 py-2 font-medium">Title</th>
-                      <th className="px-3 py-2 font-medium">Category</th>
-                      <th className="px-3 py-2 font-medium">Venue</th>
-                      <th className="px-3 py-2 font-medium">Date</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {llmResult.activities.map((a) => (
-                      <tr key={`${a.rank}-${a.id}`} className="border-t border-border align-top">
-                        <td className="px-3 py-2 tabular-nums text-muted-foreground">{a.rank}</td>
-                        <td className="px-3 py-2">{a.title}</td>
-                        <td className="px-3 py-2 text-muted-foreground">{a.category || "—"}</td>
-                        <td className="px-3 py-2 text-muted-foreground">{a.venue || "—"}</td>
-                        <td className="px-3 py-2 tabular-nums text-muted-foreground">
-                          {a.date}
-                          {a.endDate && a.endDate !== a.date ? ` → ${a.endDate}` : ""}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-      </main>
-    </div>
+        <TabsContent value="build" className="mt-4">
+          <BuildSection goldSets={goldSets} refresh={refresh} />
+        </TabsContent>
+        <TabsContent value="audit" className="mt-4">
+          <AuditSection goldSets={goldSets} refresh={refresh} />
+        </TabsContent>
+        <TabsContent value="evaluate" className="mt-4">
+          <EvaluateSection goldSets={goldSets} />
+        </TabsContent>
+      </Tabs>
+
+      {isLoading && <p className="text-center text-sm text-muted-foreground">Loading gold sets…</p>}
+    </main>
   )
 }
