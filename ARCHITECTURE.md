@@ -107,9 +107,15 @@ real source URL rather than something a model produced live.
     (Free → 0, otherwise the smallest number found, else NULL). Having a numeric column is what
     lets the budget filter run in SQL (§6). The trigger keeps it in sync with zero ingest-code
     changes, and a one-time backfill populated existing rows.
+  - **`series_key text` (derived)** groups the many rows of a recurring/multi-day show (e.g. a
+    theatre run with one row per night) into a single **logical event**. Another
+    `BEFORE INSERT/UPDATE` trigger (`events_set_series_key`) sets it to
+    `md5(source + normalizedTitle + normalizedVenue)` via `compute_series_key()` — title lowercased
+    with per-occurrence qualifiers ("– Matinee/Evening/Preview…") stripped, venue reduced to
+    alphanumerics. This is what stops recurring events from flooding retrieval and the top-15. See §5b.
   - **Server-side RPCs** encapsulate retrieval + filtering (§5/§6): `match_events` (vector search)
-    and `filter_events` (keyword / whole-window), plus helpers `parse_price_usd` and
-    `event_travel_min` (Haversine minutes, mirroring `lib/geo.ts`).
+    and `filter_events` (keyword / whole-window), plus helpers `parse_price_usd`,
+    `event_travel_min` (Haversine minutes, mirroring `lib/geo.ts`), and `compute_series_key`.
   - **RLS:** both tables are public-read; all writes happen server-side with the **service role**
     key (which bypasses RLS) in the cron job. The service client (`lib/supabase/server.ts`) is
     server-only and must never be imported into a Client Component.
@@ -182,6 +188,8 @@ order is now **filter → fetch → rank** (previously fetch → rank → filter
      description, it is embedded and the closest events by **cosine distance** are returned
      (`SEMANTIC_MATCH_COUNT = 80`). This is what lets someone get relevant results **without**
      selecting any interest (see §5a).
+   - Both RPCs also collapse recurring/multi-day shows to **one representative per `series_key`**
+     so a single logical event can't occupy many candidates or slots (see §5b).
    - When both are provided the two result sets are **UNIONED and deduped by id**. If neither is
      usable (no interests + embedding failed), Path C returns the whole filtered window.
 2. **AI curation (best-effort).** `openai/gpt-5-mini` with `Output.object()` (Zod schema) and
@@ -229,6 +237,37 @@ order is now **filter → fetch → rank** (previously fetch → rank → filter
   are precomputed. Batch embedding uses `embedMany` (96/call) with **exponential backoff** because
   the free AI-Gateway tier rate-limits embeddings; the per-run cap (300) bounds each ingest and the
   backlog simply drains over subsequent runs.
+
+---
+
+## 5b. Recurring / Multi-Day Event De-duplication
+
+- **Problem:** a show that runs for a month arrives from sources in one of two shapes — **(1)** a
+  single row with a `start_time`→`end_time` **span**, or **(2)** **one row per performance**
+  (each night a distinct `source_event_id`, or same title + different `start_time` via the
+  fallback key). Shape (2) meant one logical show could occupy dozens of embedding candidates and
+  eat many of the 15 slots — duplicate, low-variety suggestions.
+- **Decision: collapse by `series_key` (title + venue + source) and de-dupe in SQL.** Both RPCs
+  select `DISTINCT ON (coalesce(series_key, id))` so the candidate pool and the top-15 contain one
+  representative per logical event: `match_events` keeps the **closest** occurrence by cosine,
+  `filter_events` keeps the **earliest upcoming** one. Doing it *inside* the RPC (before the
+  `LIMIT`) is essential — de-duping after an 80-row limit could collapse to a handful.
+- **Grouping strictness — chosen `title + venue + source`.** Alternatives: *title + source* (looser
+  — risks merging different events that share a generic title like "Yoga in the Park" at different
+  venues) and *title + venue + time-of-day* (stricter — a matinee and evening show stay separate,
+  but recurring shows with varying times stop collapsing). Title+venue is the balanced middle; the
+  accepted failure mode is two genuinely different same-title events at the *same* venue merging,
+  which is rarer and less harmful than duplicates.
+- **Where — stored column vs. app-layer.** A trigger-populated column + SQL `DISTINCT ON` was
+  chosen over over-fetching and de-duping in JS: it guarantees exact candidate counts (80 distinct,
+  15 distinct) and keeps retrieval + de-dup in one round-trip, at the cost of a small migration.
+- **Display (`buildPlan` → `fetchSeriesSpans`):** the RPC returns only the representative
+  occurrence, which for shape (2) knows just its own night. So for the picked series we look up the
+  **true run span** (`min(start)`/`max(end)` across still-relevant occurrences) and render **one
+  card, on its opening day, with a "Runs through …" range** — counted once toward the 15. A run
+  that began in a **previous week** but is still active is anchored to **today** (`displayDate =
+  startDate < today ? today : startDate`) so it still appears, exactly as a shape-(1) spanning row
+  already did.
 
 ---
 
