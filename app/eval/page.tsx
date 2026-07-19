@@ -8,8 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 
-// An event in the embedding model's top 80, with the independent judge's score attached.
-type Top80Event = {
+// An event in the embedding model's top ranking, with the independent judge's score attached.
+type TopEvent = {
   rank: number
   id: string
   title: string | null
@@ -29,20 +29,26 @@ type RelevantEvent = {
   neighborhood: string | null
   score: number
   rank: number | null
-  inTop80: boolean
+}
+
+// recall@k at one cutoff.
+type RecallAtK = {
+  k: number
+  captured: number
+  recall: number | null
 }
 
 type RecallResult = {
   query: string
   judgeModel: string
   relevantThreshold: number
-  topK: number
+  kValues: number[]
+  maxK: number
   generatedAt: string
   universeSize: number
   totalRelevant: number
-  capturedInTop80: number
-  recallAt80: number | null
-  top80: Top80Event[]
+  recallAtK: RecallAtK[]
+  topEvents: TopEvent[]
   relevantEvents: RelevantEvent[]
   misses: RelevantEvent[]
 }
@@ -87,6 +93,14 @@ function scoreBadgeVariant(score: number, threshold: number): "secondary" | "out
   return score >= threshold ? "secondary" : "outline"
 }
 
+// Smallest cutoff k that captures an event at the given embedding rank, or null if beyond all cutoffs.
+function capturedAtK(rank: number | null, kValues: number[]): number | null {
+  if (rank === null) return null
+  const sorted = [...kValues].sort((a, b) => a - b)
+  for (const k of sorted) if (rank <= k) return k
+  return null
+}
+
 export default function EvalPage() {
   const [query, setQuery] = useState("")
   const [loading, setLoading] = useState(false)
@@ -111,7 +125,7 @@ export default function EvalPage() {
         return
       }
       setResult(data as RecallResult)
-      toast.success(`recall@80 computed over ${data.universeSize} events`)
+      toast.success(`recall computed over ${data.universeSize} events`)
     } catch {
       toast.error("Request failed. Please try again.")
     } finally {
@@ -121,19 +135,17 @@ export default function EvalPage() {
 
   const downloadJson = () => {
     if (!result) return
-    download(`recall80-${slug(result.query)}.json`, JSON.stringify(result, null, 2), "application/json")
+    download(`recall-${slug(result.query)}.json`, JSON.stringify(result, null, 2), "application/json")
   }
 
   const downloadMissesCsv = () => {
     if (!result) return
     download(
-      `recall80-misses-${slug(result.query)}.csv`,
+      `recall-misses-${slug(result.query)}.csv`,
       toCsv(result.misses, ["rank", "id", "title", "category", "venue_name", "neighborhood", "score"]),
       "text/csv",
     )
   }
-
-  const recallPct = result?.recallAt80 === null || result?.recallAt80 === undefined ? null : result.recallAt80 * 100
 
   return (
     <div className="min-h-svh">
@@ -143,7 +155,7 @@ export default function EvalPage() {
             <FlaskConical className="size-4" />
           </div>
           <div className="leading-tight">
-            <p className="font-mono text-sm font-bold uppercase tracking-widest">Recall@80 Eval</p>
+            <p className="font-mono text-sm font-bold uppercase tracking-widest">Recall@k Eval</p>
             <p className="text-xs text-muted-foreground">Embedding retrieval vs. an independent Claude judge</p>
           </div>
         </div>
@@ -164,9 +176,9 @@ export default function EvalPage() {
             />
             <div className="flex items-center justify-between gap-4">
               <p className="text-xs leading-relaxed text-muted-foreground">
-                Embeds the prompt and retrieves the app&apos;s top 80 via <code>match_events</code> (permissive
-                filters = model in isolation), then has an independent judge (<code>claude-sonnet-4.6</code>) score
-                every event in the next-7-day window. This takes ~30–45s.
+                Embeds the prompt and retrieves the app&apos;s ranking via <code>match_events</code> (permissive
+                filters = model in isolation), then has an independent Claude judge score every event in the
+                next-7-day window and reports recall at k = 40, 80, and 160. This takes ~30–45s.
               </p>
               <Button onClick={run} disabled={loading} className="shrink-0">
                 {loading ? (
@@ -174,7 +186,7 @@ export default function EvalPage() {
                     <Loader2 className="size-4 animate-spin" /> Computing…
                   </>
                 ) : (
-                  "Compute recall@80"
+                  "Compute recall@k"
                 )}
               </Button>
             </div>
@@ -183,11 +195,11 @@ export default function EvalPage() {
 
         {result && (
           <>
-            {/* Headline recall@80 */}
+            {/* Headline recall@k */}
             <Card>
               <CardHeader className="flex flex-row items-center justify-between gap-3">
                 <CardTitle className="flex flex-wrap items-center gap-2 text-sm font-semibold uppercase tracking-wide">
-                  recall@80
+                  recall@k
                   <Badge variant="secondary" className="font-normal normal-case">
                     judge: {result.judgeModel}
                   </Badge>
@@ -196,48 +208,53 @@ export default function EvalPage() {
                   <Download className="size-4" /> JSON
                 </Button>
               </CardHeader>
-              <CardContent className="flex flex-col gap-4">
-                <div className="flex flex-wrap items-end gap-x-10 gap-y-4">
+              <CardContent className="flex flex-col gap-5">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                  {result.recallAtK.map((r) => (
+                    <div key={r.k} className="rounded-lg border border-border p-4">
+                      <div className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
+                        recall@{r.k}
+                      </div>
+                      <div className="mt-1 text-4xl font-semibold tabular-nums">
+                        {r.recall === null ? "—" : `${(r.recall * 100).toFixed(1)}%`}
+                      </div>
+                      <div className="mt-1 text-xs text-muted-foreground">
+                        {r.captured} of {result.totalRelevant} relevant in top {r.k}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex flex-wrap gap-8 text-sm">
                   <div>
-                    <div className="text-5xl font-semibold tabular-nums">
-                      {recallPct === null ? "—" : `${recallPct.toFixed(1)}%`}
-                    </div>
-                    <div className="mt-1 text-sm text-muted-foreground">
-                      {result.capturedInTop80} of {result.totalRelevant} relevant events captured in top 80
-                    </div>
+                    <div className="text-2xl font-semibold tabular-nums">{result.universeSize}</div>
+                    <div className="text-xs text-muted-foreground">events in window</div>
                   </div>
-                  <div className="flex gap-8 text-sm">
-                    <div>
-                      <div className="text-2xl font-semibold tabular-nums">{result.universeSize}</div>
-                      <div className="text-xs text-muted-foreground">events in window</div>
-                    </div>
-                    <div>
-                      <div className="text-2xl font-semibold tabular-nums">{result.totalRelevant}</div>
-                      <div className="text-xs text-muted-foreground">relevant (Claude)</div>
-                    </div>
-                    <div>
-                      <div className="text-2xl font-semibold tabular-nums">{result.misses.length}</div>
-                      <div className="text-xs text-muted-foreground">missed by top 80</div>
-                    </div>
+                  <div>
+                    <div className="text-2xl font-semibold tabular-nums">{result.totalRelevant}</div>
+                    <div className="text-xs text-muted-foreground">relevant (Claude)</div>
+                  </div>
+                  <div>
+                    <div className="text-2xl font-semibold tabular-nums">{result.misses.length}</div>
+                    <div className="text-xs text-muted-foreground">missed beyond top {result.maxK}</div>
                   </div>
                 </div>
                 <p className="rounded-md bg-secondary px-3 py-2 text-xs leading-relaxed text-muted-foreground">
-                  recall@80 = relevant events inside the embedding&apos;s top 80 ÷ all relevant events in the window.
+                  recall@k = relevant events inside the embedding&apos;s top k ÷ all relevant events in the window.
                   An event counts as relevant when Claude scores it ≥ {result.relevantThreshold} (0=irrelevant,
                   1=tangential, 2=relevant, 3=perfect).
                 </p>
               </CardContent>
             </Card>
 
-            {/* Side by side: embedding top 80 vs Claude relevant */}
+            {/* Side by side: embedding top ranking vs Claude relevant */}
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
               {/* Embedding top 80 */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide">
-                    Embedding top 80
+                    Embedding top {result.maxK}
                     <Badge variant="secondary" className="font-normal">
-                      {result.top80.length}
+                      {result.topEvents.length}
                     </Badge>
                   </CardTitle>
                 </CardHeader>
@@ -253,7 +270,7 @@ export default function EvalPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {result.top80.map((e) => (
+                        {result.topEvents.map((e) => (
                           <tr key={e.id} className="border-t border-border align-top">
                             <td className="px-3 py-2 tabular-nums text-muted-foreground">{e.rank}</td>
                             <td className="px-3 py-2">
@@ -297,7 +314,7 @@ export default function EvalPage() {
                           <th className="px-3 py-2 font-medium">Title</th>
                           <th className="px-3 py-2 font-medium">Category</th>
                           <th className="px-3 py-2 text-right font-medium">Emb. rank</th>
-                          <th className="px-3 py-2 text-right font-medium">In 80?</th>
+                          <th className="px-3 py-2 text-right font-medium">Captured</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -314,9 +331,14 @@ export default function EvalPage() {
                               {e.rank ?? "—"}
                             </td>
                             <td className="px-3 py-2 text-right">
-                              <Badge variant={e.inTop80 ? "secondary" : "outline"} className="font-normal">
-                                {e.inTop80 ? "yes" : "no"}
-                              </Badge>
+                              {(() => {
+                                const k = capturedAtK(e.rank, result.kValues)
+                                return (
+                                  <Badge variant={k === null ? "outline" : "secondary"} className="font-normal">
+                                    {k === null ? "miss" : `≤${k}`}
+                                  </Badge>
+                                )
+                              })()}
                             </td>
                           </tr>
                         ))}
@@ -331,7 +353,7 @@ export default function EvalPage() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between gap-3">
                 <CardTitle className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide">
-                  Missed by embedding (relevant, outside top 80)
+                  Missed by embedding (relevant, outside top {result.maxK})
                   <Badge variant="secondary" className="font-normal">
                     {result.misses.length}
                   </Badge>
@@ -345,7 +367,7 @@ export default function EvalPage() {
               <CardContent>
                 {result.misses.length === 0 ? (
                   <p className="text-sm text-muted-foreground">
-                    None — every event Claude judged relevant was captured within the top 80.
+                    None — every event Claude judged relevant was captured within the top {result.maxK}.
                   </p>
                 ) : (
                   <div className="overflow-x-auto rounded-md border border-border">

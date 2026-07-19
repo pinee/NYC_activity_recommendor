@@ -4,16 +4,17 @@ import { embedQuery } from "@/lib/embeddings"
 import { generateText, Output } from "ai"
 import * as z from "zod"
 
-// Recall@80 eval for the EMBEDDING model, using an INDEPENDENT judge (Anthropic Claude — different
-// from the app's OpenAI embedder) as ground truth.
+// Recall@k eval for the EMBEDDING model, using an INDEPENDENT judge (Anthropic Claude — different
+// from the app's OpenAI embedder) as ground truth. Recall is reported at several cutoffs (see
+// K_VALUES), e.g.:
 //
-//   recall@80 = (relevant events in the embedding's top 80) / (ALL relevant events in the window)
+//   recall@k = (relevant events in the embedding's top k) / (ALL relevant events in the window)
 //
-// True recall needs the full universe as denominator, not just the retrieved 80. Every in-window
+// True recall needs the full universe as denominator, not just the retrieved top k. Every in-window
 // series has an embedding, so calling match_events with a huge count + permissive filters returns
 // the entire 7-day window ranked by cosine distance — the ranking AND the denominator in one call.
-// Claude then grades every event, and we report recall@80 plus the relevant events the embedding
-// model MISSED (relevant per Claude but outside the top 80).
+// Claude then grades every event, and we report recall at each cutoff plus the relevant events the
+// embedding model MISSED (relevant per Claude but beyond the largest cutoff).
 
 export const maxDuration = 300
 
@@ -23,7 +24,10 @@ export const maxDuration = 300
 const JUDGE_MODEL = "anthropic/claude-haiku-4.5"
 // score >= this is treated as "relevant". 0=irrelevant, 1=tangential, 2=relevant, 3=perfect.
 const RELEVANT_THRESHOLD = 2
-const TOP_K = 80
+// Recall is reported at each of these cutoffs. All are computed from the same full-window
+// ranking + judge scores, so adding cutoffs is free. MAX_K bounds the table + "miss" definition.
+const K_VALUES = [40, 80, 160]
+const MAX_K = Math.max(...K_VALUES)
 const JUDGE_BATCH = 50 // events per Claude call
 const JUDGE_CONCURRENCY = 4 // parallel Claude calls
 
@@ -204,8 +208,7 @@ export async function POST(req: Request) {
     )
   }
 
-  // 3) recall@80 for the embedding model. Denominator = ALL relevant events in the window.
-  const top80Ids = new Set(ranked.slice(0, TOP_K).map((e) => e.id))
+  // 3) Relevant set per Claude. Denominator for recall = ALL relevant events in the window.
   const relevantEvents = ranked
     .filter((e) => (scoreById.get(e.id) ?? 0) >= RELEVANT_THRESHOLD)
     .map((e) => ({
@@ -216,17 +219,20 @@ export async function POST(req: Request) {
       neighborhood: e.neighborhood,
       score: scoreById.get(e.id) ?? 0,
       rank: rankById.get(e.id) ?? null, // position in the embedding ranking
-      inTop80: top80Ids.has(e.id),
     }))
     // Highest judge score first, then by embedding rank.
     .sort((a, b) => b.score - a.score || (a.rank ?? 1e9) - (b.rank ?? 1e9))
 
   const totalRelevant = relevantEvents.length
-  const capturedInTop80 = relevantEvents.filter((e) => e.inTop80).length
-  const recallAt80 = totalRelevant > 0 ? +(capturedInTop80 / totalRelevant).toFixed(4) : null
 
-  // 4) The embedding model's top 80 (what the app would feed the LLM), with judge scores attached.
-  const top80 = ranked.slice(0, TOP_K).map((e, i) => ({
+  // recall@k for each cutoff = relevant events whose embedding rank <= k, over ALL relevant.
+  const recallAtK = K_VALUES.map((k) => {
+    const captured = relevantEvents.filter((e) => (e.rank ?? Number.POSITIVE_INFINITY) <= k).length
+    return { k, captured, recall: totalRelevant > 0 ? +(captured / totalRelevant).toFixed(4) : null }
+  })
+
+  // 4) The embedding model's top MAX_K ranking, with judge scores attached.
+  const topEvents = ranked.slice(0, MAX_K).map((e, i) => ({
     rank: i + 1,
     id: e.id,
     title: e.title,
@@ -237,20 +243,20 @@ export async function POST(req: Request) {
     relevant: (scoreById.get(e.id) ?? 0) >= RELEVANT_THRESHOLD,
   }))
 
-  // 5) Misses — relevant per Claude but NOT in the embedding top 80 (the recall gap).
-  const misses = relevantEvents.filter((e) => !e.inTop80)
+  // 5) Misses — relevant per Claude but beyond the largest cutoff (the recall gap even at max k).
+  const misses = relevantEvents.filter((e) => (e.rank ?? Number.POSITIVE_INFINITY) > MAX_K)
 
   return Response.json({
     query,
     judgeModel: JUDGE_MODEL,
     relevantThreshold: RELEVANT_THRESHOLD,
-    topK: TOP_K,
+    kValues: K_VALUES,
+    maxK: MAX_K,
     generatedAt: new Date().toISOString(),
     universeSize: ranked.length,
     totalRelevant,
-    capturedInTop80,
-    recallAt80,
-    top80,
+    recallAtK,
+    topEvents,
     relevantEvents,
     misses,
   })
