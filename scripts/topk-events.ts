@@ -153,12 +153,17 @@ async function main() {
     JSON.stringify({ window: { start, end }, size: universe.length, events: universe }, null, 2),
   )
   const escU = (s: string) => `"${(s ?? "").replace(/"/g, '""')}"`
-  const uLines = ["event_id,title,category,venue_name,neighborhood"]
+  const uLines = ["event_id,title,category,venue_name,neighborhood,description"]
   for (const e of universe) {
     uLines.push(
-      [e.id, escU(e.title ?? ""), escU(e.category ?? ""), escU(e.venue_name ?? ""), escU(e.neighborhood ?? "")].join(
-        ",",
-      ),
+      [
+        e.id,
+        escU(e.title ?? ""),
+        escU(e.category ?? ""),
+        escU(e.venue_name ?? ""),
+        escU(e.neighborhood ?? ""),
+        escU(e.description ?? ""),
+      ].join(","),
     )
   }
   writeFileSync(join(outDir, "window-universe.csv"), uLines.join("\n"))
