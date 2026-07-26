@@ -53,3 +53,29 @@ export const EVAL_PROMPTS: string[] = [
   "I want to get out of my comfort zone.",
   "What's happening tonight that most New Yorkers don't know about?",
 ]
+
+// New benchmark set (20 prompts) evaluated against an EXTERNAL ground-truth relevance set.
+// These are scored with pure embedding recall@k (no LLM judge) in scripts/recall-eval.ts.
+// The index (1-based) of each prompt here is the key used in lib/eval/recall-truth.ts.
+export const NEW_EVAL_PROMPTS: string[] = [
+  "I want to watch a movie outdoors tonight",
+  "Are there any World Cup watch parties happening?",
+  "I'm looking for yoga classes in Manhattan",
+  "What art exhibitions or gallery events are happening this week?",
+  "I want to go to a live jazz or music concert",
+  "I want to do something active and energetic outdoors",
+  "I'm looking for a quiet, intellectual evening",
+  "I need something fun and family-friendly for the kids",
+  "I want to feel connected to nature in the city",
+  "I'm looking for a creative hands-on experience",
+  "What free events are happening in Brooklyn?",
+  "I want to do something fun in Queens",
+  "What's happening at Bryant Park?",
+  "I want to volunteer and give back to the community",
+  "Find me something happening near the waterfront or by the water",
+  "Something cultural and unique that most tourists wouldn't know about",
+  "What's a good way to spend a summer evening in NYC?",
+  "I want to learn something new this weekend",
+  "Surprise me with something I probably haven't tried before",
+  "I just want to get out of the house and do something fun",
+]
