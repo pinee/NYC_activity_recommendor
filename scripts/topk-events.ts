@@ -73,29 +73,54 @@ async function embedQuery(text: string): Promise<number[]> {
   return embedding
 }
 
+const MATCH_PARAMS = (start: string, end: string, queryEmbedding: number[]) => ({
+  p_query_embedding: queryEmbedding,
+  p_match_count: 5000, // > window size => returns everything, ranked
+  p_window_start: start,
+  p_window_end: end,
+  p_budget_cap: null,
+  p_include_approx: true,
+  p_home_lat: null,
+  p_home_lng: null,
+  p_office_lat: null,
+  p_office_lng: null,
+  p_max_travel: null,
+  p_workday_dows: [],
+  p_work_start_min: null,
+  p_work_end_min: null,
+})
+
 // Returns the full window, ranked by cosine similarity — identical params to retrieveWindowUniverse().
 async function rankedWindowIds(supabase: ReturnType<typeof createServiceClient>, queryEmbedding: number[]) {
   const { start, end } = weekWindow()
   const { data, error } = await supabase
-    .rpc("match_events", {
-      p_query_embedding: queryEmbedding,
-      p_match_count: 5000, // > window size => returns everything, ranked
-      p_window_start: start,
-      p_window_end: end,
-      p_budget_cap: null,
-      p_include_approx: true,
-      p_home_lat: null,
-      p_home_lng: null,
-      p_office_lat: null,
-      p_office_lng: null,
-      p_max_travel: null,
-      p_workday_dows: [],
-      p_work_start_min: null,
-      p_work_end_min: null,
-    })
+    .rpc("match_events", MATCH_PARAMS(start, end, queryEmbedding))
     .select("id")
   if (error) throw new Error(`match_events failed: ${error.message}`)
   return ((data as { id: string }[]) || []).map((r) => r.id).filter(Boolean)
+}
+
+type UniverseEvent = {
+  id: string
+  title: string | null
+  category: string | null
+  venue_name: string | null
+  neighborhood: string | null
+  description: string | null
+}
+
+// The full candidate universe that match_events ranks over. Universe membership is filter-driven,
+// so any query embedding returns the same complete set of window events (only ordering changes).
+async function windowUniverse(
+  supabase: ReturnType<typeof createServiceClient>,
+  queryEmbedding: number[],
+): Promise<UniverseEvent[]> {
+  const { start, end } = weekWindow()
+  const { data, error } = await supabase
+    .rpc("match_events", MATCH_PARAMS(start, end, queryEmbedding))
+    .select("id,title,category,venue_name,neighborhood,description")
+  if (error) throw new Error(`match_events (universe) failed: ${error.message}`)
+  return ((data as UniverseEvent[]) || []).filter((e) => e.id)
 }
 
 async function main() {
@@ -115,9 +140,32 @@ async function main() {
   }
   const results: Row[] = []
 
+  // Dump the full candidate universe once (the set match_events ranks over) before any slicing.
+  const seedEmb = await embedQuery(PROMPTS[0])
+  const universe = await windowUniverse(supabase, seedEmb)
+  console.log(`[v0] window universe size = ${universe.length}`)
+
+  const outDir = join(process.cwd(), "scripts", "out")
+  mkdirSync(outDir, { recursive: true })
+
+  writeFileSync(
+    join(outDir, "window-universe.json"),
+    JSON.stringify({ window: { start, end }, size: universe.length, events: universe }, null, 2),
+  )
+  const escU = (s: string) => `"${(s ?? "").replace(/"/g, '""')}"`
+  const uLines = ["event_id,title,category,venue_name,neighborhood"]
+  for (const e of universe) {
+    uLines.push(
+      [e.id, escU(e.title ?? ""), escU(e.category ?? ""), escU(e.venue_name ?? ""), escU(e.neighborhood ?? "")].join(
+        ",",
+      ),
+    )
+  }
+  writeFileSync(join(outDir, "window-universe.csv"), uLines.join("\n"))
+
   for (let i = 0; i < PROMPTS.length; i++) {
     const prompt = PROMPTS[i]
-    const emb = await embedQuery(prompt)
+    const emb = i === 0 ? seedEmb : await embedQuery(prompt)
     const ranked = await rankedWindowIds(supabase, emb)
     const topN = (n: number) => ranked.slice(0, n)
     results.push({
@@ -132,9 +180,6 @@ async function main() {
     })
     console.log(`[v0] ${i + 1}/${PROMPTS.length} "${prompt.slice(0, 48)}" -> window=${ranked.length}`)
   }
-
-  const outDir = join(process.cwd(), "scripts", "out")
-  mkdirSync(outDir, { recursive: true })
 
   writeFileSync(join(outDir, "topk-events.json"), JSON.stringify({ window: { start, end }, results }, null, 2))
 
