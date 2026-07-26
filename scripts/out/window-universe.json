@@ -3,7 +3,7 @@
     "start": "2026-07-26T04:00:00.000Z",
     "end": "2026-08-02T04:00:00.000Z"
   },
-  "size": 617,
+  "size": 615,
   "events": [
     {
       "id": "1ef66e0b-4da0-c445-72c0-6211f390faae",
@@ -252,14 +252,6 @@
       "venue_name": "Bryant Park",
       "neighborhood": "Midtown",
       "description": null
-    },
-    {
-      "id": "142d640b-38fe-e9f6-9739-a72f29f0d4c5",
-      "title": "Inception (Rooftop Cinema)",
-      "category": "Film & cinema",
-      "venue_name": "Rooftop Cinema Club Midtown",
-      "neighborhood": "Midtown",
-      "description": "Open-air rooftop screening of Inception at Rooftop Cinema Club Midtown"
     },
     {
       "id": "c393f98c-a6fa-9393-b2a8-7d8a04ce1737",
@@ -582,7 +574,7 @@
       "description": "<p>Join us for concerts on the waterfront! Taking place on the Great Lawn at Astoria Park, a performance by StrangeMagic. A tribute band to Electric Light Orchestra and 70's pop. We hope to see you there! </p>"
     },
     {
-      "id": "860e65c6-2261-a1f5-d030-f375f231f536",
+      "id": "6e1d4478-776b-05c3-2815-be31b43374af",
       "title": "Kids In Motion: Torsney Playground",
       "category": "Family & kids",
       "venue_name": "Torsney Playground",
@@ -590,7 +582,7 @@
       "description": "The Kids In Motion Program engages children in active outdoor play. A NYC Parks staff member leads four to seven hours of free activities in NYC's playgrounds, including organized sports, games, fitness demos, board games, water games, and more!<br/><br/>Kids In Motion is a free, drop-in program without registration. Children can head to the playground during the listed hours of operation to participate. Occasionally, a Kids In Motion program may be cancelled due to harsh weather or other conditions.<br/><br/>Please note: We recommend that guardians accompany children participating in this program. Kids In Motion is not a childcare program and NYC Parks is not responsible for the well-being of attendees."
     },
     {
-      "id": "a08204a8-01bd-f111-e0ab-84d8ae9fb4a7",
+      "id": "e6bca88b-cd1b-2e37-e976-401ca4636e22",
       "title": "Kids In Motion: Beach 59th Street Playground",
       "category": "Family & kids",
       "venue_name": "Rockaway Beach and Boardwalk",
@@ -710,7 +702,7 @@
       "description": "The Kids In Motion Program engages children in active outdoor play. A NYC Parks staff member leads four to seven hours of free activities in NYC's playgrounds, including organized sports, games, fitness demos, board games, water games, and more!<br/><br/>Kids In Motion is a free, drop-in program without registration. Children can head to the playground during the listed hours of operation to participate. Occasionally, a Kids In Motion program may be cancelled due to harsh weather or other conditions.<br/><br/>Please note: We recommend that guardians accompany children participating in this program. Kids In Motion is not a childcare program and NYC Parks is not responsible for the well-being of attendees."
     },
     {
-      "id": "e2c5a304-9908-5002-c555-e028a3f683de",
+      "id": "352ba6f5-0650-970d-8ade-461710bb4bb9",
       "title": "Kids in Motion: Al Quinones Playground",
       "category": "Family & kids",
       "venue_name": "Al Qui&#241;ones Playground",
@@ -734,7 +726,7 @@
       "description": "Glide along the water this summer and fall in our protected embayment with free public kayaking! Presented in partnership with..."
     },
     {
-      "id": "eb570bb2-2dab-374b-be36-4659d6286fea",
+      "id": "b2172460-de96-fe19-31f5-fce8c7900d96",
       "title": "Kids In Motion: Brookville Park",
       "category": "Family & kids",
       "venue_name": "Brookville Park",
@@ -750,7 +742,7 @@
       "description": "Glide along the water this summer and fall in our protected embayment with free public kayaking! Presented in partnership with..."
     },
     {
-      "id": "4e1eb9a8-cdef-8cbc-f99e-ca372a796017",
+      "id": "53b9e3dd-f2ac-54c9-fa83-0620d0b7c8ac",
       "title": "Kids In Motion: Bloomingdale Playground",
       "category": "Family & kids",
       "venue_name": "Bloomingdale Playground",
@@ -806,7 +798,7 @@
       "description": "<p>Volunteer with us! We will be cleaning up litter to prevent it from entering the Bronx River.</p><p>Your efforts not only protect wildlife & the rest of the Bronx River ecosystem, but they also help us identify the sources of trash so we can stop the pollution where it starts!</p>"
     },
     {
-      "id": "bdc14067-d5c2-675e-ffb4-12e91372c62a",
+      "id": "81a4a5d4-9aa8-295a-4612-dda3bf6ae2a0",
       "title": "Kids in Motion: Metcalf Playground",
       "category": "Family & kids",
       "venue_name": "Soundview Park",
@@ -814,7 +806,7 @@
       "description": "The Kids in Motion Program engages children in active, outdoor play. A NYC Parks staff member leads four to seven hours of free activities in NYC's playgrounds, including organized sports. games, fitness, demos, board games, water games, and more!<br/><br/>Kids in Motion is a free, drop-in program without registration. Children can head to the playground during the listed hours of operation to participate. Occasionally a Kids in motion program may be cancelled due to harsh weather or other conditions. <br/><br/>Please note: We recommend that guardians accompany children participating in this program. Kids in Motion is not a childcare program and NYC Parks is not responsible for the well-being of attendees."
     },
     {
-      "id": "2e0188f1-f5e5-b076-428d-1bc6b59f6b2b",
+      "id": "58bba95d-49de-a9c7-d8ba-39d70d312fd8",
       "title": "Kids In Motion: Addabbo Playground",
       "category": "Family & kids",
       "venue_name": "Tudor Park",
@@ -838,7 +830,7 @@
       "description": "This summer, Drama Desk Award-winning TADA! Youth Theater concludes its 2025-26 season with The Little Moon Theater, running July 11–31, 2026. It’s a whimsical and charming musical based on the beloved book by award-winning author Irene Haas. Follow a troupe of child actors who travel from town to town granting wishes through their performances. Along the way, they encounter a colorful cast of characters including a boy with his pet snake, a dog in love with the moon, and a fairy godmother who must grant one last wish before she can retire. Experience the joy of friendship, the magic of wishes coming true in unexpected ways, and the triumph of being accepted for who you are. It’s a treasured picture book come to life! The Little Moon Theater is perfect for audiences as young as three and runs approximately one hour . With engaging storytelling, catchy music, colorful characters, and budget-friendly tickets, this production brings the joy and imagination of childhood to audiences of every age. Special Events After the Show: The Little Moon Theater Song & Dance Workshop L earn a song and the dance from the show with the cast and TADA! Choreographer Kim Grier-Martinez. Enjoy a rare opportunity to learn a song from the fun musical you just watched Date: Saturday, July 18, 2026 after the show ($10 fee) Post-Show Talkback with the Cast Have questions for the cast? Get them ready, because here’s your chance! Dates: Friday, July 17, 2026 after the 1:30pm Show Only! Discount Tickets Are Available: Pay-What-You-Can Tickets are Available at the Box Office Starting at $1. (Cash Only One Hour Prior to Every Show) Special Group Rates are Available for 15 or more people. $10 Tickets (Children & Adults) – Up to 66% discount Email: dmartinez@tadatheater.com to book your group"
     },
     {
-      "id": "1334194d-8340-735c-a765-a92592022cda",
+      "id": "ca2f8d9d-ac36-41f6-21b3-f62957e1267d",
       "title": "Kids In Motion: Northern Playground",
       "category": "Family & kids",
       "venue_name": "Northern Playground",
@@ -886,7 +878,7 @@
       "description": "<p>Our friends from <a href=\"https://www.nypl.org/locations/hudson-park\">The New York Public Library&#8217;s Hudson Branch</a> bring the library to you. Designed for little ones, sing songs and read books together under the trees.</p>"
     },
     {
-      "id": "572b1c73-28ff-1b8e-179c-93014b623ecc",
+      "id": "f8db0f87-50bb-130e-6927-a5ff914b96e6",
       "title": "Kids in Motion: Loreto Playground",
       "category": "Family & kids",
       "venue_name": "Loreto Playground",
@@ -966,7 +958,7 @@
       "description": "$25 Ticket To The Brooklyn Cyclones Fri-Yay Experience: Baseball Game Tickets, Drinks, Souvenir Cap & More"
     },
     {
-      "id": "3732c5a8-e63f-4959-881e-5a030b1690d0",
+      "id": "eef4fe14-e336-275d-da18-8db10786ab1b",
       "title": "Kids in Motion: Tompkins Square Park",
       "category": "Family & kids",
       "venue_name": "Tompkins Square Park",
@@ -974,7 +966,7 @@
       "description": "The Kids in Motion program engages children in active, outdoors play. A NYC Parks staff member leads four to seven hours of free activities in NYC's playgrounds, including organized sports, games, fitness demos, board games, and more!<br/><br/>Kids in Motion is a free, drop-in program without registration. Children can head to the playground during the listed hours of operation to participate. Occasionally a kids in Motion program may be cancelled due to harsh weather or other conditions. <br/><br/>Please note: We recommend that guardians accompany children participating in this program. Kids in Motion is not a childcare program and NYC parks is not responsible for the well-being of attendees."
     },
     {
-      "id": "4e676b73-a5d3-3aec-2b1b-f1404886ca43",
+      "id": "8119f4a6-3d86-f4db-5064-f7514e8797d4",
       "title": "P&#233;tanque in the Park",
       "category": "Outdoor Fitness",
       "venue_name": "Washington Square Park",
@@ -990,7 +982,7 @@
       "description": "Brooklyn’s most beloved outdoor yoga series is back in Prospect Park! Brooklyn Flow and Prospect Park Alliance present free, outdoor yoga on the Long Meadow. Brooklyn’s finest yoga teachers lead free, outdoor group yoga classes in a low-pressure, beautiful environment. Join hundreds of Brooklynites each week to celebrate yoga and wellness in our treasured Prospect Park. Bring your own mat or towel, a bottle of water and friends. All levels are welcome. Please RSVP and sign the waiver prior to your first class: brooklynflow.com/prospectparkyoga . This outdoor yoga series is sponsored by NewYork-Presbyterian."
     },
     {
-      "id": "34d07d42-6c6f-4377-5afb-48b5553079a4",
+      "id": "6ab2fc62-7ee6-7ccb-9b06-13f3d37f8179",
       "title": "Kids In Motion: Astoria Heights Playground",
       "category": "Family & kids",
       "venue_name": "Astoria Heights Playground",
@@ -1014,7 +1006,7 @@
       "description": "This summer, Drama Desk Award-winning TADA! Youth Theater concludes its 2025-26 season with The Little Moon Theate r running now through July 31, 2026. It’s a whimsical and charming musical based on the beloved book by award-winning author Irene Haas. Follow a troupe of child actors who travel from town to town granting wishes through their performances. Along the way, they encounter a colorful cast of characters including a beloved pet snake, a dog in love with the moon, and a fairy godmother who must grant one last wish before she can retire. Experience the joy of friendship, the magic of wishes coming true in unexpected ways, and the triumph of being accepted for who you are. It’s a treasured picture book come to life! The Little Moon Theater is perfect for audiences as young as three and runs approximately one hour. With engaging storytelling, catchy music, colorful characters, and budget-friendly tickets, this production brings the joy and imagination of childhood to audiences of every age. Performance Dates & Times: Sold Out Dates Are In Bold Wednesday, July 15: 11am & 1:45pm Thursday, July 16: 1:30pm Friday, July 17: 1:30pm Saturday, July 18: 2pm Tuesday, July 21: 11am & 1:45pm Wednesday, July 22: 11am & 1:45pm Thursday, July 23: 11am & 1:45pm Friday, July 24: 11am & 1:30pm Saturday, July 25: 2pm Tuesday, July 28: 11am & 1:30pm Wednesday, July 29: 11am & 1:45pm Thursday, July 30: 11am & 1:45pm Friday, July 31: 1:30pm & 4pm"
     },
     {
-      "id": "19fc9dbb-edb3-48dd-9625-3e784a539842",
+      "id": "9d41e208-a1e2-f5bf-1577-da5a68838fec",
       "title": "Kids in Motion: Willis Playground",
       "category": "Family & kids",
       "venue_name": "Willis Playground",
@@ -1022,7 +1014,7 @@
       "description": "The Kids in Motion Program engages children in active, outdoor play. A NYC Parks staff member leads four to seven hours of free activities in NYC's playgrounds, including organized sports. games, fitness, demos, board games, water games, and more!<br/><br/>Kids in Motion is a free, drop-in program without registration. Children can head to the playground during the listed hours of operation to participate. Occasionally a Kids in motion program may be cancelled due to harsh weather or other conditions. <br/><br/>Please note: We recommend that guardians accompany children participating in this program. Kids in Motion is not a childcare program and NYC Parks is not responsible for the well-being of attendees."
     },
     {
-      "id": "3ace9c2a-63e3-5617-a68c-106e5c390e0e",
+      "id": "de190287-2b8d-000f-cf10-6fed2be6bd56",
       "title": "Kids In Motion: Corona Golf Playground",
       "category": "Family & kids",
       "venue_name": "Corona Golf Playground",
@@ -1030,7 +1022,7 @@
       "description": "The Kids in Motion program engages children in active, outdoors play. A NYC Parks staff member leads four to seven hours of free activities in NYC's playgrounds, including organized sports, games, fitness demos, board games, and more!<br/><br/>Kids in Motion is a free, drop-in program without registration. Children can head to the playground during the listed hours of operation to participate. Occasionally a Kids in Motion program may be cancelled due to harsh weather or other conditions.<br/><br/>Please note: We recommend that guardians accompany children participating in this program. Kids in Motion is not a childcare program and NYC parks is not responsible for the well-being of attendees."
     },
     {
-      "id": "87095fd8-ff8f-68d8-2fff-6538d15da977",
+      "id": "f62961e4-301a-4a02-5b48-889b85a735b1",
       "title": "Kids in Motion: St. James Playground",
       "category": "Family & kids",
       "venue_name": "St. James Park",
@@ -1054,7 +1046,7 @@
       "description": "<p>Join NYC Parks and The Forest Park Trust for Restoration Fridays this summer to engage in hands-on forest restoration work, including invasive species removal, trail restoration, and possible planting in Highland Park.</p><p><strong>Advance registration required with the link below. Please wear sturdy, closed toe shoes and clothes you don't mind getting dirty.</strong></p>"
     },
     {
-      "id": "9557c937-cc6c-39a1-298d-5ba4961fd448",
+      "id": "bd70004f-3df6-6a8f-d889-cace5fe93ee6",
       "title": "Kids In Motion: Haggerty Park",
       "category": "Family & kids",
       "venue_name": "Haggerty Park",
@@ -1086,7 +1078,7 @@
       "description": "Glide along the water this summer and fall in our protected embayment with free public kayaking! Presented in partnership with..."
     },
     {
-      "id": "9fc64355-1011-5e50-741f-5fa25db50a20",
+      "id": "420354e2-4377-6585-cb73-f9aa6249d33d",
       "title": "Kids In Motion: Hoover-Manton Playgrounds",
       "category": "Family & kids",
       "venue_name": "Hoover - Manton Playgrounds",
@@ -1094,7 +1086,7 @@
       "description": "The Kids in Motion program engages children in active, outdoors play. A NYC Parks staff member leads four to seven hours of free activities in NYC's playgrounds, including organized sports, games, fitness demos, board games, and more!<br/><br/>Kids in Motion is a free, drop-in program without registration. Children can head to the playground during the listed hours of operation to participate. Occasionally a Kids in Motion program may be cancelled due to harsh weather or other conditions.<br/><br/>Please note: We recommend that guardians accompany children participating in this program. Kids in Motion is not a childcare program and NYC parks is not responsible for the well-being of attendees."
     },
     {
-      "id": "dd19f183-b70d-27d6-d525-062e393063a0",
+      "id": "5ff125d2-47e0-59bb-7fff-c050a3b222e6",
       "title": "Kids in Motion: Samuel Seabury Playground",
       "category": "Family & kids",
       "venue_name": "Samuel Seabury Playground",
@@ -1102,7 +1094,7 @@
       "description": "The Kids in Motion program engages children in active, outdoors play. A NYC Parks staff member leads four to seven hours of free activities in NYC's playgrounds, including organized sports, games, fitness demos, board games, and more!<br/><br/>Kids in Motion is a free, drop-in program without registration. Children can head to the playground during the listed hours of operation to participate. Occasionally a kids in Motion program may be cancelled due to harsh weather or other conditions. <br/><br/>Please note: We recommend that guardians accompany children participating in this program. Kids in Motion is not a childcare program and NYC parks is not responsible for the well-being of attendees."
     },
     {
-      "id": "0ade51c9-7cca-2848-2928-b8fab5a052c5",
+      "id": "609139e9-e7fd-e530-5792-811d9ea498d0",
       "title": "Kids In Motion: The Big Park",
       "category": "Family & kids",
       "venue_name": "The Big Park",
@@ -1134,7 +1126,7 @@
       "description": "The Kids In Motion Program engages children in active outdoor play. A NYC Parks staff member leads four to seven hours of free activities in NYC's playgrounds, including organized sports, games, fitness demos, board games, water games, and more!<br/><br/>Kids In Motion is a free, drop-in program without registration. Children can head to the playground during the listed hours of operation to participate. Occasionally, a Kids In Motion program may be cancelled due to harsh weather or other conditions.<br/><br/>Please note: We recommend that guardians accompany children participating in this program. Kids In Motion is not a childcare program and NYC Parks is not responsible for the well-being of attendees."
     },
     {
-      "id": "cc7ade22-64c1-289b-5a4e-b5a6d53879c9",
+      "id": "41a3e067-03a7-7c87-0cb6-8a804ec030cf",
       "title": "Kids in Motion: Columbus Park",
       "category": "Family & kids",
       "venue_name": "Columbus Park",
@@ -1150,7 +1142,7 @@
       "description": null
     },
     {
-      "id": "a989343e-9532-b77a-ac69-a7cc40e8eb46",
+      "id": "e335f514-7a09-35e6-8646-954c5797e6be",
       "title": "Kids In Motion: Lawrence Virgilio Playground",
       "category": "Family & kids",
       "venue_name": "Lawrence Virgilio Playground",
@@ -1174,7 +1166,7 @@
       "description": "Push yourself with this Amp'd Bootcamp, led by Chelsea Piers Fitness. This one-hour fitness class is open to all ages..."
     },
     {
-      "id": "6cac0c5f-e048-d50b-e05a-63463009b0af",
+      "id": "0a5e93d0-4a24-319e-66c5-347a90df99cb",
       "title": "Kids In Motion: Phil \"Scooter\" Rizzuto Park",
       "category": "Family & kids",
       "venue_name": "Phil \"Scooter\" Rizzuto Park",
@@ -1206,7 +1198,7 @@
       "description": "<p>Come join the garden group at <a href=\"https://www.nycgovparks.org/opportunities/volunteer/group/bronx-river-community-garden\">Bronx River Community Garden</a> for a <a href=\"https://onebookonebronx.com/\">One Book One Bronx</a> event! This is a weekly community space that sparks powerful conversations and celebrates diverse voices. Saturdays, May 23-August 8, registration required.</p>"
     },
     {
-      "id": "bc160866-0c57-ed6a-0350-8cbeb5058117",
+      "id": "7f536c02-f5a2-e558-449d-038c74e7c836",
       "title": "Kids in Motion: Ben Abrams Playground",
       "category": "Family & kids",
       "venue_name": "Bronx Park",
@@ -1222,7 +1214,7 @@
       "description": ", Photo Credit: Evan Rabeck .stk-2be9b3b {margin-right:0px !important;margin-bottom:24px !important;margin-left:0px !important;}.stk-2be9b3b-column{--stk-column-gap:20px !important;} .stk-3717db9-container{margin-top:0px !important;margin-right:0px !important;margin-bottom:0px !important;margin-left:0px !important;}.stk-3717db9 {margin-top:0px !important;margin-right:0px !important;margin-bottom:0px !important;margin-left:0px !important;}@media screen and (min-width: 768px){.stk-3717db9 {flex:var(--stk-flex-grow, 1) 1 calc(66.7% - var(--stk-column-gap, 0px) * 1 / 2 ) !important;}} .stk-3717db9.stk-block-column{n !important}.stk-3717db9 n.stk-column-wrapper{nmargin:0px !important;n !important} As the sun sets over Green-Wood’s historic landscape, some of its most elusive nocturnal creatures begin to stir—the bats! Join biologist Nic Comparato as we dive into the secret world of bats. Discover the species that call this Cemetery home, from the little brown bat to the eastern red bat and hoary bat. Experience a live sonar demonstration and see how scientists use this tool to identify bats in real time. Get ready for a fascinating evening as you uncover the mysteries of these incredible, flying mammals and their vital role in our ecosystem! .stk-8fdef55-container{margin-top:0px !important;margin-right:0px !important;margin-bottom:0px !important;margin-left:0px !important;}.stk-8fdef55 {margin-top:0px !important;margin-right:0px !important;margin-bottom:0px !important;margin-left:0px !important;}@media screen and (min-width: 768px){.stk-8fdef55 {flex:var(--stk-flex-grow, 1) 1 calc(33.333% - var(--stk-column-gap, 0px) * 1 / 2 ) !important;}} .stk-8fdef55.stk-block-column{n !important}.stk-8fdef55 n.stk-column-wrapper{nmargin:0px !important;n !important} .stk-fd7323c {margin-bottom:0px !important;} .stk-4a67f03 {margin-bottom:35px !important;} Price: $30 / $24 for members Get Tickets var exampleCallback = function() { console.log('Order complete!'); }; window.EBWidgets.createWidget({ widgetType: 'checkout', eventId: '1989845886612', modal: true, modalTriggerElementId: 'eventbrite-widget-modal-trigger-1989845886612', onOrderComplete: exampleCallback }); Walking Tour (see details below) BEFORE PURCHASING YOUR TICKET, PLEASE NOTE: Tickets: There is no need to print tickets! Attendees will be checked in by name. Where To Go: Check-in takes place at the Gothic Arch near the Main Entrance at Fifth Avenue and 25th Street (500 25th Street). Accessibility & Safety: Walking tour routes cover hilly, grassy, and uneven terrain. This tour is not accessible for those using wheelchairs or other mobility aids and may be difficult for those with balance or other mobility issues. There is no place to sit down during the tour. For other disability-related accommodations, contact us at (718) 768-7300 or events@green-wood.com . This tour is not recommended for children under the age of 10. We strongly encourage attendees to wear suitable footwear. A Little More About Safety: This tour takes place in the dark. We strongly encourage attendees to bring a flashlight. Unless there is a medical emergency, it is not possible to leave during the tour. Please consider these limitations before purchasing tickets. Refunds: All ticket sales are final. Refunds are only permissible if the tour is canceled by Green-Wood. Tickets cannot be exchanged for a different tour date. Inclement Weather Policy: We monitor weather conditions throughout the day for the best chance of proceeding with the tour and will not make a final decision until approximately 3 hours before the start of the tour. Cancellations will be announced via Eventbrite email blasts, so check your email and spam folders. Add to calendar Google Calendar iCalendar Outlook 365 Outlook Live"
     },
     {
-      "id": "22065ce8-c1a2-483d-63a3-8b2ab48a235d",
+      "id": "c5de4bd1-bb9e-02a1-aa80-5701ed8c4c98",
       "title": "Kids in Motion: St. Mary's Park West",
       "category": "Family & kids",
       "venue_name": "St. Mary's Park",
@@ -1230,7 +1222,7 @@
       "description": "The Kids in Motion Program engages children in active, outdoor play. A NYC Parks staff member leads four to seven hours of free activities in NYC's playgrounds, including organized sports. games, fitness, demos, board games, water games, and more!<br/><br/>Kids in Motion is a free, drop-in program without registration. Children can head to the playground during the listed hours of operation to participate. Occasionally a Kids in motion program may be cancelled due to harsh weather or other conditions. <br/><br/>Please note: We recommend that guardians accompany children participating in this program. Kids in Motion is not a childcare program and NYC Parks is not responsible for the well-being of attendees."
     },
     {
-      "id": "2de57e78-faba-0d7f-bbe4-1fcceda02da7",
+      "id": "c962501a-9c3b-6850-9375-c50624cd3b7d",
       "title": "Kids In Motion: Rosemary's Playground",
       "category": "Family & kids",
       "venue_name": "Rosemary's Playground",
@@ -1302,7 +1294,7 @@
       "description": "<p><a href=\"dvpnyc.org\">Dances for a Variable Population</a> leads creative movement classes for adults of all ages and abilities, with a focus on seniors.</p>"
     },
     {
-      "id": "f465e4f4-fed5-2dc7-e00b-0c11b39f62f1",
+      "id": "1d39fb2b-0e32-4091-6c3b-38f6c0dbc69c",
       "title": "Kids in Motion: Hunts Point Playground",
       "category": "Family & kids",
       "venue_name": "Hunts Point Playground",
@@ -1310,7 +1302,7 @@
       "description": "The Kids in Motion Program engages children in active, outdoor play. A NYC Parks staff member leads four to seven hours of free activities in NYC's playgrounds, including organized sports. games, fitness, demos, board games, water games, and more!<br/><br/>Kids in Motion is a free, drop-in program without registration. Children can head to the playground during the listed hours of operation to participate. Occasionally a Kids in motion program may be cancelled due to harsh weather or other conditions. <br/><br/>Please note: We recommend that guardians accompany children participating in this program. Kids in Motion is not a childcare program and NYC Parks is not responsible for the well-being of attendees."
     },
     {
-      "id": "4ecb8916-1954-ad39-af55-e1d97e86b59a",
+      "id": "add6f080-8eeb-1541-7611-b2b7b6910362",
       "title": "Kids In Motion: Nautilus Playground",
       "category": "Family & kids",
       "venue_name": "Roy Wilkins Recreation Center",
@@ -1318,7 +1310,7 @@
       "description": "The Kids In Motion Program engages children in active outdoor play. A NYC Parks staff member leads four to seven hours of free activities in NYC's playgrounds, including organized sports, games, fitness demos, board games, water games, and more!<br/><br/>Kids In Motion is a free, drop-in program without registration. Children can head to the playground during the listed hours of operation to participate. Occasionally, a Kids In Motion program may be cancelled due to harsh weather or other conditions.<br/><br/>Please note: We recommend that guardians accompany children participating in this program. Kids In Motion is not a childcare program and NYC Parks is not responsible for the well-being of attendees."
     },
     {
-      "id": "4574e3a6-955c-9846-eb4a-0641fac7024c",
+      "id": "b8cdb2af-faa1-8229-4126-b7a0b0950e6a",
       "title": "Wheel Fun Rentals Celebrates America's 250th with Patriotic LED Bike Ride",
       "category": "Fourth of July",
       "venue_name": "Flushing Meadows Corona Park, Franklin D. Roosevelt Boardwalk and Beach, Marine Park, Bensonhurst Park",
@@ -1350,7 +1342,7 @@
       "description": "Our experienced Urban Park Rangers teach the ecology of our waterways on every seining program. Get ready to get your hands wet; seining programs use nets to catch fish. All equipment is provided; this program is recommended for ages 8 years and older. Participation is first-come, first-served."
     },
     {
-      "id": "820ebb62-a7ff-a8b2-72cd-a0914779e710",
+      "id": "2302374a-2e9e-5e00-3efa-fceab48ddb00",
       "title": "Kids in Motion: Flynn Playground",
       "category": "Family & kids",
       "venue_name": "Flynn Playground",
@@ -1446,7 +1438,7 @@
       "description": "<p>GreenThumb community gardens are developed, led, and cared for by dedicated volunteer gardeners who critically upkeep them as public green spaces.<br><br><a href=\"https://www.nycgovparks.org/opportunities/volunteer/group/bay-84th-street-community-garden\"><strong>Bay 84th Street Community Garden</strong></a>, is searching for its community! We invite you to come visit the garden and help reimagine what this vital green space can be. We will be hosting an open garden day and volunteer session. Join us for hands-on community service open to all levels to help care for the garden, along with fun garden activities. We will have a kids' art station and teach visitors how to make their own smudge sticks to take home, using the same plant we will be weeding. This garden is creating space for those who are curious and willing to dig in. Join us! No prior experience necessary - beginners are welcome! GreenThumb will provide supplies and facilitation.<br><br>This is a great opportunity to support and join a dynamic community space while learning about community gardens. Please wear comfortable, weather-appropriate clothing and bring water and snacks. Note: Some tasks may involve lifting heavy materials and extended periods of bending, squatting, and moving.</p><p><a href=\"https://www.nycgovparks.org/reg/greenthumb-volunteer-events/20076\">Register here! </a></p><p>Join our second event on August 15th <a href=\"https://www.nycgovparks.org/reg/greenthumb-volunteer-events/20077\">here! </a><br><br><strong>Location: 3-22 Beach 84th St, Rockaway Beach, NY 11693</strong><br><br>For information about group volunteering, please contact Volunteer Program Coordinator, Olivia Navarro at Olivia.Navarro@parks.nyc.gov<br><br><i>This event is co-hosted by NYC Parks GreenThumb. We are proud to be the nation&#8217;s largest urban community gardening program, sustaining over 550 gardens throughout New York City. With GreenThumb&#8217;s support, community gardens are centers of environmental justice, ensuring that our city is fairer, safer, and greener for all. GreenThumb&#8217;s events are free and open to the public.</i></p>"
     },
     {
-      "id": "a30834bc-f999-27f1-8bed-31f46484b551",
+      "id": "fdb527a0-246c-a74c-d2bc-2a3413a8bf69",
       "title": "Kids in Motion: Seward Park",
       "category": "Family & kids",
       "venue_name": "Seward Park",
@@ -1462,7 +1454,7 @@
       "description": "Few experiences compare with being on the open water in New York City. The rhythm of the waves, the sun on your face, and the exhilaration of slicing through the water all add up to an experience you&#8217;ll never forget. Our trained Urban Park Rangers will lead you on canoe adventures that range from the gentle waters of protected lakes to the challenging open waters of rivers and bays. All canoe programs are for ages 8 years and older. Participants must have prior canoeing experience. First come, first served."
     },
     {
-      "id": "471c2d7e-a491-d262-2193-a481337f2d04",
+      "id": "80de9437-4165-89d2-f9b6-ac80a0753a2a",
       "title": "40 in Focus: SummerStage through the Lens of Photographer Jack Vartoogian",
       "category": "History",
       "venue_name": "Central Park",
@@ -1494,7 +1486,7 @@
       "description": "l’alliance new york (ues) presents a six-film retrospective of claude chabrol's collaborations with isabelle huppert, including la cérémonie, madame bovary, merci pour le chocolat , and more. $16 general, $8 for under 28. <font color=\"#FF6600\""
     },
     {
-      "id": "20e48eca-5478-8d62-0546-8be37a11af2d",
+      "id": "2403d1b7-2f8c-5c7a-4b8a-56fa5f0eabb8",
       "title": "Kids In Motion: P.S. 55",
       "category": "Family & kids",
       "venue_name": "Lieutenant John H. Martinson Playground",
@@ -1550,7 +1542,7 @@
       "description": null
     },
     {
-      "id": "47bc3f87-4c5f-ea57-32c4-29a276fdc3da",
+      "id": "de8f4942-dc72-5e09-4cd3-fcdc0ad02943",
       "title": "Kids In Motion: Nostrand Playground",
       "category": "Family & kids",
       "venue_name": null,
@@ -1598,7 +1590,7 @@
       "description": "<p>GreenThumb community gardens are developed, led, and cared for by dedicated volunteer gardeners who critically maintain them as public green spaces.<br><br><a href=\"https://www.nycgovparks.org/opportunities/volunteer/group/newport-garden\"><strong>Newport Garden</strong></a> is seeking volunteers and new garden members who are interested in helping preserve this vital green space. The garden is creating space for those who are curious and willing to dig in. Join us for a hands-on volunteer day to help beautify the space and spruce up the rain gardens. No prior experience necessary - beginners are welcome! GreenThumb will provide supplies and facilitation.<br><br>This is a great opportunity to support a dynamic community space while learning about community gardens and rain gardens. Please wear comfortable, weather-appropriate clothing and bring water and snacks. Note: Some tasks may involve lifting heavy materials and extended periods of bending, squatting, and moving.<br><br><strong>Location: 195 Newport St, Brooklyn, NY 11212</strong></p><p><a href=\"https://www.nycgovparks.org/reg/greenthumb-volunteer-events/20203\"><strong>Register here!</strong></a><strong> </strong><br><br>For information about group volunteering, please contact Volunteer Program Coordinator, Olivia Navarro at Olivia.Navarro@parks.nyc.gov<br><br><i>This event is co-hosted by NYC Parks GreenThumb. We are proud to be the nation&#8217;s largest urban community gardening program, sustaining over 550 gardens throughout New York City. With GreenThumb&#8217;s support, community gardens are centers of environmental justice, ensuring that our city is fairer, safer, and greener for all. GreenThumb&#8217;s events are free and open to the public.</i></p>"
     },
     {
-      "id": "2674dbde-7b4b-18e1-79ff-bcf71260197d",
+      "id": "a44d0d31-9875-a5af-ea99-df3d3a31ce1e",
       "title": "Kids In Motion: Austin J. McDonald's Playground",
       "category": "Family & kids",
       "venue_name": "Austin J. McDonald Playground",
@@ -1710,7 +1702,7 @@
       "description": "Join Daniel and Ken Trush, co-founders of Daniel’s Music Foundation, and James Ian, singer- songwriter and recording artist on Just Call Me By My Name®, for a special evening of music, conversation, and community in Poster House’s Main Gallery. The program will begin with an introduction to Daniel’s Music Foundation and its mission to make music accessible to all, followed by live performances from Daniel Trush and James Ian. The evening will conclude with an engaging audience Q&A exploring the power of music, the importance of inclusion, and how creating spaces where everyone belongs can transform lives. Daniel Trush is a musician and co-founder of Daniel’s Music Foundation , an extraordinary New York City-based organization that is committed to bringing music-based education programs to the disabled community both in person and online. At just 12 years old, Daniel survived a life-altering rupture of an undetected brain aneurysm, an experience that could have silenced his dreams. Instead, music became a beacon of hope and a critical part of his recovery, transforming his life and igniting his passion to connect with others through song. Daniel’s songs reflect his commitment to use music as a force for good in the world. Ken Trush is a co-founder and the Managing Director of Daniel’s Music Foundation (DMF). He works closely with the management team in the strategic development of their music programs and the marketing, development and operational areas of the Foundation. In 2020, Ken created the concept of The Danny Awards, an annual global award show that recognizes the talents of musicians with disabilities and celebrates differences. He is currently working on a digital music platform that will bring both live online and on-demand music programming to our community 24/7. Formerly, Ken was a partner at Spring Advisors, a M&A advisory firm and the CFO and EVP of Corporate Development at Agency.com, one of the first digital agencies in the ‘90’s that went public in December 1999. He has used his vast work and life experiences to lead and shape Daniel’s Music into an ever-expanding organization. James Ian is a multifaceted talent whose artistry transcends music. As a singer, songwriter, and producer, James captivates audiences with deeply personal lyrics, soulful melodies, and raw emotion. His music reflects his unique experiences as an artist living with Spinal Muscular Atrophy (SMA), giving voice to underrepresented stories and fostering a deeper sense of connection and understanding. James is also a sought-after public speaker who uses his platform to advocate for disability inclusion and to encourage others to embrace their individuality. Through keynote speeches, panel discussions, and community events, he shares his journey, encouraging audiences to view differences as strengths and to champion accessibility and representation across all industries. Just Call Me By My Name® is a non-traditional record label founded by Daniel’s Music Foundation. JCMBMN® amplifies the voices of artists with disabilities and creates opportunities for their stories and artistry to reach wider audiences. Profits support Daniel’s Music Foundation’s free music programs for people with disabilities, helping expand access to creative expression and community through music. This event is free and part of Disability Pride Night. Please find additional programming on Poster House’s Events page. Advance registration is required as space is limited. Please email access@posterhouse.org or call 914-295-2387 to sign up for this event. Kindly arrive 15 minutes before start time. The program will begin promptly and will last approximately 90 minutes with questions. Accessibility Note : ASL (American Sign Language) interpretation will be present for this event. Masks and ear plugs are available free of charge at the museum. Assistive listening devices and stools are available. CART (Communication Access Realtime Translation) is also available upon request. Please contact access@posterhouse.org or 914-295-2387 to request services and to address any other accessibility needs. For other event-related questions, please contact events@posterhouse.org ."
     },
     {
-      "id": "357d067c-cc97-911c-4a34-91686a48a2c9",
+      "id": "21fcb640-959e-f240-3c70-0f7ae0124f66",
       "title": "Kids In Motion: Yellowstone Park",
       "category": "Family & kids",
       "venue_name": "Yellowstone Park",
@@ -1750,7 +1742,7 @@
       "description": "Join NYC Parks for a day of drills and games as we turn your playground into<br/>a field of dreams. Flag football is a fun and fast-paced sport where players<br/>build skills, learn teamwork and train for competition. Level up your game and<br/>join we got flags, no pads!<br/><br/>11:00 a.m. &#8211; 1:00 p.m. | 8 &#8211; 11 yrs.<br/>2:00 p.m. &#8211; 4:00 p.m. | 12 &#8211; 14 yrs."
     },
     {
-      "id": "cc0bb6eb-5be1-ae11-044f-999eff5462c0",
+      "id": "dac8a4e0-8781-08af-5c07-40be5b00689f",
       "title": "Kids In Motion: St. John's park",
       "category": "Family & kids",
       "venue_name": "St. John's Park",
@@ -1758,7 +1750,7 @@
       "description": "The Kids In Motion programs engage children in active, outdoor play. An NYC parks staff member leads four to seven hours of free activities in NYC's playgrounds, including organized sports, games, fitness demos, board games, water games and more"
     },
     {
-      "id": "87d1bf25-588a-742b-6274-23e3bdc97064",
+      "id": "0313023b-9ea0-22bd-1bad-74b7e627d1cb",
       "title": "Piano",
       "category": "Live music",
       "venue_name": "Bryant Park",
@@ -1774,7 +1766,7 @@
       "description": "<p>Teach a Horse to Fish is a program that introduces Bronx residents to their natural environment through Fishing. The goal of the program is to stir interest in the environment and learn sustainable fishing. Informational zines will be distributed along with program.</p><p>Note: This is one of this year&#8217;s Community Grant workshops.</p>"
     },
     {
-      "id": "14b3e41d-c4ed-a39d-82b7-95fc724eeab8",
+      "id": "209e8c15-73d0-7c95-8f55-54f13b56f917",
       "title": "Yoga in the Park",
       "category": "Yoga & Pilates Classes",
       "venue_name": "Randall's Island Park",
@@ -1782,7 +1774,7 @@
       "description": "<p>Stretch, breathe, and find your inner peace at Randall&#8217;s Island Park&#8217;s free outdoor yoga series. Guided by a beloved, local yoga instructor, participants will flow through a calming and grounding sequence against the backdrop of the uptown skyline. All levels and abilities are welcome. Bring a friend, family member or two, or your yoga-loving pet! </p><p>No registration required&#8212;just show up ready to move! We&#8217;ll have water and a limited number of mats available to borrow, so please bring your own if possible or show up early to claim one. </p><p>Our free yoga classes run weekly on <strong>Tuesdays from 6:30 &#8211; 7:30 pm from May 5 &#8211; September 1</strong>, and <strong>Saturdays from 10:00 &#8211; 11:00 am, July 11 &#8211; August 29.</strong> On Saturdays, stay after and join our dance class! Please check Instagram for the most updated schedule. </p><p><strong>Location: East River Picnic Area </strong></p><p>For inquiries about accessibility, to request an accommodation, or for event information, please email <a href=\"mailto:publicprograms@randallsisland.org\">publicprograms@randallsisland.org</a>. </p>"
     },
     {
-      "id": "bcba8349-6609-70c6-52b7-18f72938d5d7",
+      "id": "05965acd-62e7-d0d7-98b4-e1f882888556",
       "title": "Nature Exploration: Lake Appreciation",
       "category": "Nature Programs",
       "venue_name": "Prospect Park",
@@ -1846,7 +1838,7 @@
       "description": "<p>Lend a hand and help steward the Bronx River Foodway. Help with tasks like weeding, laying mulch, and planting some edible and native at the Foodway. This is a reoccurring event, join us Tuesday mornings through October 2026.</p>"
     },
     {
-      "id": "58ec7d45-bc84-f764-8b06-b0f603f5dfee",
+      "id": "35fdd2d2-47fa-fec6-2aa3-b21e8a40d80f",
       "title": "Green-Wood After Hours",
       "category": "Walking Tour",
       "venue_name": "Green-Wood Cemetery",
@@ -1894,7 +1886,7 @@
       "description": "The Kids in Motion program engages children in active, outdoors play. A NYC Parks staff member leads four to seven hours of free activities in NYC's playgrounds, including organized sports, games, fitness demos, board games, and more!<br/><br/>Kids in Motion is a free, drop-in program without registration. Children can head to the playground during the listed hours of operation to participate. Occasionally a Kids in Motion program may be cancelled due to harsh weather or other conditions.<br/><br/>Please note: We recommend that guardians accompany children participating in this program. Kids in Motion is not a childcare program and NYC parks is not responsible for the well-being of attendees."
     },
     {
-      "id": "db8b8866-bc29-71b1-33db-c42fa9dff41e",
+      "id": "115107ae-8da5-4b7a-b4fe-a3e084769cd2",
       "title": "Kids In Motion: Police Officer Edward Byrne Park",
       "category": "Family & kids",
       "venue_name": "Police Officer Edward Byrne Park",
@@ -2166,7 +2158,7 @@
       "description": "The Kids In Motion program engages children in active, outdoor play. An NYC parks staff member leads four to steven hours of free activities in NYC'S playgrounds, including organized sports, games, fitness demos, board games, water games, and more."
     },
     {
-      "id": "5c184e0b-e443-cc4f-6610-8d226b944e71",
+      "id": "a670f403-29a0-55f2-4b1e-83e36bb46f56",
       "title": "Kids in Motion: Brownsville Playground",
       "category": "Family & kids",
       "venue_name": "Brownsville Playground",
@@ -2174,7 +2166,7 @@
       "description": "The Kids In Motion programs engage children in active, outdoor play. An NYC parks staff member leads four to seven hours of free activities in NYC's playgrounds, including organized sports, games, fitness demos, board games, water games and more"
     },
     {
-      "id": "91240817-d831-8bdb-dfb4-18bddb5d6d24",
+      "id": "74dfb796-573b-e3bd-176d-8b5a157f98a6",
       "title": "Kids in Motion: Jesse Owens Playground",
       "category": "Family & kids",
       "venue_name": null,
@@ -2230,7 +2222,7 @@
       "description": "<p>Our free archery class is a bullseye! Learn the art of archery with free lessons taught by our expert Urban Park Rangers. This program uses safe equipment with magnetic arrows and targets. All equipment will be provided. Foam axe throwing will be available for ages 5 and over.</p>"
     },
     {
-      "id": "1721e3c3-d0bb-17de-92ad-a0c51ad7d523",
+      "id": "3e8352cd-2c60-5d5e-ad72-ee19569db4ad",
       "title": "Le Carrousel",
       "category": "Hiking & parks",
       "venue_name": "Bryant Park",
@@ -2278,7 +2270,7 @@
       "description": "Explore Brooklyn Bridge Park like never before during Open Hours at the Environmental Education Center. The Environmental Education Center is..."
     },
     {
-      "id": "3d0ff2fb-c228-006f-8d2c-812a974e60dc",
+      "id": "1f491c99-e4c5-495b-6673-c95726918120",
       "title": "Bryant Park Shop",
       "category": "Hiking & parks",
       "venue_name": "Bryant Park",
@@ -2534,7 +2526,7 @@
       "description": "Join NYC Parks and unleash your imagination&#8212;one monster at a time! Get ready for an afternoon of creativity, laughter, and a little bit of monster mischief! In this hands-on workshop, you&#8217;ll learn how to sculpt your very own clay creature&#8212;whether it&#8217;s cute, creepy, or completely out of this world. This event is free and open to the public."
     },
     {
-      "id": "cbd6ede1-1664-9bc7-f8d7-7a7401044487",
+      "id": "45d470fb-c592-0d01-3493-3501e3a3dab9",
       "title": "Free Summer Meals in Prospect Park",
       "category": "Wellness",
       "venue_name": "Prospect Park",
@@ -2550,7 +2542,7 @@
       "description": "<p>Volunteer with NYC Parks for Trees Count 2025! At each event you will receive a tote bag with all the materials needed to count trees. Next, we'll provide a 30-minute training session that includes the basics of tree identification and how to measure and assess each tree. Using our Tree Census app, you&#8217;ll split up into different zones within the park to start counting trees! After completing your first training event, you are welcome to continue counting trees on your own in smaller parks across the city. For your comfort and safety, please bring water and wear closed-toe shoes to this program. To sign up a group of 10 or more volunteers please reach out to stewardship@parks.nyc.gov. Parking- There are two parking lots near the Visitor Services Booth, P3 and P4, where volunteers can park. For your comfort and safety, please bring water and wear closed-toe shoes to this program.</p>"
     },
     {
-      "id": "bcd8f6e9-3a66-6ab8-accb-3013bc866577",
+      "id": "60dda7a4-1f1f-4bf5-684e-59eac165412c",
       "title": "Piano in Bryant Park",
       "category": "Accessible Activities",
       "venue_name": "Bryant Park",
@@ -2598,7 +2590,7 @@
       "description": "Join Prospect Park Alliance and JouvayFest Collective for the Long Live J’ouvert! Pop Up Installation on-view at the tollbooth outside of Lefferts Historic House through Sunday, September 6. Long Live J’ouvert! delves into the vibrant history of J’ouvert, a significant cultural tradition originating in Trinidad & Tobago and now deeply rooted in Brooklyn. J’ouvert, meaning “opening of the day” in French, marks the start of the Carnival season in the Caribbean and is celebrated the night before Labor Day in Brooklyn. Born from the resistance of formerly enslaved Africans who fought to partake in pre-Lenten festivities, J’ouvert has evolved into a powerful symbol of resistance and resilience, commemorating enslavement and oppression and celebrating emancipation and freedom. The installation aims to deepen the public’s understanding of J’ouvert through photography and the exploration of traditional masquerade costumes and musical traditions."
     },
     {
-      "id": "1f345b4e-89f8-0be0-7ca8-f42e5cc5867d",
+      "id": "01423bd6-8b96-46d6-4380-07fd0deed246",
       "title": "Cardio Sculpt",
       "category": "Exercise Classes",
       "venue_name": "Torsney Playground",
@@ -2622,7 +2614,7 @@
       "description": null
     },
     {
-      "id": "9e2de9ee-5504-8017-d25b-389edfd2a90c",
+      "id": "ee1ba883-9ded-143d-e1c1-a38b3f50fe83",
       "title": "Park Open Studio",
       "category": "Family & kids",
       "venue_name": "Washington Square Park",
@@ -2662,16 +2654,16 @@
       "description": "Join the Poster House education team on guided docent tours of our current exhibitions! Gain a deeper understanding of the historical context and the design techniques behind one of the museum’s shows in an informative yet casual setting. Admission must be purchased upon your arrival to the museum to attend this tour. To view our admission prices, please visit our Hours and Admissions page . This Thursday, we will be focusing on the posters from Love & Fury: New York’s Fight Against AIDS . Accessibility Note: Masks and clear masks are available free of charge at the museum. Assistive listening devices and stools are available. ASL (American Sign Language) interpretation or a CART (Communication Access Realtime Translation) is also available upon request. Please contact access@posterhouse.org or (914) 295-2387 to request interpretation services and to address any other accessibility needs. For other event-related questions, please contact info@posterhouse.org ."
     },
     {
-      "id": "b3133d73-c536-c159-5eff-b1ae026507f4",
-      "title": "Summer Sports Experience: Basketball",
+      "id": "7364e233-eff3-efdd-2ee8-9e8d955c2e70",
+      "title": "Summer Sports Experience: Introduction to Soccer and Introduction to Dodgeball",
       "category": "Summer Sports Experience",
       "venue_name": "Chelsea Park",
       "neighborhood": null,
       "description": "Summer Sports Experience is an instructional youth program that teaches sports skills. Our knowledgeable NYC Parks staff train kids in sports such as basketball, ball hockey, kickball, flag football, pickleball, soccer, team handball, track and field, and volleyball. This program covers basic and more advanced techniques. <br/> <br/>Summer Sports Experience is a drop-in program recommended for children ages 8-14. Participants can stop by for one or more sessions, but kids who stay for the whole program will get the most benefit from it. Occasionally a Summer Sports Experience program may be cancelled due to harsh weather or other conditions.<br/><br/>Please note: We recommend that guardians accompany children participating in this program. Summer Sports Experience is not a childcare program, and NYC Parks is not responsible for the well-being of attendees. <br/><br/>For more information, please visit nyc.gov/parks. <br/><br/>Contact accessibility@parks.nyc.gov or (212) 360-1430 for more information regarding accessibility."
     },
     {
-      "id": "08d365f1-76e4-e458-a77a-282713b49af5",
-      "title": "Summer Sports Experience: Introduction to Soccer and Introduction to Dodgeball",
+      "id": "b3133d73-c536-c159-5eff-b1ae026507f4",
+      "title": "Summer Sports Experience: Basketball",
       "category": "Summer Sports Experience",
       "venue_name": "Chelsea Park",
       "neighborhood": null,
@@ -2758,7 +2750,7 @@
       "description": "<p>The Highland Park Community Garden presents the Garden Teatime and Learning Series</p><p>Hosted by long-time gardener and educator, Michele Danels (@MyshellaZART) </p><p>Enjoy a cup of tea while learning how to make a medicinal salve from our herbal community garden! Register in advance to secure your spot.</p>"
     },
     {
-      "id": "036ca492-8b94-9302-a529-62fbb6d1e185",
+      "id": "8b8f0257-ae26-a544-2eea-267de0fca576",
       "title": "Ongoing Outdoor Museum Exhibit: Alice's Terracotta Garden",
       "category": "Walking",
       "venue_name": "Conference House Park",
@@ -2870,7 +2862,7 @@
       "description": null
     },
     {
-      "id": "af18d9a4-0efd-fcfc-9466-96920367e468",
+      "id": "88a2b475-246a-1cf0-82f8-5680aa3ab2bd",
       "title": "Le Carrousel Extravaganza in Bryant Park",
       "category": "Family & kids",
       "venue_name": "Bryant Park",
@@ -2902,7 +2894,7 @@
       "description": "<p>Join Friends of Bronx River Forest for a team meeting on <strong>Thursday, July 30th from 12pm &#8211; 1pm on google meet.</strong></p><p>Friends of Bronx River Forest is an up and coming community group that is working together to help restore and maintain the Bronx River Forest.</p>"
     },
     {
-      "id": "458c9930-6682-fb42-a3a1-b68b2d8481c5",
+      "id": "08e3b32d-c56f-f6bb-fdf0-11a31d52c55e",
       "title": "Risha Gorig: The Journey",
       "category": "Free",
       "venue_name": "Prospect Park",
@@ -2942,7 +2934,7 @@
       "description": "<p>Learn from Lashette how to make loose incense and smoke wands with local plants grown at the Bronx River Foodway. Participants will be introduced to the history and uses of plants and make their own incense blends.</p><p>Note: This is one of this year&#8217;s Community Grant workshops.</p>"
     },
     {
-      "id": "aa62c2d3-11b1-59ef-725b-8bb7cb703d37",
+      "id": "c3caccb3-bbf7-27f8-3ebb-c107244d0723",
       "title": "Alfred E. Smith Recreation Center Summer Camp Extended Day",
       "category": "Recreation Center Programming",
       "venue_name": "Alfred E. Smith Playground",
@@ -2990,7 +2982,7 @@
       "description": "Kids aged 6-17 can join Brooklyn Bridge Park for free basketball clinics led by KING Hoops, NYC’s premier youth basketball..."
     },
     {
-      "id": "8ea63c6d-8ce9-ecdb-ce67-82f105e5ff7f",
+      "id": "b43e1eb3-fa99-ba0d-fff8-54d9fbd072f8",
       "title": "KIM: Rev. Dr. Maggie Howard",
       "category": "Family & kids",
       "venue_name": "Rev. Dr. Maggie Howard Playground",
@@ -3038,7 +3030,7 @@
       "description": "If you love basketball and want to improve your skills, join hoops harmony at Spuyten Duyvil Playground. Whether you are a beginner or experienced player, our clinics are designed to develop your basketball skills through practice, drills, and play. Are you ready to take your game to the next level?<br/><br/>Session One - 11:00 a.m. - 1:00 p.m. Ages 8 - 11<br/>Session Two - 3:00 p.m.- 5:00 p.m. Ages 12 - 14"
     },
     {
-      "id": "f72c7466-ff9b-bec5-2d4d-95f0b8d785f1",
+      "id": "8168dcba-19db-473a-ae0c-19ad9b5e4ae3",
       "title": "Summer Sports Experience: Basketball: Skills and Drills",
       "category": "Summer Sports Experience",
       "venue_name": "Chelsea Park",
@@ -3046,7 +3038,7 @@
       "description": "Summer Sports Experience is an instructional youth program that teaches sports skills. Our knowledgeable NYC Parks staff train kids in sports such as basketball, ball hockey, kickball, flag football, pickleball, soccer, team handball, track and field, and volleyball. This program covers basic and more advanced techniques. <br/> <br/>Summer Sports Experience is a drop-in program recommended for children ages 8-14. Participants can stop by for one or more sessions, but kids who stay for the whole program will get the most benefit from it. Occasionally a Summer Sports Experience program may be cancelled due to harsh weather or other conditions.<br/><br/>Please note: We recommend that guardians accompany children participating in this program. Summer Sports Experience is not a childcare program, and NYC Parks is not responsible for the well-being of attendees. <br/><br/>For more information, please visit nyc.gov/parks. <br/><br/>Contact accessibility@parks.nyc.gov or (212) 360-1430 for more information regarding accessibility."
     },
     {
-      "id": "97cbb47e-fb1e-2297-940a-f821429a8b9c",
+      "id": "7fd5ce7e-6092-24b0-f585-4b99322a2104",
       "title": "Juggling Class",
       "category": "Sports & games",
       "venue_name": "Bryant Park",
@@ -3214,7 +3206,7 @@
       "description": "A giant inflatable sandwich will appear wedged between two Flatiron buildings for two days only ( July 30–31 ), as Care.com brings its first-ever Sandwich Generation Report to life with a free public activation. #block-c1ae3ca9ee0b73d66d7e { } #block-c1ae3ca9ee0b73d66d7e .sqs-html-content { } #block"
     },
     {
-      "id": "9f8f5693-849a-ed41-426d-8a1341f2dfd6",
+      "id": "63c7832f-f814-023d-d1b9-9764dc043bac",
       "title": "Yoga",
       "category": "Yoga & wellness",
       "venue_name": "Bryant Park",
@@ -3374,7 +3366,7 @@
       "description": "A fun, high energy dance class geared to get your heart pumping and your energy flowing. The <br/>simple dance moves and Caribbean beats will feel like a party instead of a workout. This <br/>aerobic class will improve cardiovascular health, flexibility, rhythm, and overall fitness."
     },
     {
-      "id": "ae4254a6-b22b-bf3e-e8fd-73b8269763cc",
+      "id": "3e332870-ea20-099e-09ad-3d081b57a9bb",
       "title": "Gottesman Pool: Lap Swim",
       "category": "Swimming/Aquatics",
       "venue_name": "Central Park",
@@ -3558,7 +3550,7 @@
       "description": "Runners of all experience levels join an easy-to-follow program of active running/walking intervals that gradually builds to more time running than walking. The program also includes activities for non-running days to maximize performance and recovery. This program is designed for anyone starting their running journey, anyone with a goal to run a 5K and for anyone coming back to running after some time off. The class is led by a running coach who provides guidance, support, and motivation to help achieve the goal. <br/><br/>Running group entrance is on Broadway and 251st Street and will meet by the Tortoise and Hare Statue."
     },
     {
-      "id": "24bedaea-2442-4cd4-776f-a3279a87bd75",
+      "id": "51c97268-35a8-ab79-5c2b-8ef92dfca767",
       "title": "Van Cortlandt Pool: Lap Swim",
       "category": "Swimming/Aquatics",
       "venue_name": "Van Cortlandt Park",
@@ -3566,7 +3558,7 @@
       "description": "Take part in a long-distance lap swim competition. To participate in the competition, please speak to an Aquatics Specialist on the pool deck and indicate this on your application. An awards ceremony will be held at the end of August to celebrate the health and fitness achievements of swimmers who complete 25 miles or more. Visit https://www.nycgovparks.org/events/lap-swim to register."
     },
     {
-      "id": "1e02e650-6c5b-063d-94d5-5004567dc286",
+      "id": "8f489588-b8f6-a98c-fe0e-2a9ca60b1ed9",
       "title": "Liberty Pool: Lap Swim",
       "category": "Swimming/Aquatics",
       "venue_name": "Detective Keith L Williams Park",
@@ -3726,7 +3718,7 @@
       "description": "Through our Learn to Swim program, your children will put the 'fun' in fundamentals and learn basic swimming and safety skills! During this two-week outdoor program, our Aquatic Specialists will teach your children (ages 6 to 17 years old) basic swimming skills, and how to stay safe around the water. Registration for this program takes place by lottery drawing. Visit https://nyc.gov/parks/learntoswim for rules and regulations."
     },
     {
-      "id": "11ebc227-50a6-85fa-a33d-c2801b417441",
+      "id": "28f8d9e6-004c-1798-0222-23374ebb06b3",
       "title": "Session 2: Liberty Pool - Children's Learn to Swim Level 2 (Class D)",
       "category": "Family & kids",
       "venue_name": "Detective Keith L Williams Park",
@@ -3748,14 +3740,6 @@
       "venue_name": "Crotona Park",
       "neighborhood": null,
       "description": "Through our Learn to Swim program, your children will put the 'fun' in fundamentals and learn basic swimming and safety skills! During this two-week outdoor program, our Aquatic Specialists will teach your children (ages 6 to 17 years old) basic swimming skills, and how to stay safe around the water. Registration for this program takes place by lottery drawing. Visit https://nyc.gov/parks/learntoswim for rules and regulations."
-    },
-    {
-      "id": "df1a2b65-a3e9-6caf-ebef-33e9f60d4097",
-      "title": "Comedians Interview Experts: The MTA vs. Japan with Adam Chase and Jake Berman",
-      "category": "Film & cinema",
-      "venue_name": "Caveat",
-      "neighborhood": null,
-      "description": null
     },
     {
       "id": "f23a1623-9286-07a6-3bc4-fa5aff087ad2",
@@ -3822,7 +3806,7 @@
       "description": null
     },
     {
-      "id": "e7bef20d-0998-4c40-90c1-3f5949a8beba",
+      "id": "4747b797-5d05-e89a-4b7a-ff85abca7a1d",
       "title": "McCarren Pool: Lap Swim",
       "category": "Swimming/Aquatics",
       "venue_name": "McCarren Park",
@@ -3838,7 +3822,7 @@
       "description": "Take a free Conditioning fitness class led by PureGym coaches Mondays at 6:30 PM at Pier 25, part of HRPK's Healthy on the Hudson series."
     },
     {
-      "id": "301a250b-eed4-4616-bb59-ab39676e0277",
+      "id": "882bacfd-cca4-541a-41e5-756d70d05e06",
       "title": "Visual Medicine: Photographs of Love + Joy in Prospect Park",
       "category": null,
       "venue_name": "Prospect Park",
@@ -3886,7 +3870,7 @@
       "description": "Take part in a long-distance lap swim competition. To participate in the competition, please speak to an Aquatics Specialist on the pool deck and indicate this on your application. An awards ceremony will be held at the end of August to celebrate the health and fitness achievements of swimmers who complete 25 miles or more. Visit https://www.nycgovparks.org/events/lap-swim to register."
     },
     {
-      "id": "58e6b1b0-43cc-d728-3463-0bc303b0bcbb",
+      "id": "169933dc-94af-8cae-ea77-e20da0cf9c0d",
       "title": "Public Gallery Tour",
       "category": "Art",
       "venue_name": "Wave Hill",
@@ -3894,7 +3878,7 @@
       "description": "<p>Solo and group exhibitions at Glyndor Gallery explore the dynamic relationships between nature, culture, and site. When exhibitions are on view in the spring, summer, and fall, Gallery Greeters lead public exhibition tours on Thursdays and Saturdays at 2PM. Visitors can expect an in-depth look at artworks on view in Glyndor Gallery and in the Sunroom Project Space, showcasing the work of both emerging and established artists in the unique context of a public garden. </p><p>Each tour lasts approximately 45 minutes. Drop-in event; no registration required. Today&#8217;s tour features current exhibitions. </p><p>Questions? Please email us at information@wavehill.org or call 718.549.3200 x251. </p><p><i>Glyndor Gallery is wheelchair-accessible. There is an accessible, ground-level entrance at the front of the building with an elevator that provides access to the gallery level. The Sunroom Project Space can be accessed with an ADA-compliant ramp. The restroom on the gallery level is all-gender and ADA-compliant. </i></p>"
     },
     {
-      "id": "14f60771-89d4-4186-dd71-8de9673351b4",
+      "id": "be81b0a6-603f-8c7f-59f6-45f974df2afa",
       "title": "Total Body Fitness",
       "category": "Exercise Classes",
       "venue_name": "St. John's Park",
@@ -3942,7 +3926,7 @@
       "description": "Through our Learn to Swim program, your children will put the 'fun' in fundamentals and learn basic swimming and safety skills! During this two-week outdoor program, our Aquatic Specialists will teach your children (ages 6 to 17 years old) basic swimming skills, and how to stay safe around the water. Registration for this program takes place by lottery drawing. Visit https://nyc.gov/parks/learntoswim for rules and regulations."
     },
     {
-      "id": "b0a012b7-70d0-a2ef-e46e-7bd92c73dab1",
+      "id": "38a15b49-b06a-2ac4-d324-8d0ac303d424",
       "title": "Session 2: Kosciuszko Pool - Children's Learn to Swim Level 1 (Class D)",
       "category": "Family & kids",
       "venue_name": "Kosciuszko Pool",
@@ -3950,7 +3934,7 @@
       "description": "Through our Learn to Swim program, your children will put the 'fun' in fundamentals and learn basic swimming and safety skills! During this two-week outdoor program, our Aquatic Specialists will teach your children (ages 6 to 17 years old) basic swimming skills, and how to stay safe around the water. Registration for this program takes place by lottery drawing. Visit https://nyc.gov/parks/learntoswim for rules and regulations."
     },
     {
-      "id": "159f518c-ef06-8eb1-296f-34850ce5b209",
+      "id": "442da0d4-effd-c0c3-6983-75cd9e6eb392",
       "title": "Session 2: Kosciuszko Pool - Children's Learn to Swim Level 2 (Class A)",
       "category": "Family & kids",
       "venue_name": "Kosciuszko Pool",
@@ -3998,7 +3982,7 @@
       "description": "Take part in a long-distance lap swim competition. To participate in the competition, please speak to an Aquatics Specialist on the pool deck and indicate this on your application. An awards ceremony will be held at the end of August to celebrate the health and fitness achievements of swimmers who complete 25 miles or more. Visit https://www.nycgovparks.org/events/lap-swim to register."
     },
     {
-      "id": "3a7bd16b-c922-65c0-3e5d-070fbe040ea7",
+      "id": "f773ba7b-6c60-5189-c8dd-dbca324da0c3",
       "title": "Session 2: McCarren Pool - Children's Learn to Swim Level 1 (Class E)",
       "category": "Family & kids",
       "venue_name": "McCarren Park",
@@ -4038,7 +4022,7 @@
       "description": "Zumba is a fusion of Latin, International and popular music dance themes creating a dynamic, exciting, effective fitness system! The routines feature aerobic, fitness interval training with a combination of fast and slow rhythms that tone and sculpt the body with easy to follow dance steps."
     },
     {
-      "id": "3bc3816f-3513-25e1-f9a1-88714464abcb",
+      "id": "1f7bb5a4-8078-1c48-9a53-ed086d1458a8",
       "title": "Session 2: McCarren Pool - Parent and Tots Learn to Swim (Class B)",
       "category": "Swimming/Aquatics",
       "venue_name": "McCarren Park",
@@ -4078,7 +4062,7 @@
       "description": "<p>Try silk fan dancing, hoop tricks, contact juggling, plate spinning, and more! Our instructors can give you one-on-one guidance in a variety of flow and circus arts skills, or just drop by, pick up a prop, and have fun! All skill levels are welcome.</p>"
     },
     {
-      "id": "1f451e0a-24cd-7912-87c6-00dd7a23b500",
+      "id": "ec88a0d5-6181-ad2a-8c74-be443d860a8f",
       "title": "Session 2: McCarren Pool - Parent and Tots Learn to Swim (Class A)",
       "category": "Swimming/Aquatics",
       "venue_name": "McCarren Park",
@@ -4102,7 +4086,7 @@
       "description": "This Dance Fitness class will not only provide you with a full body workout- but with fun as well! Soca Sweat will invigorate and refresh the mind, body and soul. Enjoy the music, move your body to choreography, and sweat it out!"
     },
     {
-      "id": "a8ca506e-ff1f-57d4-aef9-309c696091e5",
+      "id": "c69287f6-91d3-a368-5712-bc4c6e3e4534",
       "title": "Session 2: Hamilton Fish Pool - Children's Learn to Swim Level 1 (Class D)",
       "category": "Family & kids",
       "venue_name": "Hamilton Fish Park",
@@ -4134,7 +4118,7 @@
       "description": "his creative and fun workout fuses high-energy dance aerobics with hula hoops! Hoops are available for loaning. Participants must bring waist belts (waist trainers). Participants must bring locks to lock up their bags. Center does not allow anyone to bring their bags to the dance room except; towel, water and phone."
     },
     {
-      "id": "a6af21e1-fdf0-2166-cf45-3dedcc0aa0dd",
+      "id": "0278f5a9-b49f-1952-fd43-318b6e499627",
       "title": "Session 2: Hamilton Fish Pool - Children's Learn to Swim Level 2 (Class A)",
       "category": "Family & kids",
       "venue_name": "Hamilton Fish Park",
@@ -4142,7 +4126,7 @@
       "description": "Through our Learn to Swim program, your children will put the 'fun' in fundamentals and learn basic swimming and safety skills! During this two-week outdoor program, our Aquatic Specialists will teach your children (ages 6 to 17 years old) basic swimming skills, and how to stay safe around the water. Registration for this program takes place by lottery drawing. Visit https://nyc.gov/parks/learntoswim for rules and regulations."
     },
     {
-      "id": "46a35efc-86fa-64f2-1709-a18e763008d5",
+      "id": "12b27e9c-3df8-f9cf-1c1c-a02fc65790a7",
       "title": "Session 2: Hamilton Fish Pool - Children's Learn to Swim Level 2 (Class B)",
       "category": "Family & kids",
       "venue_name": "Hamilton Fish Park",
@@ -4158,7 +4142,7 @@
       "description": null
     },
     {
-      "id": "af4e095e-77fe-e728-4555-240dfbf4b2ff",
+      "id": "7a312648-30b6-c455-852b-218e309e5c0e",
       "title": "Exhibit: Black People and the Battle of Brooklyn",
       "category": "Lefferts Historic House",
       "venue_name": "Prospect Park",
@@ -4182,7 +4166,7 @@
       "description": "This Instructional basketball clinic will provide an opportunity for youth, regardless of skill to have a positive basketball experience followed by league play. Participants will have the opportunity to learn and practice the fundamentals of Basketball and advance their basketball skills through a series of drills. This specific clinic for youth ages 5 and 7."
     },
     {
-      "id": "c062574b-f175-86ed-f974-ed8807d20a3e",
+      "id": "309d8c9e-d60f-d153-a901-f27c2c43e21c",
       "title": "Session 2: Hamilton Fish Pool - Children's Learn to Swim Level 1 (Class C)",
       "category": "Family & kids",
       "venue_name": "Hamilton Fish Park",
@@ -4238,7 +4222,7 @@
       "description": null
     },
     {
-      "id": "3fabbfee-2c54-c4af-4df0-151a4b4385c5",
+      "id": "64b82a3a-6164-1f91-7b49-084a2bf59eed",
       "title": "Session 2: Hamilton Fish Pool - Children's Learn to Swim Level 1 (Class E)",
       "category": "Family & kids",
       "venue_name": "Hamilton Fish Park",
@@ -4254,7 +4238,7 @@
       "description": "Join for an EPIC series of FREE fitness events all around New York City! The 15th year of IronStrength classes are a mix of every kind of thing, in every kind of place! #block-e0501beae72d782420e0 { } #block-e0501beae72d782420e0 .sqs-html-content { } #block-e0501beae72d782420e0 { mix-blend-mode: var"
     },
     {
-      "id": "3f943dec-b146-7c15-c563-733bc66a269a",
+      "id": "4774c311-a1d1-3e7a-6b80-2c532c6aeaaa",
       "title": "Latin Dance Fitness",
       "category": "Exercise Classes",
       "venue_name": null,
@@ -4294,7 +4278,7 @@
       "description": "Zumba Gold&#174; offers a low-impact workout set to a fusion of Latin, International and popular music dance themes, creating a dynamic, exciting, effective fitness system! The routines feature aerobic fitness interval training with a combination of fast and slow rhythms that challenge both the heart and muscles. With fun music and easy-to-follow steps, you can&#8217;t go wrong! <br/><br/>Participants must sign in at the front desk and bring locks to lock up their bags. The center does not allow anyone to bring their bags to the multi-use room except: towel, water and phone."
     },
     {
-      "id": "0cf6d237-8e3a-7794-bbb8-55870f46bc27",
+      "id": "d2c36f2d-c84e-85ab-adf8-a1baa609647d",
       "title": "Session 2: Lyons Pool - Children's Learn to Swim Level 1 (Class B)",
       "category": "Family & kids",
       "venue_name": "Lyons Pool",
@@ -4390,7 +4374,7 @@
       "description": "The Learn to Swim program puts the fun in fundamentals and teaches basic swimming and safety skills. The program offers tots, from 1 1/2 to 5 years old, the opportunity to become comfortable in the water and prepare to learn to swim. Parents/Guardians must accompany tots in the water. Registration for this program takes place by lottery drawing. Visit https://nyc.gov/parks/learntoswim for rules and regulations."
     },
     {
-      "id": "f346f5b9-216f-2d5b-0d23-0f08bf2604bb",
+      "id": "050dc23c-201d-1fc8-44fe-75cc40475822",
       "title": "Zumba",
       "category": "Exercise Classes",
       "venue_name": null,
@@ -4414,7 +4398,7 @@
       "description": "Learn competitive swimming strokes, goal setting, sportsmanship, teamwork principals, and improve your fitness. Participants must know how to swim comfortably; advanced skill level required. For ages 6-18. Advanced skill level required."
     },
     {
-      "id": "5ff8ad4f-f3fb-c280-8bf3-052ecd976a8c",
+      "id": "952f0419-3689-ad8d-585b-ec8e1c0593a9",
       "title": "Liberty Pool: Swim Team Training",
       "category": "Swimming/Aquatics",
       "venue_name": "Detective Keith L Williams Park",
@@ -4430,7 +4414,7 @@
       "description": "Zumba Gold&#174; offers a low-impact workout set to a fusion of Latin, International and popular music dance themes, creating a dynamic, exciting, effective fitness system! The routines feature aerobic fitness interval training with a combination of fast and slow rhythms that challenge both the heart and muscles. With fun music and easy-to-follow steps, you can&#8217;t go wrong! <br/><br/>Please register for updates about cancellations. Class is first come, first served, but for safety reasons, participants will not be allowed to join after the first fifteen minutes of class. New Settlement Community Center requires all first-time participants to create a profile with the site upon arrival so please arrive at least 15 minutes in advance."
     },
     {
-      "id": "d71fa74b-10f7-3b26-1f54-14c6067848a8",
+      "id": "28505f3c-808d-3406-cc24-f36446af66e3",
       "title": "Faber Pool: Lap Swim",
       "category": "Swimming/Aquatics",
       "venue_name": "Faber Pool and Park",
@@ -4574,7 +4558,7 @@
       "description": null
     },
     {
-      "id": "813d79e0-87fb-c920-cb0f-044a9b930abe",
+      "id": "edf680d4-ea1f-5980-fc76-dc1cba2c9fa6",
       "title": "Senior Cardio Sculpt",
       "category": "Exercise Classes",
       "venue_name": null,
@@ -4790,7 +4774,7 @@
       "description": "Join Prospect Park Alliance for a virtual tour of the Black Loyalist Heritage Centre in Shelburne, Nova Scotia at Lefferts Historic House. Many Black Brooklynites worked for the British army during the American Revolution. Some gained freedom from enslavement by doing so. When the Americans won the war, these Black Loyalists feared the new nation would not respect their rights. So they evacuated to Nova Scotia in 1783. The Black Loyalist Heritage Centre interprets, safeguards, and promotes the history and heritage of the Black Loyalists. This special virtual tour of the Centre will be available during open hours at Lefferts."
     },
     {
-      "id": "4dfd99c9-59e9-eb5f-25b7-051023dcef8e",
+      "id": "871128d1-0a0b-b476-885a-f3b1d2b000c4",
       "title": "Faber Pool: Swim Team Training",
       "category": "Swimming/Aquatics",
       "venue_name": "Faber Pool and Park",
