@@ -213,6 +213,14 @@ async function main() {
     index: number
     prompt: string
     inputCount: number
+    diagnostics?: {
+      rawPickCount: number
+      droppedUnknownId: number
+      droppedByDateFilter: number
+      droppedAsDuplicateId: number
+      droppedByCap: number
+      final: number
+    }
     summary: string
     picks: {
       rank: number
@@ -261,10 +269,25 @@ async function main() {
     const distinct = kept.filter((x) => (seenIds.has(x.row.id) ? false : (seenIds.add(x.row.id), true)))
     const capped = distinct.slice(0, MAX_ACTIVITIES)
 
+    // Attribution diagnostics: why did the final list end up this size?
+    const rawPickCount = out.picks.length // what the LLM returned
+    const mappedToRow = out.picks.filter((p) => rowById.get(p.eventId)).length // ids that exist
+    const afterDateFilter = kept.length // survived the "next 7 days / not earlier today" filter
+    const distinctCount = distinct.length // after dedup by eventId
+    const diagnostics = {
+      rawPickCount,
+      droppedUnknownId: rawPickCount - mappedToRow,
+      droppedByDateFilter: mappedToRow - afterDateFilter,
+      droppedAsDuplicateId: afterDateFilter - distinctCount,
+      droppedByCap: Math.max(0, distinctCount - MAX_ACTIVITIES),
+      final: capped.length,
+    }
+
     finals.push({
       index: r.index,
       prompt: r.prompt,
       inputCount: top80.length,
+      diagnostics,
       summary: out.summary,
       picks: capped.map((x, i) => ({
         rank: i + 1,
