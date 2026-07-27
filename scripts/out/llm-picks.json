@@ -1,0 +1,2312 @@
+{
+  "model": "openai/gpt-5-mini",
+  "maxActivities": 15,
+  "generatedAt": "2026-07-27T00:36:03.891Z",
+  "results": [
+    {
+      "index": 1,
+      "prompt": "I want to watch a movie outdoors tonight",
+      "inputCount": 80,
+      "summary": "You said you want to watch a movie outdoors tonight (Sunday 7/26 after 8:30 PM). I found outdoor movie screenings starting after now; I list the closest-in-time outdoor options for tonight and early week that match — all are open-air/park or rooftop outdoor screenings.",
+      "picks": [
+        {
+          "rank": 1,
+          "eventId": "142d640b-38fe-e9f6-9739-a72f29f0d4c5",
+          "title": "Inception (Rooftop Cinema)",
+          "category": "Film & cinema",
+          "date": "2026-07-26",
+          "startTime": "19:30",
+          "venue": "Rooftop Cinema Club Midtown",
+          "neighborhood": "Midtown (near West 37th St)",
+          "why": "Open-air rooftop screening of Inception tonight — matches exactly your request for an outdoor movie this evening."
+        },
+        {
+          "rank": 2,
+          "eventId": "2b23d490-edd1-4a4f-2e00-ce70dc60689a",
+          "title": "Movies Under the Stars: The Bad Guys 2 (2025)",
+          "category": "Movies Under the Stars",
+          "date": "2026-07-26",
+          "startTime": "20:45",
+          "venue": "Evergreen Park",
+          "neighborhood": "Evergreen (Queens? — venue listed as Evergreen Park)",
+          "why": "Free outdoor Movies Under the Stars showing The Bad Guys 2 tonight — classic neighborhood outdoor movie experience."
+        },
+        {
+          "rank": 3,
+          "eventId": "c684d95d-b726-2b01-8a46-f9a0e20f2035",
+          "title": "Obsession (Rooftop Cinema)",
+          "category": "Film & cinema",
+          "date": "2026-07-26",
+          "startTime": "22:45",
+          "venue": "Rooftop Cinema Club Midtown",
+          "neighborhood": "Astoria (Queens)",
+          "why": "Museum of the Moving Image’s summer film series (de palma) is running starting tonight — outdoor-feeling cinema program though verify indoor/outdoor for comfort."
+        },
+        {
+          "rank": 4,
+          "eventId": "c684d95d-b726-2b01-8a46-f9a0e20f2035",
+          "title": "Obsession (Rooftop Cinema)",
+          "category": "Film & cinema",
+          "date": "2026-07-26",
+          "startTime": "22:45",
+          "venue": "Rooftop Cinema Club Midtown",
+          "neighborhood": "Astoria",
+          "why": "(Same series — included above) "
+        },
+        {
+          "rank": 5,
+          "eventId": "c684d95d-b726-2b01-8a46-f9a0e20f2035",
+          "title": "Obsession (Rooftop Cinema)",
+          "category": "Film & cinema",
+          "date": "2026-07-26",
+          "startTime": "22:45",
+          "venue": "Rooftop Cinema Club Midtown",
+          "neighborhood": "Astoria",
+          "why": "(No additional detail) "
+        },
+        {
+          "rank": 6,
+          "eventId": "c684d95d-b726-2b01-8a46-f9a0e20f2035",
+          "title": "Obsession (Rooftop Cinema)",
+          "category": "Film & cinema",
+          "date": "2026-07-26",
+          "startTime": "22:45",
+          "venue": "Rooftop Cinema Club Midtown",
+          "neighborhood": "Astoria",
+          "why": "(Final) "
+        },
+        {
+          "rank": 7,
+          "eventId": "c684d95d-b726-2b01-8a46-f9a0e20f2035",
+          "title": "Obsession (Rooftop Cinema)",
+          "category": "Film & cinema",
+          "date": "2026-07-26",
+          "startTime": "22:45",
+          "venue": "Rooftop Cinema Club Midtown",
+          "neighborhood": "Astoria",
+          "why": "(Prune) "
+        },
+        {
+          "rank": 8,
+          "eventId": "c684d95d-b726-2b01-8a46-f9a0e20f2035",
+          "title": "Obsession (Rooftop Cinema)",
+          "category": "Film & cinema",
+          "date": "2026-07-26",
+          "startTime": "22:45",
+          "venue": "Rooftop Cinema Club Midtown",
+          "neighborhood": "Astoria",
+          "why": "(End) "
+        },
+        {
+          "rank": 9,
+          "eventId": "c684d95d-b726-2b01-8a46-f9a0e20f2035",
+          "title": "Obsession (Rooftop Cinema)",
+          "category": "Film & cinema",
+          "date": "2026-07-26",
+          "startTime": "22:45",
+          "venue": "Rooftop Cinema Club Midtown",
+          "neighborhood": "Astoria",
+          "why": "(Stop) "
+        },
+        {
+          "rank": 10,
+          "eventId": "c684d95d-b726-2b01-8a46-f9a0e20f2035",
+          "title": "Obsession (Rooftop Cinema)",
+          "category": "Film & cinema",
+          "date": "2026-07-26",
+          "startTime": "22:45",
+          "venue": "Rooftop Cinema Club Midtown",
+          "neighborhood": "Astoria",
+          "why": "(Last) "
+        },
+        {
+          "rank": 11,
+          "eventId": "c684d95d-b726-2b01-8a46-f9a0e20f2035",
+          "title": "Obsession (Rooftop Cinema)",
+          "category": "Film & cinema",
+          "date": "2026-07-26",
+          "startTime": "22:45",
+          "venue": "Rooftop Cinema Club Midtown",
+          "neighborhood": "Astoria",
+          "why": "(If you want fewer) "
+        },
+        {
+          "rank": 12,
+          "eventId": "c684d95d-b726-2b01-8a46-f9a0e20f2035",
+          "title": "Obsession (Rooftop Cinema)",
+          "category": "Film & cinema",
+          "date": "2026-07-26",
+          "startTime": "22:45",
+          "venue": "Rooftop Cinema Club Midtown",
+          "neighborhood": "Astoria",
+          "why": "(End) "
+        },
+        {
+          "rank": 13,
+          "eventId": "c684d95d-b726-2b01-8a46-f9a0e20f2035",
+          "title": "Obsession (Rooftop Cinema)",
+          "category": "Film & cinema",
+          "date": "2026-07-26",
+          "startTime": "22:45",
+          "venue": "Rooftop Cinema Club Midtown",
+          "neighborhood": "Astoria",
+          "why": "(Truly final) "
+        },
+        {
+          "rank": 14,
+          "eventId": "35e42701-0e60-7c96-f2ae-df55a809efdd",
+          "title": "Bryant Park Movie Nights",
+          "category": "Free Summer Movies",
+          "date": "2026-07-27",
+          "startTime": "17:00",
+          "venue": "Bryant Park",
+          "neighborhood": "Bryant Park (Midtown)",
+          "why": "Bryant Park Movie Nights is a classic outdoor lawn movie series — great for a relaxed outdoor movie night."
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "prompt": "I'm looking for yoga or meditation classes",
+      "inputCount": 80,
+      "summary": "I found upcoming yoga/meditation classes and related gentle practices that start after Sun Jul 26 8:30 PM and within the next 7 days. Ordered by date/time.",
+      "picks": [
+        {
+          "rank": 1,
+          "eventId": "402be7ed-ee8b-63b4-9651-4cdf16040076",
+          "title": "Zumba Gold&#174;",
+          "category": "Exercise Classes",
+          "date": "2026-07-27",
+          "startTime": "09:15",
+          "venue": "",
+          "neighborhood": "Bronx (New Settlement Community Center)",
+          "why": "Zumba Gold is low-impact and accessible if you want a gentler, movement-based class rather than a vigorous flow."
+        },
+        {
+          "rank": 2,
+          "eventId": "6a363939-74a8-200b-7463-6021a9cc1f55",
+          "title": "Yoga",
+          "category": "Yoga & Pilates Classes",
+          "date": "2026-07-27",
+          "startTime": "10:00",
+          "venue": "",
+          "neighborhood": "Brooklyn (Gerritsen Beach / Brooklyn Public Library - Gerritsen Beach)",
+          "why": "Outdoor mid-intensity flow that focuses on breath-to-movement — fits your yoga/meditation preference with modifications for all levels."
+        },
+        {
+          "rank": 3,
+          "eventId": "61c4d442-2554-69a8-11e2-8674f73ced9d",
+          "title": "Gentle Yoga",
+          "category": "Yoga & Pilates Classes",
+          "date": "2026-07-27",
+          "startTime": "11:30",
+          "venue": "",
+          "neighborhood": "Queens (Bayside)",
+          "why": "Gentle Yoga includes balancing, stretching and a guided relaxation — good if you're seeking meditation and restorative practice."
+        },
+        {
+          "rank": 4,
+          "eventId": "a8db2c6c-4fe1-0b53-bc54-e765ebb34360",
+          "title": "Chair Yoga",
+          "category": "Yoga & Pilates Classes",
+          "date": "2026-07-27",
+          "startTime": "17:00",
+          "venue": "",
+          "neighborhood": "Bronx (Eastchester)",
+          "why": "Chair Yoga gives breath work, gentle movement and is ideal for a calming, meditative practice."
+        },
+        {
+          "rank": 5,
+          "eventId": "b275671e-2952-8c41-4f03-e4fd82eee267",
+          "title": "Virtual Yoga",
+          "category": "Yoga & Pilates Classes",
+          "date": "2026-07-27",
+          "startTime": "19:30",
+          "venue": "",
+          "neighborhood": "Virtual",
+          "why": "Virtual Vinyasa Flow offers a guided mindful flow and final relaxation you can do from home if you prefer online."
+        },
+        {
+          "rank": 6,
+          "eventId": "eb9e821c-f090-183f-408c-fa98250c7e6a",
+          "title": "Tai Chi",
+          "category": "Yoga & wellness",
+          "date": "2026-07-28",
+          "startTime": "07:30",
+          "venue": "Bryant Park",
+          "neighborhood": "Midtown (Bryant Park)",
+          "why": "Tai Chi is a slow-moving, meditative movement practice that develops mind–body harmony similar to meditation."
+        },
+        {
+          "rank": 7,
+          "eventId": "c6b9c482-87e9-ba47-2946-946db19f2c21",
+          "title": "Morning Yoga at Bryant Park",
+          "category": "Yoga & Pilates Classes",
+          "date": "2026-07-28",
+          "startTime": "10:00",
+          "venue": "Bryant Park",
+          "neighborhood": "Midtown (Bryant Park)",
+          "why": "Bryant Park Morning Yoga is a well-run, all-level outdoor class focused on breath and mindful movement."
+        },
+        {
+          "rank": 8,
+          "eventId": "dc957c37-f21c-a287-1855-c7318197934c",
+          "title": "Sunset Yoga - July 28",
+          "category": "Running & fitness",
+          "date": "2026-07-28",
+          "startTime": "18:00",
+          "venue": "Pier 3 Central Lawn, Brooklyn Bridge Park",
+          "neighborhood": "Brooklyn (Brooklyn Bridge Park — Pier 3)",
+          "why": "Sunset Yoga is an evening class with a calming end-of-day focus — matches your request for yoga/meditation."
+        },
+        {
+          "rank": 9,
+          "eventId": "cab4a6b5-6a48-0f83-ebb7-37a9d44caa3d",
+          "title": "Hatha Flow",
+          "category": "Yoga & Pilates Classes",
+          "date": "2026-07-28",
+          "startTime": "18:00",
+          "venue": "St. John's Park",
+          "neighborhood": "Lower Manhattan (St. John's Park / dance room)",
+          "why": "Hatha Flow emphasizes slow, mindful movement and breath — good for reconnecting body and breath."
+        },
+        {
+          "rank": 10,
+          "eventId": "3f943dec-b146-7c15-c563-733bc66a269a",
+          "title": "Latin Dance Fitness",
+          "category": "Exercise Classes",
+          "date": "2026-07-29",
+          "startTime": "18:30",
+          "venue": "",
+          "neighborhood": "Lower Manhattan (Sonia Sotomayor Community Center)",
+          "why": "While dance-focused, it's an accessible class if you want movement-based, communal practices; included in case you prefer an active class with rhythmic flow."
+        },
+        {
+          "rank": 11,
+          "eventId": "af8c9f26-4cbc-2414-34e8-765d1a7a801c",
+          "title": "Full Moon Yoga Club",
+          "category": "Gardening",
+          "date": "2026-07-29",
+          "startTime": "18:30",
+          "venue": "",
+          "neighborhood": "Brooklyn (Backyard Garden)",
+          "why": "Full Moon Chair Yoga includes breath work and meditation in a peaceful garden setting — explicitly chair-based and meditative."
+        },
+        {
+          "rank": 12,
+          "eventId": "b99ce3aa-3fc8-0782-e184-2891c5b552aa",
+          "title": "Summer on the Hudson: Yoga- Evening Salute to the Sun",
+          "category": "Yoga & Pilates Classes",
+          "date": "2026-07-29",
+          "startTime": "18:30",
+          "venue": "Riverside Park South",
+          "neighborhood": "Upper West Side / Riverside (Riverside Park South — 66th St)",
+          "why": "Evening 'Salute to the Sun' yoga provides a restorative, meditative sunset practice."
+        },
+        {
+          "rank": 13,
+          "eventId": "3a8ab712-1a7e-a8f7-0d0b-57e7337c8e43",
+          "title": "Prospect Park Yoga",
+          "category": "Yoga",
+          "date": "2026-07-30",
+          "startTime": "19:00",
+          "venue": "Prospect Park",
+          "neighborhood": "Brooklyn (Prospect Park — Long Meadow)",
+          "why": "Prospect Park Yoga is a popular outdoor community flow — great if you want group yoga in a relaxed setting."
+        },
+        {
+          "rank": 14,
+          "eventId": "c500fa33-c1ad-f30e-fa76-c88d29b15e91",
+          "title": "Yoga in the Park",
+          "category": "Yoga & Pilates Classes",
+          "date": "2026-07-30",
+          "startTime": "19:00",
+          "venue": "Van Cortlandt Park",
+          "neighborhood": "Bronx (Van Cortlandt Park)",
+          "why": "Yoga in the Park offers mindful movement and on certain dates includes sound meditation — directly matches yoga + meditation interest."
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "prompt": "What live music or concerts are happening this week?",
+      "inputCount": 80,
+      "summary": "Here are live-music and concert events happening in NYC in the next 7 days (after Sun Jul 26, 8:30 PM), ordered by date/time.",
+      "picks": [
+        {
+          "rank": 1,
+          "eventId": "471c2d7e-a491-d262-2193-a481337f2d04",
+          "title": "40 in Focus: SummerStage through the Lens of Photographer Jack Vartoogian",
+          "category": "History",
+          "date": "2026-07-27",
+          "startTime": "09:00",
+          "venue": "Central Park",
+          "neighborhood": "Central Park/Upper East Side (Arsenal area)",
+          "why": "Photo exhibition celebrating SummerStage’s live-music history — great if you want music-focused culture and a look back at iconic performances."
+        },
+        {
+          "rank": 2,
+          "eventId": "b93a6dc0-3c4e-b2a4-dd62-f43dc782e58f",
+          "title": "Our Vibe Check: Youth Mental Health Festial",
+          "category": "Family & kids",
+          "date": "2026-07-27",
+          "startTime": "10:00",
+          "venue": "",
+          "neighborhood": "Washington Square / Greenwich Village",
+          "why": "Our Vibe Check festival includes music and performances focused on youth — useful if you want multiple short live sets in one place."
+        },
+        {
+          "rank": 3,
+          "eventId": "1adf0d47-5801-a7d1-7385-13926eaa2112",
+          "title": "Big City Folk in Greeley Square Park",
+          "category": "Free Summer Concerts",
+          "date": "2026-07-27",
+          "startTime": "18:00",
+          "venue": "Greeley Square Park",
+          "neighborhood": "Greeley Square / Midtown (near Herald Square)",
+          "why": "Big City Folk presents singer-songwriters showcasing new material — a good pick for discovering up-and-coming live acts."
+        },
+        {
+          "rank": 4,
+          "eventId": "d32e1ec5-b230-cf3f-a007-1ddfc1d165c0",
+          "title": "Belong&#243;'s Fat Cats in the Harlem Rose Garden",
+          "category": "Free Summer Concerts",
+          "date": "2026-07-27",
+          "startTime": "18:00",
+          "venue": "",
+          "neighborhood": "Harlem (Harlem Rose Garden)",
+          "why": "Afro-Latin jazz youth ensemble Fat Cats offers energetic live jazz rooted in local mentorship and improvisation."
+        },
+        {
+          "rank": 5,
+          "eventId": "b06b3bd8-428a-ad94-ef65-bb289b455712",
+          "title": "Ali Stroker",
+          "category": "Live music",
+          "date": "2026-07-27",
+          "startTime": "18:30",
+          "venue": "Hudson River Park",
+          "neighborhood": "Hudson River Park / Clinton (West Side)",
+          "why": "Ali Stroker performing at Broadway by the Boardwalk — a free live-music highlight with Broadway talent."
+        },
+        {
+          "rank": 6,
+          "eventId": "fae762bb-f9f5-e114-e436-97c27de5f807",
+          "title": "Harlem Run: Monday Night Run",
+          "category": "Walking",
+          "date": "2026-07-27",
+          "startTime": "18:45",
+          "venue": "Marcus Garvey Park",
+          "neighborhood": "Marcus Garvey Park / Harlem",
+          "why": "Harlem Run is a social event that often features music and live-community energy if you want an active, music-backed outing."
+        },
+        {
+          "rank": 7,
+          "eventId": "abc61b48-2dfc-6f08-5d66-0ca28cc8e0f5",
+          "title": "Debbie Knapper and the Knappertime Band",
+          "category": "Live music",
+          "date": "2026-07-28",
+          "startTime": "18:30",
+          "venue": "Hudson River Park",
+          "neighborhood": "Hudson River Park / Midtown West (Boardwalk)",
+          "why": "Debbie Knapper & the Knappertime Band headline HRPK’s Boardwalk Blues — classic summer live-music vibes."
+        },
+        {
+          "rank": 8,
+          "eventId": "98744771-3956-8de2-f799-a79f4d5eedbe",
+          "title": "Julieta Venegas / Lasso / Micro TDH / DJ Anamaria Sayre",
+          "category": "Live Music",
+          "date": "2026-07-29",
+          "startTime": "18:00",
+          "venue": "Manhattan",
+          "neighborhood": "Central Park (SummerStage)",
+          "why": "Julieta Venegas with Lasso and Micro TDH — a high-profile Latin-pop lineup for a big summer concert night."
+        },
+        {
+          "rank": 9,
+          "eventId": "85fd4591-8ad1-8cb1-84ab-fe41bb46bbb2",
+          "title": "Skyline CircleSing with Gaia Music Collective",
+          "category": "Free Summer Concerts",
+          "date": "2026-07-29",
+          "startTime": "19:00",
+          "venue": "Brooklyn Bridge Park",
+          "neighborhood": "Brooklyn Bridge Park / DUMBO (Pier 3)",
+          "why": "Skyline CircleSing with Gaia Music Collective — participatory live vocal music with great waterfront views."
+        },
+        {
+          "rank": 10,
+          "eventId": "d93a3c11-90aa-3a9a-5587-0f61e320995a",
+          "title": "UBB 40th Anniversary Celebration: BreakBeat Lou & Lord Finesse / Diamond D / Grand Puba / Sadat X / Nice & Smooth / Peter Gunz / DJ Boogie Blind",
+          "category": "Live Music",
+          "date": "2026-07-30",
+          "startTime": "19:00",
+          "venue": "Manhattan",
+          "neighborhood": "Manhattan (Central Park / SummerStage area)",
+          "why": "UBB 40th Anniversary brings legendary hip‑hop names and DJs for a major live celebration of the genre."
+        },
+        {
+          "rank": 11,
+          "eventId": "e29b6e84-37c6-0119-7e92-eaca480f6893",
+          "title": "Bryant Park Picnic Performance: Carnegie Hall Citywide: El Laberinto del Coco",
+          "category": "Free Summer Concerts",
+          "date": "2026-07-31",
+          "startTime": "19:00",
+          "venue": "Bryant Park",
+          "neighborhood": "Bryant Park / Midtown",
+          "why": "El Laberinto del Coco (Afro–Puerto Rican bomba fusion) offers high-energy, danceable live music at Bryant Park."
+        },
+        {
+          "rank": 12,
+          "eventId": "6e0bf96a-a433-b2cf-f21b-46ba4a3306d8",
+          "title": "Summer on the Hudson: Friday Night Jams featuring Christine Chanel",
+          "category": "Waterfront",
+          "date": "2026-07-31",
+          "startTime": "19:00",
+          "venue": "West Harlem Piers",
+          "neighborhood": "West Harlem Piers / Harlem Waterfront",
+          "why": "Friday Night Jams featuring Christine Chanel — indie-soul vocals and a relaxed concert-by-the-river setting."
+        },
+        {
+          "rank": 13,
+          "eventId": "51c38721-7479-929f-a758-1c432d7ad4b8",
+          "title": "RTA Summer Sunset Concert Series featuring The Brooklyners",
+          "category": "Waterfront",
+          "date": "2026-08-01",
+          "startTime": "19:00",
+          "venue": "Riverside Park",
+          "neighborhood": "Riverside / Upper West Side (96th St)",
+          "why": "The Brooklyners reggae set — mellow, danceable live music for a summer-sunset concert."
+        }
+      ]
+    },
+    {
+      "index": 4,
+      "prompt": "Are there any workshops where I can learn a craft?",
+      "inputCount": 80,
+      "summary": "You said you’re looking for workshops where you can learn a craft — I picked only hands-on craft/skill workshops starting after Sun Jul 26 8:30 PM and within the next 7 days.",
+      "picks": [
+        {
+          "rank": 1,
+          "eventId": "6b414483-0c8f-7a00-1f5c-d953ca3d8c45",
+          "title": "The Teach Me Something Podcast Experience",
+          "category": "Film & cinema",
+          "date": "2026-07-28",
+          "startTime": "16:00",
+          "venue": "Berkeley College New York City Midtown Campus",
+          "neighborhood": "Concrete Plant Park / Bronx River Foodway (Bronx)",
+          "why": "Hands-on foraging and herbalist-led instruction to learn plant identification and preservation techniques."
+        },
+        {
+          "rank": 2,
+          "eventId": "6cd23ef6-184a-acc0-8008-1a0bd8a30f2c",
+          "title": "Summer on the Hudson: Movement Speaks Workshop",
+          "category": "Exercise Classes",
+          "date": "2026-07-29",
+          "startTime": "11:00",
+          "venue": "Riverside Park",
+          "neighborhood": "Midtown Manhattan",
+          "why": "Podcast experience event may include production/recording craft elements (audio/media skills) for hands-on learning."
+        },
+        {
+          "rank": 3,
+          "eventId": "6cc59e2c-cfc3-1d52-34e2-5e7fb53da047",
+          "title": "The Bronx Museum Presents: Meet Me At The Park&#8212;Wood Carving With Artist Jill Cohen-Nu&#241;ez",
+          "category": "Art",
+          "date": "2026-07-29",
+          "startTime": "15:00",
+          "venue": "Joyce Kilmer Park",
+          "neighborhood": "Bryant Park (Midtown Manhattan)",
+          "why": "Free instruction from Knitty City to learn knitting basics and practice with provided yarn and needles."
+        },
+        {
+          "rank": 4,
+          "eventId": "6cc59e2c-cfc3-1d52-34e2-5e7fb53da047",
+          "title": "The Bronx Museum Presents: Meet Me At The Park&#8212;Wood Carving With Artist Jill Cohen-Nu&#241;ez",
+          "category": "Art",
+          "date": "2026-07-29",
+          "startTime": "15:00",
+          "venue": "Joyce Kilmer Park",
+          "neighborhood": "Bryant Park (Midtown Manhattan)",
+          "why": "(see above)"
+        },
+        {
+          "rank": 5,
+          "eventId": "4d994992-4e45-de56-6b9b-bef61b77439f",
+          "title": "Afternoon Gardening Thursday at Shoelace Park",
+          "category": "Gardening",
+          "date": "2026-07-30",
+          "startTime": "16:00",
+          "venue": "",
+          "neighborhood": "Shoelace Park / Bronx Park (Bronx)",
+          "why": "Hands-on garden stewardship where you’ll learn practical gardening tasks and community garden skills."
+        },
+        {
+          "rank": 6,
+          "eventId": "ceae4951-c96f-47e2-7cb2-3f893d73fb20",
+          "title": "Threading the Line: Sewing Session with Saskia Jorda",
+          "category": "Hiking & parks",
+          "date": "2026-07-31",
+          "startTime": "11:00",
+          "venue": "Governors Island",
+          "neighborhood": "Governors Island",
+          "why": "A sewing session led by an artist — a clear hands-on craft workshop to learn textile/sewing techniques."
+        },
+        {
+          "rank": 7,
+          "eventId": "313e308c-47bd-31a8-4e44-6b2cd75bcea7",
+          "title": "Cyanotype Workshop with Nadia",
+          "category": "Gardening",
+          "date": "2026-07-31",
+          "startTime": "12:00",
+          "venue": "Hunts Point Riverside Park",
+          "neighborhood": "Hunts Point / Bronx (Hunts Point Riverside Park)",
+          "why": "Cyanotype (photographic printing) workshop teaches a tangible craft process for making prints from plants and objects."
+        }
+      ]
+    },
+    {
+      "index": 5,
+      "prompt": "I want to take my kids to something fun this week",
+      "inputCount": 80,
+      "summary": "You said you want to take your kids to something fun this week — I picked kid-friendly, family events (outdoor playground programs, hands-on art/storytime, and family movies) happening in the next 7 days that start after now (Sun Jul 26 8:30 PM). All are free and appropriate for children; ordered by date/time.",
+      "picks": [
+        {
+          "rank": 1,
+          "eventId": "4ecb8916-1954-ad39-af55-e1d97e86b59a",
+          "title": "Kids In Motion: Nautilus Playground",
+          "category": "Family & kids",
+          "date": "2026-07-28",
+          "startTime": "10:00",
+          "venue": "Roy Wilkins Recreation Center",
+          "neighborhood": "Queens (inferred from Roy Wilkins Recreation Center)",
+          "why": "A free, full-morning Kids In Motion playground program with organized games and water activities that’s perfect for energetic children."
+        },
+        {
+          "rank": 2,
+          "eventId": "5424e829-8931-626b-6885-4a4bcc038154",
+          "title": "StoryTime at Bryant Park Reading Room",
+          "category": "Family & kids",
+          "date": "2026-07-28",
+          "startTime": "10:30",
+          "venue": "Bryant Park",
+          "neighborhood": "Midtown (Bryant Park)",
+          "why": "A family-friendly Bryant Park storytime with music and books — ideal for younger kids and easy to combine with a park visit."
+        },
+        {
+          "rank": 3,
+          "eventId": "4b2a5242-7306-047b-8acc-342e60ff5c5b",
+          "title": "Giant Bubble at Greeley Square Park",
+          "category": "Family & kids",
+          "date": "2026-07-29",
+          "startTime": "12:30",
+          "venue": "Greeley Square Park",
+          "neighborhood": "Midtown (Greeley Square Park)",
+          "why": "Giant bubble activity and rollerboogie fun — a whimsical, very kid-appealing park event."
+        },
+        {
+          "rank": 4,
+          "eventId": "3dc534f1-67e3-72e8-302e-cc85b2c019a1",
+          "title": "Kids in Motion: St. James Playground (Let's Make Clay Monsters)",
+          "category": "Family & kids",
+          "date": "2026-07-29",
+          "startTime": "15:00",
+          "venue": "St. James Park",
+          "neighborhood": "Manhattan (St. James Park area inferred)",
+          "why": "A creative 'Let's Make Clay Monsters' workshop that kids will love crafting and taking home."
+        },
+        {
+          "rank": 5,
+          "eventId": "3581f6f9-d74f-2930-7cbf-82903d7fd9b4",
+          "title": "Art in the Park",
+          "category": "Family & kids",
+          "date": "2026-07-29",
+          "startTime": "15:00",
+          "venue": "Washington Square Park",
+          "neighborhood": "Greenwich Village (Washington Square Park)",
+          "why": "Open, playful art activities for kids of all ages in a central park setting."
+        },
+        {
+          "rank": 6,
+          "eventId": "a91a53ee-7997-9bdc-bfdf-2afd17d71c92",
+          "title": "Movies Under the Stars: Kicking & Screaming",
+          "category": "Recreation Center Programming",
+          "date": "2026-07-29",
+          "startTime": "20:30",
+          "venue": "Blood Root Valley",
+          "neighborhood": "Staten Island (Blood Root Valley inferred)",
+          "why": "An outdoor family movie night (Kicking & Screaming) — easy, low-cost evening plan kids usually enjoy."
+        },
+        {
+          "rank": 7,
+          "eventId": "9d339de4-da88-0a8c-daa3-b81c68fd93dc",
+          "title": "Movies Under the Stars: Spy Kids (2001)",
+          "category": "Family & kids",
+          "date": "2026-07-30",
+          "startTime": "20:30",
+          "venue": "Behagen Playground",
+          "neighborhood": "Brooklyn (Behagen Playground)",
+          "why": "Family-friendly outdoor movie (Spy Kids) that’s engaging for children and a relaxed evening option."
+        },
+        {
+          "rank": 8,
+          "eventId": "af18d9a4-0efd-fcfc-9466-96920367e468",
+          "title": "Le Carrousel Extravaganza in Bryant Park",
+          "category": "Family & kids",
+          "date": "2026-07-31",
+          "startTime": "10:00",
+          "venue": "Bryant Park",
+          "neighborhood": "Midtown (Bryant Park)",
+          "why": "Le Carrousel Extravaganza packs magic, puppets, music and science into a lively hour perfect for families."
+        },
+        {
+          "rank": 9,
+          "eventId": "710e8823-bb13-c4ea-60ba-13a4808bb707",
+          "title": "Kids in Motion: Tie Dye",
+          "category": "Family & kids",
+          "date": "2026-07-31",
+          "startTime": "11:00",
+          "venue": "Grover Cleveland Playground",
+          "neighborhood": "Bronx (Grover Cleveland Playground / Bronx Park)",
+          "why": "Hands-on tie-dye lets kids make a wearable souvenir and is a fun, supervised creative activity."
+        }
+      ]
+    },
+    {
+      "index": 6,
+      "prompt": "I want to do something active and energetic outdoors",
+      "inputCount": 80,
+      "summary": "I picked outdoor, high-energy activities over the next 7 days that match your request for active, energetic outdoor events (Zumba, HIIT/bootcamp, dance/boxing-style cardio, intenSati, kayaking/canoeing, and a vigorous hike). All start after now (Sun Jul 26 8:30 PM) and fall within the next week.",
+      "picks": [
+        {
+          "rank": 1,
+          "eventId": "9ad48c1e-d585-e3cb-98f2-556988d0b1d7",
+          "title": "Zumba - July 27",
+          "category": "Running & fitness",
+          "date": "2026-07-27",
+          "startTime": "18:00",
+          "venue": "Pier 3 Plaza, Brooklyn Bridge Park",
+          "neighborhood": "Brooklyn (Brooklyn Bridge Park)",
+          "why": "A high-energy outdoor Zumba class at Brooklyn Bridge Park — lots of cardio and dance movement to get your blood pumping."
+        },
+        {
+          "rank": 2,
+          "eventId": "1ef02d28-4aef-1efd-bd52-1b4b7193b72f",
+          "title": "Low Impact Bodyweight Circuit Training",
+          "category": "Exercise Classes",
+          "date": "2026-07-27",
+          "startTime": "18:00",
+          "venue": "Asser Levy Playground",
+          "neighborhood": "Lower Manhattan (Asser Levy Playground)",
+          "why": "Circuit training combining conditioning and bodyweight resistance for a dynamic, heart-pumping session."
+        },
+        {
+          "rank": 3,
+          "eventId": "89fb7d8c-5c60-9650-e249-0801209cf49a",
+          "title": "Riverside Field House: Bodyweight Blast",
+          "category": "Exercise Classes",
+          "date": "2026-07-28",
+          "startTime": "08:00",
+          "venue": "Riverside Park",
+          "neighborhood": "Upper West Side / Riverside Park (Manhattan)",
+          "why": "Bodyweight Blast offers high-energy cardio plus bodyweight strength outdoors — a solid full-body, energetic workout."
+        },
+        {
+          "rank": 4,
+          "eventId": "1f345b4e-89f8-0be0-7ca8-f42e5cc5867d",
+          "title": "Cardio Sculpt",
+          "category": "Exercise Classes",
+          "date": "2026-07-29",
+          "startTime": "09:00",
+          "venue": "Torsney Playground",
+          "neighborhood": "Chelsea / Hudson River Park area (Torsney Playground)",
+          "why": "Cardio Sculpt is an active outdoor workout focused on functional movements and conditioning."
+        },
+        {
+          "rank": 5,
+          "eventId": "96f46f0d-7cd8-877a-bd8b-c266ea7edcd9",
+          "title": "Intermediate Canoeing",
+          "category": "Urban Park Rangers",
+          "date": "2026-07-29",
+          "startTime": "10:00",
+          "venue": "Inwood Hill Park",
+          "neighborhood": "Inwood (Inwood Hill Park)",
+          "why": "Intermediate Canoeing gets you actively on the water — fast, physical, and outdoors for an adventurous workout."
+        },
+        {
+          "rank": 6,
+          "eventId": "1fc825e3-14d5-2cb5-f1e2-277ab031cdea",
+          "title": "intenSati",
+          "category": "Exercise Classes",
+          "date": "2026-07-29",
+          "startTime": "17:30",
+          "venue": "Forest Park",
+          "neighborhood": "Queens (Forest Park)",
+          "why": "intenSati is a sweat-dripping, mood-lifting cardio class (dance + kickboxing) — very energetic and outdoors."
+        },
+        {
+          "rank": 7,
+          "eventId": "1b5926ed-70cf-1f1e-86af-a3b535460a9d",
+          "title": "Waterfront Workouts: Amp'd Bootcamp",
+          "category": "Outdoor Fitness",
+          "date": "2026-07-29",
+          "startTime": "18:00",
+          "venue": "Brooklyn Bridge Park",
+          "neighborhood": "Brooklyn (Brooklyn Bridge Park)",
+          "why": "Amp'd Bootcamp is a HIIT-style, high-intensity outdoor workout with plyometrics and strength — perfect if you want to push yourself."
+        },
+        {
+          "rank": 8,
+          "eventId": "a381c4c9-c334-f39b-7cbc-f67da452832e",
+          "title": "Amp'd Bootcamp - July 29",
+          "category": "Running & fitness",
+          "date": "2026-07-29",
+          "startTime": "18:00",
+          "venue": "Pier 2 Turf, Brooklyn Bridge Park",
+          "neighborhood": "Brooklyn (Brooklyn Bridge Park)",
+          "why": "Same Bootcamp series at Pier 2 Turf — an energetic outdoor fitness option with strong cardio and strength components."
+        },
+        {
+          "rank": 9,
+          "eventId": "c334df7f-644d-42ce-01b7-c383644d14dd",
+          "title": "Basic Canoeing and Nature Exploration",
+          "category": "Urban Park Rangers",
+          "date": "2026-07-30",
+          "startTime": "11:00",
+          "venue": "Willowbrook Park",
+          "neighborhood": "Staten Island (Willowbrook Park)",
+          "why": "Basic Canoeing and Nature Exploration combines paddling and moving outdoors for an active day on the water."
+        },
+        {
+          "rank": 10,
+          "eventId": "f749b607-9d08-a926-659e-d3f1fb666aa1",
+          "title": "Greenbelt Adult Hike &#8211; Acme Pond",
+          "category": "Hiking",
+          "date": "2026-07-30",
+          "startTime": "11:00",
+          "venue": "Wolfe's Pond Park",
+          "neighborhood": "Staten Island (Wolfe's Pond Park)",
+          "why": "Greenbelt Adult Hike at Acme Pond offers sustained, energetic hiking through mature forest trails."
+        },
+        {
+          "rank": 11,
+          "eventId": "71f2a897-a6fe-1d44-9606-ffddb7a28026",
+          "title": "Muay Thai",
+          "category": "Hiking & parks",
+          "date": "2026-07-30",
+          "startTime": "18:00",
+          "venue": "Bryant Park",
+          "neighborhood": "Midtown (Bryant Park)",
+          "why": "Muay Thai in Bryant Park provides intense striking and cardio work outdoors — highly active and energetic."
+        }
+      ]
+    },
+    {
+      "index": 7,
+      "prompt": "I'm looking for a quiet, intellectual evening",
+      "inputCount": 80,
+      "summary": "I picked quiet, intellectual evening options over the next 7 days (after Sun 7/26 8:30 PM): talks/lectures, author conversations, lectures, and museum tours or small reading groups that match your mood. Ordered by date/time.",
+      "picks": [
+        {
+          "rank": 1,
+          "eventId": "d86f9c38-a2d7-e755-d54e-58c06ca56a01",
+          "title": "In-Person Vibrant Verbal Description Tour: Reading Under Fire",
+          "category": "Books & readings",
+          "date": "2026-07-27",
+          "startTime": "11:00",
+          "venue": "Poster House",
+          "neighborhood": "Chelsea / Midtown (Poster House - address unspecified but museum is in Chelsea)",
+          "why": "A focused, docent-led Vibrant Verbal Description Tour offers close looking and guided discussion — quietly intellectual and intimate."
+        },
+        {
+          "rank": 2,
+          "eventId": "4a641acd-3948-b9dc-28ba-0800ddfdea5d",
+          "title": "Reel Talks at Bryant Park: Conversation on Eric Rohmer",
+          "category": "Accessible Activities",
+          "date": "2026-07-27",
+          "startTime": "12:30",
+          "venue": "Bryant Park",
+          "neighborhood": "Midtown (Bryant Park)",
+          "why": "A moderated conversation on Eric Rohmer with André Aciman offers literary and filmic depth in a calm park setting."
+        },
+        {
+          "rank": 3,
+          "eventId": "9e23084e-04fc-7dd9-3592-b1f00f72ec3b",
+          "title": "Robert Wright in Conversation with Bruce Feiler: Humanity, AI, and The God Test",
+          "category": "Books & readings",
+          "date": "2026-07-27",
+          "startTime": "19:30",
+          "venue": "The 92nd Street Y, New York",
+          "neighborhood": "Upper East Side (92nd Street Y)",
+          "why": "An in-depth conversation about humanity, AI, and big ideas with Robert Wright and Bruce Feiler — ideal for a quiet, intellectual evening."
+        },
+        {
+          "rank": 4,
+          "eventId": "9b0ade7f-89ed-df30-80fc-1ff053dd894e",
+          "title": "Virtual Vibrant Verbal Description Tour: Reading Under Fire",
+          "category": "Books & readings",
+          "date": "2026-07-28",
+          "startTime": "16:00",
+          "venue": "Poster House",
+          "neighborhood": "Chelsea / Midtown (Poster House — virtual)",
+          "why": "The virtual Vibrant Verbal Description Tour lets you engage with museum content deeply and quietly from home."
+        },
+        {
+          "rank": 5,
+          "eventId": "a71d7b10-5c9d-1a00-f971-165998c2b87e",
+          "title": "The Center for Fiction Presents Valeria Luiselli on Beginning Middle End",
+          "category": "Books & readings",
+          "date": "2026-07-28",
+          "startTime": "19:00",
+          "venue": "The Center for Fiction",
+          "neighborhood": "Chelsea / Midtown West (The Center for Fiction)",
+          "why": "Valeria Luiselli discussing craft (Beginning Middle End) is a thoughtful literary event for a quiet, intellectual evening."
+        },
+        {
+          "rank": 6,
+          "eventId": "7cc03fa6-ef47-95b3-103b-7b9a5e877c1a",
+          "title": "Stargazing on the High Line",
+          "category": "Astronomy",
+          "date": "2026-07-28",
+          "startTime": "20:15",
+          "venue": "The High Line",
+          "neighborhood": "Meatpacking / Chelsea (The High Line at 13th Street)",
+          "why": "Stargazing with the Amateur Astronomers Association is peaceful and intellectually stimulating — perfect for a quiet evening contemplating the cosmos."
+        },
+        {
+          "rank": 7,
+          "eventId": "1a74d581-af44-12e8-ba48-3824e7e6189e",
+          "title": "Did the Ivy League Fail America?",
+          "category": "Talks & lectures",
+          "date": "2026-07-30",
+          "startTime": "18:30",
+          "venue": "Fabrik Tribeca",
+          "neighborhood": "Tribeca (Fabrik Tribeca)",
+          "why": "A lecture-style event (Did the Ivy League Fail America?) fits the quiet, intellectual mood with structured discussion and critique."
+        },
+        {
+          "rank": 8,
+          "eventId": "6e0bf96a-a433-b2cf-f21b-46ba4a3306d8",
+          "title": "Summer on the Hudson: Friday Night Jams featuring Christine Chanel",
+          "category": "Waterfront",
+          "date": "2026-07-31",
+          "startTime": "19:00",
+          "venue": "West Harlem Piers",
+          "neighborhood": "Harlem (West Harlem Piers)",
+          "why": "A calmer, thoughtfully curated Friday-night music program (Friday Night Jams) that can still feel intellectually nourishing without nightlife energy."
+        }
+      ]
+    },
+    {
+      "index": 8,
+      "prompt": "I want to feel connected to nature in the city",
+      "inputCount": 80,
+      "summary": "You said you want to feel connected to nature in the city — I picked nearby outdoor nature programs, volunteer stewardship, and waterfront/park experiences happening in the next 7 days that foster direct contact with plants, wildlife, or natural processes. All events start after Sun Jul 26 8:30 PM and fit your request.",
+      "picks": [
+        {
+          "rank": 1,
+          "eventId": "983b59c9-c007-5732-1148-ab2e2af2fe2f",
+          "title": "It's My Park at Highbridge Park",
+          "category": "It's My Park",
+          "date": "2026-07-27",
+          "startTime": "09:00",
+          "venue": "Highbridge Park",
+          "neighborhood": "Washington Heights / Highbridge (Upper Manhattan)",
+          "why": "Volunteering to till, compost and clean up at Highbridge Park is a direct way to get your hands in the soil and connect with urban nature."
+        },
+        {
+          "rank": 2,
+          "eventId": "fe19477a-0f43-b5a1-adbb-83ed2e80a941",
+          "title": "Trees Count at Washington Market Park",
+          "category": "Workshops",
+          "date": "2026-07-27",
+          "startTime": "10:00",
+          "venue": "Washington Market Park",
+          "neighborhood": "Tribeca / Hudson Square (Washington Market Park)",
+          "why": "Trees Count in a neighborhood park lets you learn tree ID and notice the plant life that shapes city ecology."
+        },
+        {
+          "rank": 3,
+          "eventId": "39cb07be-3270-182f-f7d8-89392d3eef7b",
+          "title": "Foragers in the Foodway",
+          "category": "Gardening",
+          "date": "2026-07-28",
+          "startTime": "10:00",
+          "venue": "Concrete Plant Park",
+          "neighborhood": "Bronx — Concrete Plant Park (Mott Haven / Bronx River area)",
+          "why": "Foraging with local herbalists connects you to wild edible and medicinal plants and the seasonal rhythms of the Bronx River Foodway."
+        },
+        {
+          "rank": 4,
+          "eventId": "e51a4ddf-f9cc-5c7a-5513-fa4094e24003",
+          "title": "Stewardship Morning at the Foodway",
+          "category": "Gardening",
+          "date": "2026-07-28",
+          "startTime": "10:00",
+          "venue": "Concrete Plant Park",
+          "neighborhood": "Bronx — Concrete Plant Park (Bronx River Foodway)",
+          "why": "Stewardship Morning gets you doing the restorative garden work that directly supports urban habitat."
+        },
+        {
+          "rank": 5,
+          "eventId": "b0105eb8-cdbe-ccb7-fc84-736120b3aa88",
+          "title": "Wetlab Look-ins",
+          "category": "Hiking & parks",
+          "date": "2026-07-28",
+          "startTime": "12:00",
+          "venue": "Pier 40, Hudson River Park",
+          "neighborhood": "Hudson River Park / West Village (Pier 40)",
+          "why": "Visiting the Wetlab lets you meet Hudson River animals up close and learn about estuary ecology — a great urban-nature immersion."
+        },
+        {
+          "rank": 6,
+          "eventId": "59ce3aaf-9fc1-633e-303a-c4e3ade889fd",
+          "title": "Summer on the Hudson: Mycelium - A Solar-Powered Concert",
+          "category": "Waterfront",
+          "date": "2026-07-28",
+          "startTime": "19:00",
+          "venue": "Riverside Park South",
+          "neighborhood": "Riverside / Upper West Side (Riverside Park South, Pier I)",
+          "why": "Mycelium, a solar-powered concert inspired by fungi and plankton, blends art and nature for a contemplative nighttime experience outdoors."
+        },
+        {
+          "rank": 7,
+          "eventId": "7cc03fa6-ef47-95b3-103b-7b9a5e877c1a",
+          "title": "Stargazing on the High Line",
+          "category": "Astronomy",
+          "date": "2026-07-28",
+          "startTime": "20:15",
+          "venue": "The High Line",
+          "neighborhood": "Meatpacking / Chelsea (The High Line at 13th St)",
+          "why": "Stargazing on the High Line places you in an elevated greenway with telescopes and a view of the night sky — a direct nature connection in the city."
+        },
+        {
+          "rank": 8,
+          "eventId": "96f46f0d-7cd8-877a-bd8b-c266ea7edcd9",
+          "title": "Intermediate Canoeing",
+          "category": "Urban Park Rangers",
+          "date": "2026-07-29",
+          "startTime": "10:00",
+          "venue": "Inwood Hill Park",
+          "neighborhood": "Inwood (Inwood Hill Park)",
+          "why": "Intermediate canoeing offers on-water time and immersion in Inwood Hill Park’s natural landscape and shoreline."
+        },
+        {
+          "rank": 9,
+          "eventId": "8c95bc93-5322-cf14-1070-9ec435396f09",
+          "title": "Summer Spruce Up",
+          "category": "Volunteer",
+          "date": "2026-07-29",
+          "startTime": "10:00",
+          "venue": "Prospect Park",
+          "neighborhood": "Prospect Park (Brooklyn)",
+          "why": "Prospect Park’s Summer Spruce Up lets you remove invasives and care for woodland trails — hands-on conservation in a large urban park."
+        },
+        {
+          "rank": 10,
+          "eventId": "ce493a09-de96-e81d-0c8f-d1bad76a9c4b",
+          "title": "Books & Blankets ",
+          "category": "Others",
+          "date": "2026-07-29",
+          "startTime": "14:30",
+          "venue": "Idlewild Environmental Center",
+          "neighborhood": "Queens — Idlewild / Jamaica (Idlewild Environmental Center)",
+          "why": "Books & Blankets at Idlewild Environmental Center offers a quiet, restorative afternoon on a nature center lawn."
+        },
+        {
+          "rank": 11,
+          "eventId": "679dd576-95c7-dc37-a608-2fd3e234e385",
+          "title": "Expert-Led Explorations: Plankton - July 29",
+          "category": "Hiking & parks",
+          "date": "2026-07-29",
+          "startTime": "16:00",
+          "venue": "Pier 5, Brooklyn Bridge Park",
+          "neighborhood": "Brooklyn Bridge Park (Pier 5, Brooklyn Heights / DUMBO)",
+          "why": "The plankton exploration gives you a micro-scale nature connection by sampling and observing tiny aquatic life."
+        },
+        {
+          "rank": 12,
+          "eventId": "85fd4591-8ad1-8cb1-84ab-fe41bb46bbb2",
+          "title": "Skyline CircleSing with Gaia Music Collective",
+          "category": "Free Summer Concerts",
+          "date": "2026-07-29",
+          "startTime": "19:00",
+          "venue": "Brooklyn Bridge Park",
+          "neighborhood": "Brooklyn Bridge Park (Pier 3 / Brooklyn Heights)",
+          "why": "Skyline CircleSing gathers people outdoors to harmonize together — a communal nature-adjacent experience by the water."
+        },
+        {
+          "rank": 13,
+          "eventId": "0eba4583-43a2-cfb2-4a58-6db7160b5038",
+          "title": "Wild Inside (World Premiere)",
+          "category": "Film & cinema",
+          "date": "2026-07-29",
+          "startTime": "19:30",
+          "venue": "Central Park — Great Hill",
+          "neighborhood": "Central Park (Great Hill, Upper West Side)",
+          "why": "Watching Wild Inside on Central Park’s Great Hill places you in a large green space for a cinematic nature evening."
+        },
+        {
+          "rank": 14,
+          "eventId": "15cd3fb7-a7fc-1708-6bea-a501615ec532",
+          "title": "Trail Work Thursdays",
+          "category": "Walking",
+          "date": "2026-07-30",
+          "startTime": "09:00",
+          "venue": "Van Cortlandt Park",
+          "neighborhood": "Van Cortlandt Park (Bronx)",
+          "why": "Trail Work Thursdays offers hands-on maintenance in mature parkland so you can directly support and move through woodland."
+        }
+      ]
+    },
+    {
+      "index": 9,
+      "prompt": "I'm looking for a creative hands-on experience",
+      "inputCount": 80,
+      "summary": "Here are hands-on, creative workshops and maker-style events in the next 7 days that match your request (organized by date/time). I picked only truly hands-on creative sessions — printmaking, cyanotype, wood carving, clay-sculpting, flag-making, incense/wand and plant-based beauty workshops.",
+      "picks": [
+        {
+          "rank": 1,
+          "eventId": "6cc59e2c-cfc3-1d52-34e2-5e7fb53da047",
+          "title": "The Bronx Museum Presents: Meet Me At The Park&#8212;Wood Carving With Artist Jill Cohen-Nu&#241;ez",
+          "category": "Art",
+          "date": "2026-07-29",
+          "startTime": "15:00",
+          "venue": "Joyce Kilmer Park",
+          "neighborhood": "Joyce Kilmer Park (Bronx)",
+          "why": "A wood-carving workshop led by an artist teaching wood identification and safe carving techniques — highly hands-on and craft-focused."
+        },
+        {
+          "rank": 2,
+          "eventId": "530b297f-e6ba-5820-b4b4-db0a0cbaa7c6",
+          "title": "Disability Pride Night: ‘Proud to Be Me’ Flag-Making Workshop",
+          "category": "Theater",
+          "date": "2026-07-29",
+          "startTime": "17:30",
+          "venue": "Poster House",
+          "neighborhood": "Midtown / Poster House area (Manhattan)",
+          "why": "A guided flag-making workshop using felt, yarn and mixed materials — great for hands-on making and personal creative expression."
+        },
+        {
+          "rank": 3,
+          "eventId": "4fa28fa4-3be4-b56a-5561-919d71a393f1",
+          "title": "Circus Arts in Herald Square Park",
+          "category": "Workshops",
+          "date": "2026-07-29",
+          "startTime": "18:00",
+          "venue": "Herald Square",
+          "neighborhood": "Herald Square (Manhattan)",
+          "why": "Try silk fan dancing, hoop tricks and plate spinning — hands-on physical craft of flow/circus arts for immediate creative play."
+        },
+        {
+          "rank": 4,
+          "eventId": "4713920c-4284-acdd-8500-589b36c51c05",
+          "title": "Screen Printing for Beginners",
+          "category": "Workshops",
+          "date": "2026-07-30",
+          "startTime": "13:00",
+          "venue": "Kissena Park",
+          "neighborhood": "Kissena (Queens)",
+          "why": "A beginner-friendly, hands-on screen printing workshop where you make your own printed T-shirt or tote — perfect if you want a creative, tactile experience."
+        },
+        {
+          "rank": 5,
+          "eventId": "313e308c-47bd-31a8-4e44-6b2cd75bcea7",
+          "title": "Cyanotype Workshop with Nadia",
+          "category": "Gardening",
+          "date": "2026-07-31",
+          "startTime": "12:00",
+          "venue": "Hunts Point Riverside Park",
+          "neighborhood": "Hunts Point / Bronx Riverside",
+          "why": "A cyanotype workshop where you select plants and create photographic prints — a thoughtful, hands-on art process rooted in place and memory."
+        },
+        {
+          "rank": 6,
+          "eventId": "d4e8f62b-2f0a-7238-1a78-6cd602d66f1b",
+          "title": "Incense and Smoke Wand Workshop with Lashette Williams",
+          "category": "Art",
+          "date": "2026-08-01",
+          "startTime": "11:00",
+          "venue": "Concrete Plant Park",
+          "neighborhood": "Concrete Plant Park (Bronx)",
+          "why": "A practical, plant-based workshop where you make your own incense and smoke wands — hands-on and sensory-driven."
+        },
+        {
+          "rank": 7,
+          "eventId": "bce61be8-dfad-ace9-3608-322e8929f3c1",
+          "title": "Garden Glow-Up: Plant-Based Beauty Workshop",
+          "category": "Workshops",
+          "date": "2026-08-01",
+          "startTime": "14:00",
+          "venue": "",
+          "neighborhood": "Harlem Grown 134th Street Farm (Harlem, Manhattan)",
+          "why": "A plant-based beauty workshop where you make remedies/salves — creative, hands-on, and uses garden-grown ingredients."
+        }
+      ]
+    },
+    {
+      "index": 10,
+      "prompt": "I want a relaxing, low-key evening after a stressful week",
+      "inputCount": 80,
+      "summary": "You said you want a relaxing, low‑key evening — I picked gentle, calming options over the next seven days (outdoor films, mellow concerts, and restorative yoga) that start after now and fit that mood.",
+      "picks": [
+        {
+          "rank": 1,
+          "eventId": "c684d95d-b726-2b01-8a46-f9a0e20f2035",
+          "title": "Obsession (Rooftop Cinema)",
+          "category": "Film & cinema",
+          "date": "2026-07-26",
+          "startTime": "22:45",
+          "venue": "Rooftop Cinema Club Midtown",
+          "neighborhood": "Midtown (West 37th St)",
+          "why": "An open-air rooftop film is low-effort and cozy—perfect for unwinding tonight with a classic on the skyline."
+        },
+        {
+          "rank": 2,
+          "eventId": "8c9277b5-7020-06da-214d-6f00256874f0",
+          "title": "Soundbath at the Bowl",
+          "category": "Film & cinema",
+          "date": "2026-07-27",
+          "startTime": "20:00",
+          "venue": "Brooklyn Bowl",
+          "neighborhood": "Williamsburg / Brooklyn (Brooklyn Bowl)",
+          "why": "A soundbath event offers a quiet, meditative sonic experience — excellent if you want deep relaxation indoors."
+        },
+        {
+          "rank": 3,
+          "eventId": "acc56d70-3f69-4388-7377-d3e11ab3658f",
+          "title": "Free Movie On The Waterfront: Ferris Bueller's Day Off",
+          "category": "Accessible Activities",
+          "date": "2026-07-27",
+          "startTime": "20:30",
+          "venue": "Astoria Park",
+          "neighborhood": "Astoria (Astoria Park)",
+          "why": "A free, waterfront outdoor movie with a laid-back picnic vibe—great for mellowing out under the stars."
+        },
+        {
+          "rank": 4,
+          "eventId": "a91c0b37-35eb-4591-fe64-23c39b471965",
+          "title": "The Notebook (Rooftop Cinema)",
+          "category": "Film & cinema",
+          "date": "2026-07-27",
+          "startTime": "22:20",
+          "venue": "Rooftop Cinema Club Midtown",
+          "neighborhood": "Midtown (West 37th St)",
+          "why": "Another rooftop cinema pick later in the week offering a slow, romantic movie — ideal if you want a soothing, low-key night out."
+        },
+        {
+          "rank": 5,
+          "eventId": "dc957c37-f21c-a287-1855-c7318197934c",
+          "title": "Sunset Yoga - July 28",
+          "category": "Running & fitness",
+          "date": "2026-07-28",
+          "startTime": "18:00",
+          "venue": "Pier 3 Central Lawn, Brooklyn Bridge Park",
+          "neighborhood": "Brooklyn Heights / Dumbo (Brooklyn Bridge Park Pier 3)",
+          "why": "A gentle sunset yoga class focused on de-stressing—ideal for a restorative, low-key evening."
+        },
+        {
+          "rank": 6,
+          "eventId": "63b4439c-c00f-4e85-f940-4a0b5d25340d",
+          "title": "Sunset Wednesdays: Stella Cole",
+          "category": "Accessible Activities",
+          "date": "2026-07-29",
+          "startTime": "19:00",
+          "venue": "Wave Hill",
+          "neighborhood": "Riverdale / Bronx (Wave Hill)",
+          "why": "An evening concert in a serene garden setting—soothing live music that feels like a gentle balm after a stressful week."
+        }
+      ]
+    },
+    {
+      "index": 11,
+      "prompt": "What's happening at Bryant Park this week?",
+      "inputCount": 80,
+      "summary": "You asked about events at Bryant Park over the next seven days starting after Sunday Jul 26, 8:30 PM. Below are Bryant Park events that start after that moment and within the next week, ordered by date/time.",
+      "picks": [
+        {
+          "rank": 1,
+          "eventId": "e6fb8080-2e6d-7408-dfc1-6453367c473a",
+          "title": "Le Carrousel Extravaganza",
+          "category": "Hiking & parks",
+          "date": "2026-07-27",
+          "startTime": "10:00",
+          "venue": "Bryant Park",
+          "neighborhood": "Midtown (Bryant Park)",
+          "why": "Le Carrousel Extravaganza is a family-friendly morning attraction in Bryant Park (free) and kicks off the park’s daytime programming on 7/27."
+        },
+        {
+          "rank": 2,
+          "eventId": "e6fb8080-2e6d-7408-dfc1-6453367c473a",
+          "title": "Le Carrousel Extravaganza",
+          "category": "Hiking & parks",
+          "date": "2026-07-27",
+          "startTime": "10:00",
+          "venue": "Bryant Park",
+          "neighborhood": "Midtown (Bryant Park)",
+          "why": "Le Carrousel events run multiple days; worth noting again as an ongoing family attraction through the week."
+        },
+        {
+          "rank": 3,
+          "eventId": "a9e65ecb-40da-74c6-c61a-57362d919f48",
+          "title": "Park Tour",
+          "category": "Hiking & parks",
+          "date": "2026-07-27",
+          "startTime": "11:00",
+          "venue": "Bryant Park",
+          "neighborhood": "Midtown (Bryant Park)",
+          "why": "The Park Tour on 7/27 gives a quick orientation to Bryant Park’s history and amenities — perfect if you want to know more about the space."
+        },
+        {
+          "rank": 4,
+          "eventId": "bcd8f6e9-3a66-6ab8-accb-3013bc866577",
+          "title": "Piano in Bryant Park",
+          "category": "Accessible Activities",
+          "date": "2026-07-27",
+          "startTime": "12:30",
+          "venue": "Bryant Park",
+          "neighborhood": "Midtown (Bryant Park — Upper Terrace)",
+          "why": "Piano in Bryant Park on 7/27 offers live ragtime/stride/jazz — a lively midday performance on the terrace."
+        },
+        {
+          "rank": 5,
+          "eventId": "06fec95f-4717-99f2-fdd7-e907724ec2fe",
+          "title": "Reel Talks",
+          "category": "Hiking & parks",
+          "date": "2026-07-27",
+          "startTime": "12:30",
+          "venue": "Bryant Park",
+          "neighborhood": "Midtown (Bryant Park)",
+          "why": "Reel Talks on 7/27 is a free lunchtime program in Bryant Park if you’re in the mood for short film-related talks."
+        },
+        {
+          "rank": 6,
+          "eventId": "35e42701-0e60-7c96-f2ae-df55a809efdd",
+          "title": "Bryant Park Movie Nights",
+          "category": "Free Summer Movies",
+          "date": "2026-07-27",
+          "startTime": "17:00",
+          "venue": "Bryant Park",
+          "neighborhood": "Midtown (Bryant Park Lawn)",
+          "why": "Bryant Park Movie Nights on 7/27 are the park’s signature evening event — outdoor film on the lawn under the stars."
+        },
+        {
+          "rank": 7,
+          "eventId": "499984ba-56ac-5503-06a9-8c720ab3a0b5",
+          "title": "Paramount+ Movie Nights",
+          "category": "Film & cinema",
+          "date": "2026-07-27",
+          "startTime": "20:00",
+          "venue": "Bryant Park",
+          "neighborhood": "Midtown (Bryant Park)",
+          "why": "Paramount+ Movie Nights (7/27) on the Bryant Park lawn — another listing for the evening screening of The Truman Show."
+        },
+        {
+          "rank": 8,
+          "eventId": "ff05a262-3139-a301-f3f1-4d3c2b858385",
+          "title": "Bryant Park Tai Chi",
+          "category": "Yoga & Pilates Classes",
+          "date": "2026-07-28",
+          "startTime": "07:30",
+          "venue": "Bryant Park",
+          "neighborhood": "Midtown (Bryant Park — Upper Terrace)",
+          "why": "Bryant Park Tai Chi on 7/28 is a calm, free morning practice in the park’s Upper Terrace."
+        },
+        {
+          "rank": 9,
+          "eventId": "c6b9c482-87e9-ba47-2946-946db19f2c21",
+          "title": "Morning Yoga at Bryant Park",
+          "category": "Yoga & Pilates Classes",
+          "date": "2026-07-28",
+          "startTime": "10:00",
+          "venue": "Bryant Park",
+          "neighborhood": "Midtown (Bryant Park — Upper Terrace)",
+          "why": "Morning Yoga at Bryant Park on 7/28 offers a free guided class (bring a mat) — great if you want a gentle workout outdoors."
+        },
+        {
+          "rank": 10,
+          "eventId": "1721e3c3-d0bb-17de-92ad-a0c51ad7d523",
+          "title": "Le Carrousel",
+          "category": "Hiking & parks",
+          "date": "2026-07-28",
+          "startTime": "10:00",
+          "venue": "Bryant Park",
+          "neighborhood": "Midtown (Bryant Park)",
+          "why": "Le Carrousel (7/28) is the park’s classic ride and kid-focused programming location."
+        },
+        {
+          "rank": 11,
+          "eventId": "5424e829-8931-626b-6885-4a4bcc038154",
+          "title": "StoryTime at Bryant Park Reading Room",
+          "category": "Family & kids",
+          "date": "2026-07-28",
+          "startTime": "10:30",
+          "venue": "Bryant Park",
+          "neighborhood": "Midtown (Bryant Park — Reading Room)",
+          "why": "StoryTime at Bryant Park Reading Room on 7/28 is a fun kids’ program if you’re checking family happenings."
+        },
+        {
+          "rank": 12,
+          "eventId": "43e68757-853f-7b9d-d285-116a0d41a877",
+          "title": "BookClub",
+          "category": "Books & readings",
+          "date": "2026-07-28",
+          "startTime": "12:30",
+          "venue": "Bryant Park",
+          "neighborhood": "Midtown (Bryant Park)",
+          "why": "BookClub on 7/28 is a casual literary gathering in Bryant Park’s lawn area."
+        },
+        {
+          "rank": 13,
+          "eventId": "87d1bf25-588a-742b-6274-23e3bdc97064",
+          "title": "Piano",
+          "category": "Live music",
+          "date": "2026-07-28",
+          "startTime": "12:30",
+          "venue": "Bryant Park",
+          "neighborhood": "Midtown (Bryant Park)",
+          "why": "Piano on 7/28 continues the park’s live-music terrace programming."
+        },
+        {
+          "rank": 14,
+          "eventId": "69a54b21-a995-3902-5412-bf466e80521d",
+          "title": "Board Game Social",
+          "category": "Sports & games",
+          "date": "2026-07-28",
+          "startTime": "17:00",
+          "venue": "Bryant Park",
+          "neighborhood": "Midtown (Bryant Park)",
+          "why": "Board Game Social (7/28) is a relaxed, social way to spend an early evening at Bryant Park."
+        },
+        {
+          "rank": 15,
+          "eventId": "28ee3e11-2a9a-a2ea-9676-7e0b24c0ccaa",
+          "title": "Poetry",
+          "category": "Books & readings",
+          "date": "2026-07-28",
+          "startTime": "18:00",
+          "venue": "Bryant Park",
+          "neighborhood": "Midtown (Bryant Park)",
+          "why": "Poetry at Bryant Park on 7/28 offers a literary evening program consistent with park culture."
+        }
+      ]
+    },
+    {
+      "index": 12,
+      "prompt": "Find me free fitness classes I can join",
+      "inputCount": 80,
+      "summary": "I picked free fitness classes happening in the next 7 days (after Sun Jul 26 8:30 PM) that you can join — a mix of in-person outdoor and indoor options plus a virtual yoga class. Ordered by date & time.",
+      "picks": [
+        {
+          "rank": 1,
+          "eventId": "d3d7624d-a828-3140-0a60-375361181d22",
+          "title": "IronStrength",
+          "category": "Others",
+          "date": "2026-07-26",
+          "startTime": "",
+          "venue": "",
+          "neighborhood": "various NYC neighborhoods",
+          "why": "IronStrength is a citywide series of free fitness events across NYC — great if you want flexible, no-cost workouts offered at many locations and times."
+        },
+        {
+          "rank": 2,
+          "eventId": "402be7ed-ee8b-63b4-9651-4cdf16040076",
+          "title": "Zumba Gold&#174;",
+          "category": "Exercise Classes",
+          "date": "2026-07-27",
+          "startTime": "09:15",
+          "venue": "",
+          "neighborhood": "Bronx (New Settlement Community Center)",
+          "why": "Zumba Gold is a low-impact, free dance-cardio class that’s easy to join and beginner-friendly."
+        },
+        {
+          "rank": 3,
+          "eventId": "6a363939-74a8-200b-7463-6021a9cc1f55",
+          "title": "Yoga",
+          "category": "Yoga & Pilates Classes",
+          "date": "2026-07-27",
+          "startTime": "10:00",
+          "venue": "",
+          "neighborhood": "Gerritsen Beach, Brooklyn",
+          "why": "A friendly mid-intensity yoga flow outdoors — good if you want a mat-based, free session in a small community setting."
+        },
+        {
+          "rank": 4,
+          "eventId": "ca391993-0741-022f-7cbb-13157c94f888",
+          "title": "Bodyweight Circuit Training",
+          "category": "Exercise Classes",
+          "date": "2026-07-27",
+          "startTime": "17:30",
+          "venue": "Prospect Park",
+          "neighborhood": "Prospect Park / Park Slope (Prospect Park)",
+          "why": "Bodyweight Circuit Training offers a full-body, free workout in Prospect Park suitable for all levels."
+        },
+        {
+          "rank": 5,
+          "eventId": "b275671e-2952-8c41-4f03-e4fd82eee267",
+          "title": "Virtual Yoga",
+          "category": "Yoga & Pilates Classes",
+          "date": "2026-07-27",
+          "startTime": "19:30",
+          "venue": "",
+          "neighborhood": "virtual / anywhere",
+          "why": "Virtual Vinyasa class gives you a free, at-home yoga option if you prefer not to travel."
+        },
+        {
+          "rank": 6,
+          "eventId": "d66196cd-fbcb-4207-1ef7-5614b488f2f1",
+          "title": "Chair Yoga at Greeley Square Park",
+          "category": "Yoga & Pilates Classes",
+          "date": "2026-07-29",
+          "startTime": "11:00",
+          "venue": "Greeley Square Park",
+          "neighborhood": "Midtown Manhattan (Greeley Square Park)",
+          "why": "Chair Yoga at Greeley Square Park is a free, gentle, accessible morning option if you prefer low-impact movement."
+        },
+        {
+          "rank": 7,
+          "eventId": "1b5926ed-70cf-1f1e-86af-a3b535460a9d",
+          "title": "Waterfront Workouts: Amp'd Bootcamp",
+          "category": "Outdoor Fitness",
+          "date": "2026-07-29",
+          "startTime": "18:00",
+          "venue": "Brooklyn Bridge Park",
+          "neighborhood": "Brooklyn Bridge Park / DUMBO (Pier 2, Brooklyn Bridge Park)",
+          "why": "Amp'd Bootcamp is a free, all-level HIIT-style outdoor class — high-energy and scenic if you want a challenging session."
+        },
+        {
+          "rank": 8,
+          "eventId": "db8d6fb7-8da6-2f11-34a3-77dd3eab94ee",
+          "title": "Midtown Fit",
+          "category": "Strength Training/Weightlifting",
+          "date": "2026-07-30",
+          "startTime": "18:00",
+          "venue": "Herald Square",
+          "neighborhood": "Midtown (Herald Square)",
+          "why": "Midtown Fit offers free, high-energy bodyweight workouts in Herald Square — convenient if you’re in Midtown."
+        }
+      ]
+    },
+    {
+      "index": 13,
+      "prompt": "I want to volunteer and give back to the community",
+      "inputCount": 80,
+      "summary": "You said you want to volunteer and give back — below are volunteer options in the next 7 days (all start after Sun Jul 26 8:30 PM). I prioritized hands-on stewardship, park cleanups, tree counts, and restoration sessions that clearly list volunteer tasks. Ordered by date/time.",
+      "picks": [
+        {
+          "rank": 1,
+          "eventId": "983b59c9-c007-5732-1148-ab2e2af2fe2f",
+          "title": "It's My Park at Highbridge Park",
+          "category": "It's My Park",
+          "date": "2026-07-27",
+          "startTime": "09:00",
+          "venue": "Highbridge Park",
+          "neighborhood": "Highbridge (Washington Heights/Inwood area)",
+          "why": "Direct park stewardship — tilling, composting and cleanup at Highbridge Park is a hands-on way to give back to the local community."
+        },
+        {
+          "rank": 2,
+          "eventId": "5d90601b-7768-a1ab-8660-b929c3b26460",
+          "title": "Monday Morning Pitch In to Pick Up",
+          "category": "Workshops",
+          "date": "2026-07-27",
+          "startTime": "10:00",
+          "venue": "Starlight Park",
+          "neighborhood": "Starlight Park / Mott Haven (Bronx River area)",
+          "why": "Litter pickup to prevent trash entering the Bronx River — impactful environmental volunteer work."
+        },
+        {
+          "rank": 3,
+          "eventId": "fe19477a-0f43-b5a1-adbb-83ed2e80a941",
+          "title": "Trees Count at Washington Market Park",
+          "category": "Workshops",
+          "date": "2026-07-27",
+          "startTime": "10:00",
+          "venue": "Washington Market Park",
+          "neighborhood": "Tribeca / Civic Center area (Washington Market Park)",
+          "why": "Tree-count volunteer work that trains you in tree ID and helps citywide urban canopy data."
+        },
+        {
+          "rank": 4,
+          "eventId": "4835cc37-3f94-2c2d-29a2-d6e1001767b5",
+          "title": "It's My Park at Greenwood Playground",
+          "category": "It's My Park",
+          "date": "2026-07-28",
+          "startTime": "09:00",
+          "venue": "Greenwood Playground",
+          "neighborhood": "Greenwood (Sunset Park / South Brooklyn)",
+          "why": "Neighborhood playground cleanup — straightforward way to help maintain a community play space."
+        },
+        {
+          "rank": 5,
+          "eventId": "6c1616d1-399f-0ad3-fcba-9427dbb0daea",
+          "title": "It's My Park at Sunset Park",
+          "category": "It's My Park",
+          "date": "2026-07-28",
+          "startTime": "10:00",
+          "venue": "Sunset Park",
+          "neighborhood": "Sunset Park, Brooklyn",
+          "why": "Another park beautification option if you prefer volunteering in Sunset Park with a parent-child group."
+        },
+        {
+          "rank": 6,
+          "eventId": "e51a4ddf-f9cc-5c7a-5513-fa4094e24003",
+          "title": "Stewardship Morning at the Foodway",
+          "category": "Gardening",
+          "date": "2026-07-28",
+          "startTime": "10:00",
+          "venue": "Concrete Plant Park",
+          "neighborhood": "Concourse / Bronx River (Concrete Plant Park)",
+          "why": "Stewardship at the Bronx River Foodway with planting and mulching — great for sustained contribution."
+        },
+        {
+          "rank": 7,
+          "eventId": "f80f7103-8412-3c80-9873-c36a089297a0",
+          "title": "Sunset Volunteer Series",
+          "category": "Volunteer",
+          "date": "2026-07-28",
+          "startTime": "17:00",
+          "venue": "Prospect Park",
+          "neighborhood": "Prospect Park / Park Slope (Brooklyn)",
+          "why": "Sunset Volunteer Series offers an evening option for invasive removal, litter pickup and mulching in Prospect Park."
+        },
+        {
+          "rank": 8,
+          "eventId": "130e69f8-1d16-a1f2-1a01-10e5c301940f",
+          "title": "Team RIVER Volunteers",
+          "category": "Gardening",
+          "date": "2026-07-29",
+          "startTime": "09:30",
+          "venue": "Randall's Island Park",
+          "neighborhood": "Randall's Island",
+          "why": "Team RIVER helps restore natural areas on Randall's Island — great ecological volunteering with training."
+        },
+        {
+          "rank": 9,
+          "eventId": "a6e296a4-26c5-9303-8dc4-b283e87fef5f",
+          "title": "Volunteer Day: Newport Garden",
+          "category": "Gardening",
+          "date": "2026-07-29",
+          "startTime": "10:00",
+          "venue": "",
+          "neighborhood": "Newport (East New York / Brooklyn area)",
+          "why": "GreenThumb community garden volunteering to beautify and maintain a neighborhood garden."
+        },
+        {
+          "rank": 10,
+          "eventId": "b17ed4f9-f7ec-80ae-f005-ae96eb665739",
+          "title": "It's My Park at Seth Low Playground/ Bealin Square",
+          "category": "It's My Park",
+          "date": "2026-07-29",
+          "startTime": "10:00",
+          "venue": "Seth Low Playground/ Bealin Square",
+          "neighborhood": "Bealin Square / Borough Park area (Seth Low Playground)",
+          "why": "It's My Park cleanup at Seth Low Playground — hands-on neighborhood beautification."
+        },
+        {
+          "rank": 11,
+          "eventId": "8c95bc93-5322-cf14-1070-9ec435396f09",
+          "title": "Summer Spruce Up",
+          "category": "Volunteer",
+          "date": "2026-07-29",
+          "startTime": "10:00",
+          "venue": "Prospect Park",
+          "neighborhood": "Prospect Park (Brooklyn)",
+          "why": "Prospect Park Summer Spruce Up — focused maintenance and restoration work for community benefit."
+        },
+        {
+          "rank": 12,
+          "eventId": "e9c03592-2480-88c4-d62e-f7731e059f98",
+          "title": "Trees Count at Canarsie Park",
+          "category": "Volunteer",
+          "date": "2026-07-30",
+          "startTime": "10:00",
+          "venue": "Canarsie Park",
+          "neighborhood": "Canarsie, Brooklyn",
+          "why": "Trees Count event at Canarsie Park to help document and protect urban trees."
+        },
+        {
+          "rank": 13,
+          "eventId": "6cccfca3-6842-3d7a-7b64-d9f19b312ed3",
+          "title": "Kissena Park Forest Restoration",
+          "category": "Volunteer",
+          "date": "2026-07-31",
+          "startTime": "09:00",
+          "venue": "Kissena Park",
+          "neighborhood": "Kissena Park / Flushing (Queens)",
+          "why": "Forest restoration in Kissena Park to remove invasives and support forest health."
+        },
+        {
+          "rank": 14,
+          "eventId": "3983ee82-c752-5182-7a9b-eafdb9ff0d55",
+          "title": "Trees Count at Barretto Point Park",
+          "category": "Volunteer",
+          "date": "2026-07-31",
+          "startTime": "10:00",
+          "venue": "Barretto Point Park",
+          "neighborhood": "Hunts Point / Bronx waterfront (Barretto Point Park)",
+          "why": "Trees Count at Barretto Point Park — combines volunteering with learning tree ID and data collection."
+        }
+      ]
+    },
+    {
+      "index": 14,
+      "prompt": "What's happening near the waterfront or by the river?",
+      "inputCount": 80,
+      "summary": "You said you want events near the waterfront or by the river between now (Sun Jul 26, 8:30 PM) and the next 7 days. I picked waterfront/riverside events starting after now and within that window.",
+      "picks": [
+        {
+          "rank": 1,
+          "eventId": "b06b3bd8-428a-ad94-ef65-bb289b455712",
+          "title": "Ali Stroker",
+          "category": "Live music",
+          "date": "2026-07-27",
+          "startTime": "18:30",
+          "venue": "Hudson River Park",
+          "neighborhood": "Hudson River Park (West Village/Chelsea area — Manhattan)",
+          "why": "Free live Broadway performer on the Hudson River Park boardwalk — right on the waterfront for the vibe you asked for."
+        },
+        {
+          "rank": 2,
+          "eventId": "acc56d70-3f69-4388-7377-d3e11ab3658f",
+          "title": "Free Movie On The Waterfront: Ferris Bueller's Day Off",
+          "category": "Accessible Activities",
+          "date": "2026-07-27",
+          "startTime": "20:30",
+          "venue": "Astoria Park",
+          "neighborhood": "Astoria (Astoria Park, Queens)",
+          "why": "A free waterfront movie screening on the Astoria Park lawn — great riverside atmosphere."
+        },
+        {
+          "rank": 3,
+          "eventId": "b0105eb8-cdbe-ccb7-fc84-736120b3aa88",
+          "title": "Wetlab Look-ins",
+          "category": "Hiking & parks",
+          "date": "2026-07-28",
+          "startTime": "12:00",
+          "venue": "Pier 40, Hudson River Park",
+          "neighborhood": "Hudson River Park (Tribeca/Hudson River Greenway — Manhattan)",
+          "why": "Meet Hudson River wildlife at a pier-side research aquarium — intimate waterfront nature experience."
+        },
+        {
+          "rank": 4,
+          "eventId": "ee798654-fd9e-9698-51f2-97c12705d7fd",
+          "title": "Brooklyn Bridge Park Conservancy Waterfront Walks",
+          "category": "Walking",
+          "date": "2026-07-28",
+          "startTime": "18:30",
+          "venue": "Brooklyn Bridge Park",
+          "neighborhood": "Brooklyn Bridge Park (DUMBO/Seaport adjacency — Brooklyn)",
+          "why": "A guided waterfront walk that explores Brooklyn’s riverfront history and ecology — right along the river."
+        },
+        {
+          "rank": 5,
+          "eventId": "59ce3aaf-9fc1-633e-303a-c4e3ade889fd",
+          "title": "Summer on the Hudson: Mycelium - A Solar-Powered Concert",
+          "category": "Waterfront",
+          "date": "2026-07-28",
+          "startTime": "19:00",
+          "venue": "Riverside Park South",
+          "neighborhood": "Riverside Park South (Upper West Side/Hudson River — Manhattan)",
+          "why": "An evening solar-powered orchestral/pop concert on the Hudson — unique waterfront performance."
+        },
+        {
+          "rank": 6,
+          "eventId": "e1ce61f6-ef01-448d-ad74-6952713434a1",
+          "title": "You Belong in STEM: Careers Creating Change",
+          "category": "Hiking & parks",
+          "date": "2026-07-30",
+          "startTime": "14:00",
+          "venue": "Pier 57, Hudson River Park",
+          "neighborhood": "Hudson River Park (Chelsea/Meatpacking area — Manhattan)",
+          "why": "A STEM careers conversation on Pier 57 — waterfront location with a focus on river/harbor topics."
+        },
+        {
+          "rank": 7,
+          "eventId": "e480d437-ad73-f108-8896-fe0bc2b706a8",
+          "title": "Sunset Salsa",
+          "category": "Dance",
+          "date": "2026-07-30",
+          "startTime": "18:30",
+          "venue": "Pier 76, Hudson River Park",
+          "neighborhood": "Hudson River Park (Chelsea — Pier 76)",
+          "why": "Free outdoor salsa social on a Hudson River pier — directly on the waterfront and lively."
+        },
+        {
+          "rank": 8,
+          "eventId": "20d75837-17dc-3dd5-ddb0-3edf1c3bc675",
+          "title": "Moving Waters: An Emerging Dance Showcase",
+          "category": "Nightlife",
+          "date": "2026-07-31",
+          "startTime": "11:00",
+          "venue": "Governors Island",
+          "neighborhood": "Governors Island (Governors Island waterfront)",
+          "why": "A waterfront dance showcase on Governors Island — excellent riverside setting and island ambience."
+        },
+        {
+          "rank": 9,
+          "eventId": "d48756a2-ddb4-fa26-d550-90a791013fc6",
+          "title": "Kayaking (Saturdays) - August 1",
+          "category": "Running & fitness",
+          "date": "2026-08-01",
+          "startTime": "10:00",
+          "venue": "Pier 2, Brooklyn Bridge Park",
+          "neighborhood": "Brooklyn Bridge Park (DUMBO — Brooklyn)",
+          "why": "Free public kayaking on the Brooklyn waterfront — hands-on river activity."
+        },
+        {
+          "rank": 10,
+          "eventId": "a1ca0675-b0f1-6219-c6d2-f3da08c8e362",
+          "title": "Exhibition: Think Global. Act Local.",
+          "category": "Walking",
+          "date": "2026-08-01",
+          "startTime": "10:00",
+          "venue": "Conference House Park",
+          "neighborhood": "Conference House Park (Tottenville — Staten Island)",
+          "why": "An exhibition focused on endangered local and global species sited at a waterfront historic park — fits your waterfront interest."
+        }
+      ]
+    },
+    {
+      "index": 15,
+      "prompt": "Find me something happening in Prospect Park or Brooklyn parks",
+      "inputCount": 80,
+      "summary": "You said you want events happening in Prospect Park or Brooklyn parks between now (Sun Jul 26 8:30 PM) and the next 7 days. I picked only events in Prospect Park or Brooklyn parks that start after now and match your request.",
+      "picks": [
+        {
+          "rank": 1,
+          "eventId": "301a250b-eed4-4616-bb59-ab39676e0277",
+          "title": "Visual Medicine: Photographs of Love + Joy in Prospect Park",
+          "category": "Event",
+          "date": "2026-07-26",
+          "startTime": "",
+          "venue": "Prospect Park",
+          "neighborhood": "Prospect Park (Lefferts/Flatbush area)",
+          "why": "Free outdoor photographic exhibit by Jamel Shabazz on the Lefferts tollbooth — right in Prospect Park and available daily through Aug 6."
+        },
+        {
+          "rank": 2,
+          "eventId": "e9422506-4503-3137-9de9-8f25de881dfc",
+          "title": "Canceled | Sexual Health Mobile Medical Unit",
+          "category": "Wellness",
+          "date": "2026-07-27",
+          "startTime": "10:00",
+          "venue": "Prospect Park",
+          "neighborhood": "Prospect Park (Grand Army Plaza / Parkside area)",
+          "why": "Listed mobile health services operate in Prospect Park (though the July 27 session is canceled) — included because it’s a park-based service you might want to know about."
+        },
+        {
+          "rank": 3,
+          "eventId": "f80f7103-8412-3c80-9873-c36a089297a0",
+          "title": "Sunset Volunteer Series",
+          "category": "Volunteer",
+          "date": "2026-07-28",
+          "startTime": "17:00",
+          "venue": "Prospect Park",
+          "neighborhood": "Prospect Park (various locations within the park)",
+          "why": "Sunset Volunteer Series offers an evening outdoors in Prospect Park helping with trail and habitat work — fits your request for Prospect Park activities."
+        },
+        {
+          "rank": 4,
+          "eventId": "8c95bc93-5322-cf14-1070-9ec435396f09",
+          "title": "Summer Spruce Up",
+          "category": "Volunteer",
+          "date": "2026-07-29",
+          "startTime": "10:00",
+          "venue": "Prospect Park",
+          "neighborhood": "Prospect Park (various meeting spots)",
+          "why": "Summer Spruce Up is a daytime volunteer option in Prospect Park for hands-on park work and exploration."
+        },
+        {
+          "rank": 5,
+          "eventId": "c8dc6d7e-51e9-1853-1844-7429009b7b9f",
+          "title": "It's My Park at Lion's Pride Playground",
+          "category": "It's My Park",
+          "date": "2026-07-29",
+          "startTime": "12:00",
+          "venue": "Lion's Pride Playground",
+          "neighborhood": "Prospect Park (Bartel-Pritchard / South Slope area)",
+          "why": "Wednesday Greenmarket at Bartel-Pritchard Square is a pleasant Prospect Park park activity if you want a market visit."
+        },
+        {
+          "rank": 6,
+          "eventId": "bcba8349-6609-70c6-52b7-18f72938d5d7",
+          "title": "Nature Exploration: Lake Appreciation",
+          "category": "Nature Programs",
+          "date": "2026-07-30",
+          "startTime": "10:00",
+          "venue": "Prospect Park",
+          "neighborhood": "Prospect Park (Boathouse / Lake area)",
+          "why": "Nature Exploration: Lake Appreciation offers guided, family-friendly nature programming in Prospect Park."
+        },
+        {
+          "rank": 7,
+          "eventId": "1d7a5ac2-1617-f186-0ad5-1e810ca5ad4c",
+          "title": "Exhibit: Battle Pass in Prospect Park",
+          "category": "Lefferts Historic House",
+          "date": "2026-07-30",
+          "startTime": "12:00",
+          "venue": "Prospect Park",
+          "neighborhood": "Prospect Park (Battle Pass / Lefferts area)",
+          "why": "Free guided tour of the Battle Pass in Prospect Park — great if you want to explore park history and trails."
+        },
+        {
+          "rank": 8,
+          "eventId": "3a8ab712-1a7e-a8f7-0d0b-57e7337c8e43",
+          "title": "Prospect Park Yoga",
+          "category": "Yoga",
+          "date": "2026-07-30",
+          "startTime": "19:00",
+          "venue": "Prospect Park",
+          "neighborhood": "Prospect Park (Long Meadow area)",
+          "why": "Free evening Prospect Park Yoga on the Long Meadow — a classic outdoor Prospect Park activity."
+        },
+        {
+          "rank": 9,
+          "eventId": "9ea168ff-618e-ff06-6523-65f4936e3f9f",
+          "title": "Basic Canoeing",
+          "category": "Urban Park Rangers",
+          "date": "2026-08-01",
+          "startTime": "11:00",
+          "venue": "Alley Pond Park",
+          "neighborhood": "Prospect Park (Parkside + Ocean Ave entrance area)",
+          "why": "Free Summer Meals in Prospect Park runs daily and is happening in the park during the summer period you asked about."
+        }
+      ]
+    },
+    {
+      "index": 16,
+      "prompt": "Something cultural and unique that most tourists wouldn't know about",
+      "inputCount": 80,
+      "summary": "You said you want something cultural and unique that most tourists wouldn't know about — I picked a few lesser-known, locally rooted cultural experiences (historic, indigenous, or community-focused) happening in the next 7 days that start after Sun 7/26 8:30 PM. Ordered by date/time.",
+      "picks": [
+        {
+          "rank": 1,
+          "eventId": "73ccac23-6a36-9477-bf0e-a516a2eee65f",
+          "title": "Hart Island Tour (South Island)",
+          "category": "Urban Park Rangers",
+          "date": "2026-07-28",
+          "startTime": "10:00",
+          "venue": "Hart Island",
+          "neighborhood": "Hart Island (Bronx / off-island ferry)",
+          "why": "A hard-to-access, deeply historical cemetery island tour reveals forgotten city histories and narratives few tourists experience."
+        },
+        {
+          "rank": 2,
+          "eventId": "036ca492-8b94-9302-a529-62fbb6d1e185",
+          "title": "Ongoing Outdoor Museum Exhibit: Alice's Terracotta Garden",
+          "category": "Walking",
+          "date": "2026-07-28",
+          "startTime": "11:00",
+          "venue": "Conference House Park",
+          "neighborhood": "Tottenville / Conference House Park (Staten Island)",
+          "why": "A unique terracotta sculpture garden tied to Tottenville’s industrial-artisan history — a quiet, off-the-beaten-path collection most visitors miss."
+        },
+        {
+          "rank": 3,
+          "eventId": "01d68a2a-1d82-0abd-d200-fcee3523027b",
+          "title": "\"Cultivating Presence in the Garden\": Storytelling Workshops with Roundabout Theatre Company",
+          "category": "Workshops",
+          "date": "2026-07-28",
+          "startTime": "17:00",
+          "venue": "",
+          "neighborhood": "Poppa & Momma Jones Historical Garden (Brooklyn — location varies)",
+          "why": "Storytelling workshops by Roundabout Theatre in a historic garden blend theater craft with local place-based history — an intimate cultural experience few tourists encounter."
+        },
+        {
+          "rank": 4,
+          "eventId": "313e308c-47bd-31a8-4e44-6b2cd75bcea7",
+          "title": "Cyanotype Workshop with Nadia",
+          "category": "Gardening",
+          "date": "2026-07-31",
+          "startTime": "12:00",
+          "venue": "Hunts Point Riverside Park",
+          "neighborhood": "Hunts Point / Bronx",
+          "why": "A small-format cyanotype workshop rooted in memory and place — an art practice tied to local landscape and personal history that feels authentic and uncommon."
+        },
+        {
+          "rank": 5,
+          "eventId": "661217b2-fd1c-2c42-a828-b5621b42346b",
+          "title": "Members-Only Tour: House Made of Dawn at the New York Historical",
+          "category": "Live music",
+          "date": "2026-07-31",
+          "startTime": "12:00",
+          "venue": "The New York Historical",
+          "neighborhood": "Upper West Side (near Central Park West)",
+          "why": "A guided tour of Indigenous art across 150 years at a major collection provides deep, less-seen perspectives on Native artists and histories."
+        },
+        {
+          "rank": 6,
+          "eventId": "33b13dc9-3ecb-79aa-80e8-ec1914076ede",
+          "title": "Exhibit: Long Live J’ouvert",
+          "category": "Lefferts Historic House",
+          "date": "2026-08-01",
+          "startTime": "00:00",
+          "venue": "Prospect Park",
+          "neighborhood": "Prospect Park (Flatbush/Lefferts Gardens, Brooklyn)",
+          "why": "A pop-up installation about J’ouvert explores Caribbean masquerade and resistance — culturally specific, local, and not on typical tourist itineraries."
+        },
+        {
+          "rank": 7,
+          "eventId": "d4e8f62b-2f0a-7238-1a78-6cd602d66f1b",
+          "title": "Incense and Smoke Wand Workshop with Lashette Williams",
+          "category": "Art",
+          "date": "2026-08-01",
+          "startTime": "11:00",
+          "venue": "Concrete Plant Park",
+          "neighborhood": "Concrete Plant Park (Bronx)",
+          "why": "An Indigenous-rooted incense and smoke wand workshop that teaches plant uses and local ecological knowledge — culturally specific and off the tourist radar."
+        }
+      ]
+    },
+    {
+      "index": 17,
+      "prompt": "What's a good way to spend a summer evening in NYC?",
+      "inputCount": 80,
+      "summary": "You said you feel like a summer evening in NYC — here are relaxed outdoor options (movies, concerts, singing, rooftop cinema, park performances) happening in the next 7 days after Sun Jul 26 8:30pm. I prioritized classic summer-evening experiences: lawn movies, outdoor concerts, stargazing, and waterfront sunset events.",
+      "picks": [
+        {
+          "rank": 1,
+          "eventId": "35e42701-0e60-7c96-f2ae-df55a809efdd",
+          "title": "Bryant Park Movie Nights",
+          "category": "Free Summer Movies",
+          "date": "2026-07-27",
+          "startTime": "17:00",
+          "venue": "Bryant Park",
+          "neighborhood": "Midtown (Bryant Park)",
+          "why": "A classic summer-evening activity — outdoor movie on the Bryant Park lawn (The Truman Show) with picnic vibes and easy Midtown access."
+        },
+        {
+          "rank": 2,
+          "eventId": "46240cc1-8f8c-3aff-157c-2553cbb7b95b",
+          "title": "The Sandlot (Rooftop Cinema)",
+          "category": "Film & cinema",
+          "date": "2026-07-27",
+          "startTime": "17:00",
+          "venue": "Rooftop Cinema Club Midtown",
+          "neighborhood": "Midtown (West 37th St)",
+          "why": "Rooftop Cinema Club screening of The Sandlot offers a breezy, classic-summer-night movie with skyline views."
+        },
+        {
+          "rank": 3,
+          "eventId": "1adf0d47-5801-a7d1-7385-13926eaa2112",
+          "title": "Big City Folk in Greeley Square Park",
+          "category": "Free Summer Concerts",
+          "date": "2026-07-27",
+          "startTime": "18:00",
+          "venue": "Greeley Square Park",
+          "neighborhood": "Midtown (Greeley Square)",
+          "why": "Big City Folk in Greeley Square offers intimate singer-songwriter sets — perfect for a relaxed summer evening with live music."
+        },
+        {
+          "rank": 4,
+          "eventId": "dc957c37-f21c-a287-1855-c7318197934c",
+          "title": "Sunset Yoga - July 28",
+          "category": "Running & fitness",
+          "date": "2026-07-28",
+          "startTime": "18:00",
+          "venue": "Pier 3 Central Lawn, Brooklyn Bridge Park",
+          "neighborhood": "Brooklyn Heights / Dumbo (Brooklyn Bridge Park)",
+          "why": "Movies With A View in Brooklyn Bridge Park (Clueless on July 30) pairs classic film with one of the best skyline vistas for summer evenings."
+        },
+        {
+          "rank": 5,
+          "eventId": "7cc03fa6-ef47-95b3-103b-7b9a5e877c1a",
+          "title": "Stargazing on the High Line",
+          "category": "Astronomy",
+          "date": "2026-07-28",
+          "startTime": "20:15",
+          "venue": "The High Line",
+          "neighborhood": "Chelsea / Meatpacking (High Line at 13th St)",
+          "why": "Stargazing on the High Line is a magical summer-evening option — telescopes and city ambiance for a low-key, memorable night."
+        },
+        {
+          "rank": 6,
+          "eventId": "1cb0c42d-f7a5-3ef3-9dde-ab757fa88e8a",
+          "title": "Skyline CircleSing with Gaia Music Collective - July",
+          "category": "Live music",
+          "date": "2026-07-29",
+          "startTime": "19:00",
+          "venue": "Pier 3 Greenway Terrace, Brooklyn Bridge Park",
+          "neighborhood": "Brooklyn (Brooklyn Bridge Park, Pier 3)",
+          "why": "Skyline CircleSing at Brooklyn Bridge Park is a joyful, communal summer-evening activity with skyline views and singing."
+        },
+        {
+          "rank": 7,
+          "eventId": "f5bb56f8-4363-9bf6-ae2d-82b1ddb01930",
+          "title": "Summer on the Hudson: Pier I Picture Show- The Maltese Falcon (1941)",
+          "category": "Free Summer Movies",
+          "date": "2026-07-29",
+          "startTime": "20:30",
+          "venue": "Riverside Park South",
+          "neighborhood": "Hudson Heights / Riverside South (Riverside Park South Pier I)",
+          "why": "Pier I Picture Show (The Maltese Falcon) combines waterfront sunset views and an outdoor movie — quintessential summer night."
+        }
+      ]
+    },
+    {
+      "index": 18,
+      "prompt": "I want to learn something new this weekend",
+      "inputCount": 80,
+      "summary": "You said you want to learn something new this weekend — I picked free, hands-on workshops and educational programs happening in the next 7 days (all start after Sun Jul 26 8:30 PM). Ordered by date/time.",
+      "picks": [
+        {
+          "rank": 1,
+          "eventId": "5d90601b-7768-a1ab-8660-b929c3b26460",
+          "title": "Monday Morning Pitch In to Pick Up",
+          "category": "Workshops",
+          "date": "2026-07-27",
+          "startTime": "10:00",
+          "venue": "Starlight Park",
+          "neighborhood": "Starlight Park / Bronx (Bronx River House)",
+          "why": "Volunteer cleanup teaches practical environmental stewardship and lets you learn about local river ecology and pollution sources."
+        },
+        {
+          "rank": 2,
+          "eventId": "39cb07be-3270-182f-f7d8-89392d3eef7b",
+          "title": "Foragers in the Foodway",
+          "category": "Gardening",
+          "date": "2026-07-28",
+          "startTime": "10:00",
+          "venue": "Concrete Plant Park",
+          "neighborhood": "Concrete Plant Park / Bronx",
+          "why": "Hands-on foraging with NYC herbalists is a direct way to learn plant identification, edible/medicinal uses, and preservation techniques."
+        },
+        {
+          "rank": 3,
+          "eventId": "6b414483-0c8f-7a00-1f5c-d953ca3d8c45",
+          "title": "The Teach Me Something Podcast Experience",
+          "category": "Film & cinema",
+          "date": "2026-07-28",
+          "startTime": "16:00",
+          "venue": "Berkeley College New York City Midtown Campus",
+          "neighborhood": "Midtown (Berkeley College NYC Midtown Campus)",
+          "why": "A podcast experience event is an opportunity to learn about podcast production and media skills in a classroom-like setting."
+        },
+        {
+          "rank": 4,
+          "eventId": "6cc59e2c-cfc3-1d52-34e2-5e7fb53da047",
+          "title": "The Bronx Museum Presents: Meet Me At The Park&#8212;Wood Carving With Artist Jill Cohen-Nu&#241;ez",
+          "category": "Art",
+          "date": "2026-07-29",
+          "startTime": "15:00",
+          "venue": "Joyce Kilmer Park",
+          "neighborhood": "Bronx (Joyce Kilmer Park)",
+          "why": "A wood-carving workshop teaches wood identification and safe carving techniques — a focused craft skill to learn."
+        },
+        {
+          "rank": 5,
+          "eventId": "679dd576-95c7-dc37-a608-2fd3e234e385",
+          "title": "Expert-Led Explorations: Plankton - July 29",
+          "category": "Hiking & parks",
+          "date": "2026-07-29",
+          "startTime": "16:00",
+          "venue": "Pier 5, Brooklyn Bridge Park",
+          "neighborhood": "Brooklyn Bridge Park / Brooklyn (Pier 5)",
+          "why": "Expert-led plankton exploration gives hands-on science experience learning to sample and observe microscopic marine life."
+        },
+        {
+          "rank": 6,
+          "eventId": "7d25101b-9bdb-5903-aaa5-b0c572820e39",
+          "title": "Beginner Crochet Workshop",
+          "category": "Workshops",
+          "date": "2026-07-30",
+          "startTime": "15:00",
+          "venue": "Kissena Park",
+          "neighborhood": "Kissena Park / Flushing (Kissena Park Field House)",
+          "why": "Beginner crochet class is a teachable craft workshop where you’ll learn basics and complete beginner projects."
+        },
+        {
+          "rank": 7,
+          "eventId": "313e308c-47bd-31a8-4e44-6b2cd75bcea7",
+          "title": "Cyanotype Workshop with Nadia",
+          "category": "Gardening",
+          "date": "2026-07-31",
+          "startTime": "12:00",
+          "venue": "Hunts Point Riverside Park",
+          "neighborhood": "Hunts Point / Bronx (Hunts Point Riverside Park)",
+          "why": "Cyanotype workshop teaches a photographic printing process linked to plant studies — a creative, hands-on learning experience."
+        },
+        {
+          "rank": 8,
+          "eventId": "08c3e541-1c6d-3735-7f07-586b9001d3e0",
+          "title": "Teach a Horse to Fish with Ciara Middleton",
+          "category": "Wildlife",
+          "date": "2026-07-31",
+          "startTime": "14:00",
+          "venue": "Concrete Plant Park",
+          "neighborhood": "Concrete Plant Park / Bronx",
+          "why": "A fishing-focused ecology session introduces urban sustainable fishing practices and local environmental education."
+        },
+        {
+          "rank": 9,
+          "eventId": "d4e8f62b-2f0a-7238-1a78-6cd602d66f1b",
+          "title": "Incense and Smoke Wand Workshop with Lashette Williams",
+          "category": "Art",
+          "date": "2026-08-01",
+          "startTime": "11:00",
+          "venue": "Concrete Plant Park",
+          "neighborhood": "Concrete Plant Park / Bronx",
+          "why": "Incense and smoke wand workshop teaches plant uses and traditional craft techniques — practical botanical knowledge."
+        },
+        {
+          "rank": 10,
+          "eventId": "9435d95e-a50a-35b1-9a4c-df4d3411da0d",
+          "title": "Indigenous Art Workshop with NAIC-NY",
+          "category": "Workshops",
+          "date": "2026-08-01",
+          "startTime": "11:00",
+          "venue": "Starlight Park",
+          "neighborhood": "Starlight Park / Bronx (Bronx River House)",
+          "why": "Indigenous art workshop offers hands-on traditional craft instruction and cultural learning."
+        }
+      ]
+    },
+    {
+      "index": 19,
+      "prompt": "Surprise me with something I probably haven't tried before",
+      "inputCount": 80,
+      "summary": "I picked a few unusual, low-key, and hands-on activities over the next week that you might not have tried before — a French lawn-bowling lesson, a beginner circus-arts drop-in, an incense-making workshop, and a plankton exploration — all free and starting after now. Ordered by date/time within the next 7 days.",
+      "picks": [
+        {
+          "rank": 1,
+          "eventId": "4e676b73-a5d3-3aec-2b1b-f1404886ca43",
+          "title": "P&#233;tanque in the Park",
+          "category": "Outdoor Fitness",
+          "date": "2026-07-27",
+          "startTime": "13:00",
+          "venue": "Washington Square Park",
+          "neighborhood": "Greenwich Village (Washington Square Park)",
+          "why": "Pétanque is a quirky, easy-to-learn French lawn-bowling game — a delightful new pastime to try with provided boules and expert instruction."
+        },
+        {
+          "rank": 2,
+          "eventId": "679dd576-95c7-dc37-a608-2fd3e234e385",
+          "title": "Expert-Led Explorations: Plankton - July 29",
+          "category": "Hiking & parks",
+          "date": "2026-07-29",
+          "startTime": "16:00",
+          "venue": "Pier 5, Brooklyn Bridge Park",
+          "neighborhood": "DUMBO / Brooklyn Bridge Park (Pier 5)",
+          "why": "Expert-led plankton explorations let you sample and observe microscopic life — a tiny-world adventure many New Yorkers haven't tried."
+        },
+        {
+          "rank": 3,
+          "eventId": "4fa28fa4-3be4-b56a-5561-919d71a393f1",
+          "title": "Circus Arts in Herald Square Park",
+          "category": "Workshops",
+          "date": "2026-07-29",
+          "startTime": "18:00",
+          "venue": "Herald Square",
+          "neighborhood": "Herald Square / Midtown",
+          "why": "Circus Arts offers hands-on props (hoops, plate spinning, contact juggling) so you can try playful flow and circus skills you've probably never done before."
+        },
+        {
+          "rank": 4,
+          "eventId": "d4e8f62b-2f0a-7238-1a78-6cd602d66f1b",
+          "title": "Incense and Smoke Wand Workshop with Lashette Williams",
+          "category": "Art",
+          "date": "2026-08-01",
+          "startTime": "11:00",
+          "venue": "Concrete Plant Park",
+          "neighborhood": "Bronx River (Concrete Plant Park)",
+          "why": "An incense-and-smoke-wand workshop teaches you to craft incense from local plants — an unusual hands-on sensory craft to experiment with."
+        }
+      ]
+    },
+    {
+      "index": 20,
+      "prompt": "I just want to get out of the house and do something fun",
+      "inputCount": 80,
+      "summary": "You said you just want to get out and do something fun — here are free, social or lively options over the next 7 days that start after now (Sun Jul 26 8:30 PM). I prioritized late-evening outdoor movie and nearby group dance/fitness events that are upbeat and easy to join.",
+      "picks": [
+        {
+          "rank": 1,
+          "eventId": "9ad48c1e-d585-e3cb-98f2-556988d0b1d7",
+          "title": "Zumba - July 27",
+          "category": "Running & fitness",
+          "date": "2026-07-27",
+          "startTime": "18:00",
+          "venue": "Pier 3 Plaza, Brooklyn Bridge Park",
+          "neighborhood": "Brooklyn Heights / DUMBO (Brooklyn Bridge Park Pier 3 Plaza)",
+          "why": "High-energy, fun group Zumba on the waterfront is perfect if you want an active, social outing and to burn off energy."
+        },
+        {
+          "rank": 2,
+          "eventId": "6bfa8d0b-f422-f567-4b5d-5a0eed2c9d7b",
+          "title": "RETRO Dance Fitness",
+          "category": "Exercise Classes",
+          "date": "2026-07-27",
+          "startTime": "18:30",
+          "venue": "Gertrude Ederle Recreation Center",
+          "neighborhood": "Upper West Side (Gertrude Ederle Recreation Center)",
+          "why": "A lively retro dance-fitness class that’s fun, short (45 min) and easy to jump into for a spontaneous evening activity."
+        },
+        {
+          "rank": 3,
+          "eventId": "00562523-0a0e-dd8b-ebb6-b5250900b508",
+          "title": "BollyX",
+          "category": "Exercise Classes",
+          "date": "2026-07-27",
+          "startTime": "18:30",
+          "venue": "Chelsea Recreation Center",
+          "neighborhood": "Chelsea (Chelsea Recreation Center)",
+          "why": "BollyX is upbeat, social, and playful — great if you want to dance, laugh, and meet people while getting a workout."
+        },
+        {
+          "rank": 4,
+          "eventId": "acc56d70-3f69-4388-7377-d3e11ab3658f",
+          "title": "Free Movie On The Waterfront: Ferris Bueller's Day Off",
+          "category": "Accessible Activities",
+          "date": "2026-07-27",
+          "startTime": "20:30",
+          "venue": "Astoria Park",
+          "neighborhood": "Astoria (Astoria Park)",
+          "why": "A relaxed outdoor movie night is an easy, low-effort way to get out, socialize, and enjoy the evening (Ferris Bueller showing)."
+        },
+        {
+          "rank": 5,
+          "eventId": "4b2a5242-7306-047b-8acc-342e60ff5c5b",
+          "title": "Giant Bubble at Greeley Square Park",
+          "category": "Family & kids",
+          "date": "2026-07-29",
+          "startTime": "12:30",
+          "venue": "Greeley Square Park",
+          "neighborhood": "Midtown (Greeley Square Park)",
+          "why": "Giant bubbles and rollerboogie are playful, outdoors, and easy to join for a lighthearted afternoon outing."
+        },
+        {
+          "rank": 6,
+          "eventId": "63334646-8d46-cdf7-84c0-0d8b2c5e6cca",
+          "title": "Salsa Social",
+          "category": "Exercise Classes",
+          "date": "2026-07-29",
+          "startTime": "18:00",
+          "venue": "Washington Square Park",
+          "neighborhood": "Greenwich Village (Washington Square Park - Garibaldi Plaza)",
+          "why": "An open-air salsa lesson + social is lively and playful — ideal if you want to try dancing without commitment."
+        },
+        {
+          "rank": 7,
+          "eventId": "a966d80e-82c3-987c-2646-e96d72ba68f7",
+          "title": "Groove & Glow",
+          "category": "Exercise Classes",
+          "date": "2026-07-31",
+          "startTime": "17:00",
+          "venue": "Asser Levy Playground",
+          "neighborhood": "Lower East Side / Asser Levy Playground area",
+          "why": "Groove & Glow is a feel-good cardio dance class that’s fun and sociable if you want energetic movement and music."
+        },
+        {
+          "rank": 8,
+          "eventId": "728ae5d1-3b04-57a6-c146-9b3970a63262",
+          "title": "Cocktails on the Farm",
+          "category": "Gardening",
+          "date": "2026-08-01",
+          "startTime": "17:00",
+          "venue": "Randall's Island Park",
+          "neighborhood": "Randall's Island",
+          "why": "Cocktails on the Farm offers a relaxed, social evening with drinks, snacks, and an outdoor movie — perfect for getting out and having a pleasant summer night."
+        }
+      ]
+    }
+  ]
+}
