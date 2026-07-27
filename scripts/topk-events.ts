@@ -1,7 +1,14 @@
-// Standalone retrieval dump: for each of the 20 NEW_EVAL_PROMPTS, embed the prompt with the
-// production embedder (openai/text-embedding-3-small via the AI Gateway), rank the entire
-// current 7-day event window with match_events (identical params to the production plan path),
-// and emit the ranked event IDs sliced at k = 10, 20, 40, 80, 160.
+// Standalone retrieval dump against a FIXED, frozen event universe.
+//
+// Instead of re-querying the live 7-day window (which drifts run-to-run and applies per-query
+// series de-duplication), this ranks each of the 20 benchmark prompts against a fixed set of
+// event IDs supplied in scripts/data/universe-617.csv. For every prompt we:
+//   1. embed the prompt with the production embedder (openai/text-embedding-3-small),
+//   2. compute cosine similarity against each fixed event's STORED embedding vector,
+//   3. rank descending and slice at k = 10, 20, 40, 80, 160.
+//
+// This makes the candidate set identical for every prompt and reproducible across runs, and
+// guarantees every emitted ID is one of the fixed universe IDs.
 //
 // No recall, no LLM judge — pure retrieval output.
 //
@@ -12,14 +19,15 @@
 
 import { createClient } from "@supabase/supabase-js"
 import { embed } from "ai"
-import { mkdirSync, writeFileSync } from "node:fs"
+import { mkdirSync, writeFileSync, readFileSync } from "node:fs"
 import { join } from "node:path"
 
 const EMBEDDING_MODEL = "openai/text-embedding-3-small"
 const K_VALUES = [10, 20, 40, 80, 160]
 const MAX_K = Math.max(...K_VALUES)
+const UNIVERSE_CSV = join(process.cwd(), "scripts", "data", "universe-617.csv")
 
-// The 20 new benchmark prompts (kept in sync with NEW_EVAL_PROMPTS in lib/eval-prompts.ts).
+// The 20 benchmark prompts (kept in sync with NEW_EVAL_PROMPTS in lib/eval-prompts.ts).
 const PROMPTS: string[] = [
   "I want to watch a movie outdoors tonight",
   "I'm looking for yoga or meditation classes",
@@ -43,24 +51,6 @@ const PROMPTS: string[] = [
   "I just want to get out of the house and do something fun",
 ]
 
-// today 00:00 America/New_York -> +7 days, matching lib/eval/gold.ts weekWindow().
-function nyToUtcISO(date: string, time: string): string {
-  const [hh, mm] = (time || "00:00").split(":").map(Number)
-  const [y, mo, d] = date.split("-").map(Number)
-  const utcGuess = Date.UTC(y, mo - 1, d, hh, mm)
-  const nyStr = new Date(utcGuess).toLocaleString("en-US", { timeZone: "America/New_York" })
-  const utcStr = new Date(utcGuess).toLocaleString("en-US", { timeZone: "UTC" })
-  const offsetMs = new Date(utcStr).getTime() - new Date(nyStr).getTime()
-  return new Date(utcGuess + offsetMs).toISOString()
-}
-
-function weekWindow(): { start: string; end: string } {
-  const todayNY = new Date().toLocaleString("sv-SE", { timeZone: "America/New_York" }).slice(0, 10)
-  const start = nyToUtcISO(todayNY, "00:00")
-  const end = new Date(new Date(start).getTime() + 7 * 86400000).toISOString()
-  return { start, end }
-}
-
 function createServiceClient() {
   const url = process.env.SUPABASE_URL
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -73,65 +63,138 @@ async function embedQuery(text: string): Promise<number[]> {
   return embedding
 }
 
-const MATCH_PARAMS = (start: string, end: string, queryEmbedding: number[]) => ({
-  p_query_embedding: queryEmbedding,
-  p_match_count: 5000, // > window size => returns everything, ranked
-  p_window_start: start,
-  p_window_end: end,
-  p_budget_cap: null,
-  p_include_approx: true,
-  p_home_lat: null,
-  p_home_lng: null,
-  p_office_lat: null,
-  p_office_lng: null,
-  p_max_travel: null,
-  p_workday_dows: [],
-  p_work_start_min: null,
-  p_work_end_min: null,
-})
-
-// Returns the full window, ranked by cosine similarity — identical params to retrieveWindowUniverse().
-async function rankedWindowIds(supabase: ReturnType<typeof createServiceClient>, queryEmbedding: number[]) {
-  const { start, end } = weekWindow()
-  const { data, error } = await supabase
-    .rpc("match_events", MATCH_PARAMS(start, end, queryEmbedding))
-    .select("id")
-  if (error) throw new Error(`match_events failed: ${error.message}`)
-  return ((data as { id: string }[]) || []).map((r) => r.id).filter(Boolean)
+// pgvector comes back from PostgREST as a JSON-ish string "[0.1,0.2,...]"; normalize to number[].
+function parseEmbedding(raw: unknown): number[] | null {
+  if (Array.isArray(raw)) return raw as number[]
+  if (typeof raw === "string") {
+    try {
+      const arr = JSON.parse(raw)
+      return Array.isArray(arr) ? arr : null
+    } catch {
+      return null
+    }
+  }
+  return null
 }
 
-type UniverseEvent = {
-  id: string
-  title: string | null
-  category: string | null
-  venue_name: string | null
-  neighborhood: string | null
-  description: string | null
+// Minimal RFC-4180 CSV parser (handles quoted fields with embedded commas, quotes, and newlines).
+// Returns an array of records, each an array of string fields.
+function parseCsv(text: string): string[][] {
+  const records: string[][] = []
+  let field = ""
+  let record: string[] = []
+  let inQuotes = false
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i]
+    if (inQuotes) {
+      if (c === '"') {
+        if (text[i + 1] === '"') {
+          field += '"'
+          i++
+        } else {
+          inQuotes = false
+        }
+      } else {
+        field += c
+      }
+    } else if (c === '"') {
+      inQuotes = true
+    } else if (c === ",") {
+      record.push(field)
+      field = ""
+    } else if (c === "\n" || c === "\r") {
+      if (c === "\r" && text[i + 1] === "\n") i++
+      record.push(field)
+      records.push(record)
+      field = ""
+      record = []
+    } else {
+      field += c
+    }
+  }
+  // flush trailing field/record if the file doesn't end with a newline
+  if (field.length > 0 || record.length > 0) {
+    record.push(field)
+    records.push(record)
+  }
+  return records
 }
 
-// The full candidate universe that match_events ranks over. Universe membership is filter-driven,
-// so any query embedding returns the same complete set of window events (only ordering changes).
-async function windowUniverse(
+// Read the fixed universe CSV and return the ordered list of event IDs (first column, minus header).
+function loadUniverseIds(): string[] {
+  const raw = readFileSync(UNIVERSE_CSV, "utf8")
+  const rows = parseCsv(raw)
+  if (rows.length === 0) throw new Error("universe CSV is empty")
+  const header = rows[0].map((h) => h.trim().toLowerCase())
+  const idCol = header.indexOf("event_id")
+  if (idCol === -1) throw new Error("universe CSV missing 'event_id' column")
+  const ids: string[] = []
+  const seen = new Set<string>()
+  for (let i = 1; i < rows.length; i++) {
+    const id = (rows[i][idCol] || "").trim()
+    if (id && !seen.has(id)) {
+      seen.add(id)
+      ids.push(id)
+    }
+  }
+  return ids
+}
+
+// Fetch stored embedding vectors for the given IDs. Chunked to stay under PostgREST URL limits.
+async function fetchEmbeddings(
   supabase: ReturnType<typeof createServiceClient>,
-  queryEmbedding: number[],
-): Promise<UniverseEvent[]> {
-  const { start, end } = weekWindow()
-  const { data, error } = await supabase
-    .rpc("match_events", MATCH_PARAMS(start, end, queryEmbedding))
-    .select("id,title,category,venue_name,neighborhood,description")
-  if (error) throw new Error(`match_events (universe) failed: ${error.message}`)
-  return ((data as UniverseEvent[]) || []).filter((e) => e.id)
+  ids: string[],
+): Promise<Map<string, number[]>> {
+  const byId = new Map<string, number[]>()
+  const ID_CHUNK = 100
+  for (let i = 0; i < ids.length; i += ID_CHUNK) {
+    const chunk = ids.slice(i, i + ID_CHUNK)
+    const { data, error } = await supabase.from("events").select("id,embedding").in("id", chunk)
+    if (error) throw new Error(`embedding fetch failed: ${error.message}`)
+    for (const r of (data as { id: string; embedding: unknown }[]) || []) {
+      const v = parseEmbedding(r.embedding)
+      if (v) byId.set(r.id, v)
+    }
+  }
+  return byId
+}
+
+// Cosine similarity between two equal-length vectors.
+function cosine(a: number[], b: number[]): number {
+  let dot = 0
+  let na = 0
+  let nb = 0
+  for (let i = 0; i < a.length; i++) {
+    dot += a[i] * b[i]
+    na += a[i] * a[i]
+    nb += b[i] * b[i]
+  }
+  if (na === 0 || nb === 0) return -1
+  return dot / (Math.sqrt(na) * Math.sqrt(nb))
 }
 
 async function main() {
   const supabase = createServiceClient()
-  const { start, end } = weekWindow()
-  console.log(`[v0] window ${start} -> ${end}`)
+
+  const universeIds = loadUniverseIds()
+  console.log(`[v0] fixed universe: ${universeIds.length} event IDs from universe-617.csv`)
+
+  const embById = await fetchEmbeddings(supabase, universeIds)
+  const withEmb = universeIds.filter((id) => embById.has(id))
+  const missing = universeIds.filter((id) => !embById.has(id))
+  console.log(`[v0] embeddings found for ${withEmb.length}/${universeIds.length} events`)
+  if (missing.length > 0) {
+    console.log(`[v0] WARNING: ${missing.length} universe IDs have no stored embedding and are excluded:`)
+    missing.forEach((id) => console.log(`      - ${id}`))
+  }
+
+  // Freeze the candidate matrix once: the ordered ids + their vectors.
+  const candidates = withEmb.map((id) => ({ id, vec: embById.get(id)! }))
 
   type Row = {
     index: number
     prompt: string
-    windowSize: number
+    universeSize: number
     top10: string[]
     top20: string[]
     top40: string[]
@@ -140,53 +203,38 @@ async function main() {
   }
   const results: Row[] = []
 
-  // Dump the full candidate universe once (the set match_events ranks over) before any slicing.
-  const seedEmb = await embedQuery(PROMPTS[0])
-  const universe = await windowUniverse(supabase, seedEmb)
-  console.log(`[v0] window universe size = ${universe.length}`)
-
-  const outDir = join(process.cwd(), "scripts", "out")
-  mkdirSync(outDir, { recursive: true })
-
-  writeFileSync(
-    join(outDir, "window-universe.json"),
-    JSON.stringify({ window: { start, end }, size: universe.length, events: universe }, null, 2),
-  )
-  const escU = (s: string) => `"${(s ?? "").replace(/"/g, '""')}"`
-  const uLines = ["event_id,title,category,venue_name,neighborhood,description"]
-  for (const e of universe) {
-    uLines.push(
-      [
-        e.id,
-        escU(e.title ?? ""),
-        escU(e.category ?? ""),
-        escU(e.venue_name ?? ""),
-        escU(e.neighborhood ?? ""),
-        escU(e.description ?? ""),
-      ].join(","),
-    )
-  }
-  writeFileSync(join(outDir, "window-universe.csv"), uLines.join("\n"))
-
   for (let i = 0; i < PROMPTS.length; i++) {
     const prompt = PROMPTS[i]
-    const emb = i === 0 ? seedEmb : await embedQuery(prompt)
-    const ranked = await rankedWindowIds(supabase, emb)
+    const q = await embedQuery(prompt)
+    const ranked = candidates
+      .map((c) => ({ id: c.id, score: cosine(q, c.vec) }))
+      .sort((a, b) => b.score - a.score)
+      .map((r) => r.id)
     const topN = (n: number) => ranked.slice(0, n)
     results.push({
       index: i + 1,
       prompt,
-      windowSize: ranked.length,
+      universeSize: candidates.length,
       top10: topN(10),
       top20: topN(20),
       top40: topN(40),
       top80: topN(80),
       top160: topN(160),
     })
-    console.log(`[v0] ${i + 1}/${PROMPTS.length} "${prompt.slice(0, 48)}" -> window=${ranked.length}`)
+    console.log(`[v0] ${i + 1}/${PROMPTS.length} "${prompt.slice(0, 48)}" -> ranked ${ranked.length}`)
   }
 
-  writeFileSync(join(outDir, "topk-events.json"), JSON.stringify({ window: { start, end }, results }, null, 2))
+  const outDir = join(process.cwd(), "scripts", "out")
+  mkdirSync(outDir, { recursive: true })
+
+  writeFileSync(
+    join(outDir, "topk-events.json"),
+    JSON.stringify(
+      { universeSize: candidates.length, missingEmbeddings: missing, kValues: K_VALUES, results },
+      null,
+      2,
+    ),
+  )
 
   // Long CSV: one row per (prompt, rank) up to MAX_K so any cutoff can be sliced downstream.
   const esc = (s: string) => `"${s.replace(/"/g, '""')}"`
