@@ -10,11 +10,34 @@ const geistMono = Geist_Mono({
   subsets: ['latin'],
 })
 
+const siteTitle = 'NYC Activities — Your Weekly Concierge'
+const siteDescription =
+  'A personal planner that turns your calendar, working hours, location, weather, and interests into a curated list of real NYC activities to attend this week.'
+
 export const metadata: Metadata = {
-  title: 'NYC Activities — Your Weekly Concierge',
-  description:
-    'A personal planner that turns your calendar, working hours, location, weather, and interests into a curated list of real NYC activities to attend this week.',
+  title: siteTitle,
+  description: siteDescription,
   generator: 'v0.app',
+  openGraph: {
+    title: siteTitle,
+    description: siteDescription,
+    type: 'website',
+    siteName: 'NYC Activities',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'NYC Activities — Your Weekly Concierge',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: siteTitle,
+    description: siteDescription,
+    images: ['/og-image.png'],
+  },
   icons: {
     icon: [
       {
