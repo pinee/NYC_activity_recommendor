@@ -240,6 +240,31 @@ order is now **filter → fetch → rank** (previously fetch → rank → filter
 
 ---
 
+## 5a-bis. Personalization Signals (choosing-for / age group / alcohol)
+
+- **Decision: three optional profile fields — `company` (solo/couple/family/colleagues/friends),
+  `ageGroup` (coarse buckets), and `alcohol` (alcohol-free / drinks please / mixed) — are soft
+  personalization signals, not hard filters.** They are never used to exclude events in SQL; they
+  only *bias* what surfaces.
+- **How they're applied (`profileSignalText` in `app/api/plan/route.ts`):** when set, each field is
+  rendered as a short natural-language phrase and folded into **both** (a) the text that is embedded
+  as the semantic-search query (`embedText = queryText + profileSignal`), so retrieval leans the
+  same direction, **and** (b) the LLM curation prompt's USER PROFILE block plus a system-prompt
+  instruction. Keeping the embedding and the prompt in lockstep is deliberate — the model shouldn't
+  be nudged one way while retrieval pulls another.
+- **Why age is a bucket, not a number:** the exact age adds no ranking value and asks for more
+  precision than the signal warrants; coarse buckets ("25–34") embed just as usefully and are less
+  intrusive.
+- **The family override:** for `company = family` the prompt explicitly asks for kid-friendly /
+  all-ages events **even when the adult's age group is older** — otherwise an older age bucket would
+  pull the plan away from the children the outing is actually for. This nuance lives in prose (the
+  prompt), not in a filter, precisely because it's a soft steer.
+- **Default-safe:** the sentinel `"any"` (the default for all three) yields an empty signal, so a
+  user who ignores the "About you" section gets exactly the old interest/semantic behavior and the
+  plan cache key is unchanged.
+
+---
+
 ## 5b. Recurring / Multi-Day Event De-duplication
 
 - **Problem:** a show that runs for a month arrives from sources in one of two shapes — **(1)** a
@@ -326,8 +351,12 @@ up front there is nothing to report after the fact.
 - `lib/worldcup.ts` fetches the **entire** tournament's viewing events (not just the 7-day window),
   aggregates sessions into **one entry per venue** with a date span and session count, and adds
   best-effort (informational only) travel estimates. It is **not** filtered by budget/hours/travel.
-- Shared by both `/api/plan` (when the interest is selected) and the standalone `/api/worldcup`
-  browse endpoint, so the two always agree. Rendered by `worldcup-spots.tsx`.
+- Surfaced **inline** in `/api/plan` when the "World Cup & Soccer" interest is selected, rendered
+  by `worldcup-spots.tsx`. The standalone "Browse all World Cup viewing" button (and the
+  `WorldCupSchedule` panel) were **removed from the UI once the tournament ended**; the
+  `/api/worldcup` endpoint still exists and shares the same `getWorldCupSpots()` helper, but is no
+  longer linked from the app. Reclassification and inline spots remain so the interest keeps
+  working if soccer viewing events reappear.
 
 ---
 
@@ -337,7 +366,8 @@ up front there is nothing to report after the fact.
   NYC events…", "Organizing your week…") then a final `{type:"result"}` or `{type:"error"}`. The
   client updates a live progress label. **Why:** perceived-latency win with no quality trade-off.
 - **In-memory cache**, keyed by (interests + addresses + week + requests + budget + working
-  hours/days + travel/approx settings), 30-min TTL. **Why in-memory:** matches the app's scale and
+  hours/days + travel/approx settings + choosing-for/age-group/alcohol signals), 30-min TTL.
+  **Why in-memory:** matches the app's scale and
   needs no extra infra; repeat clicks are instant. **Trade-off:** per-instance and non-persistent
   (acceptable, noted as a limitation).
 
