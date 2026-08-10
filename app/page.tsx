@@ -11,7 +11,6 @@ import { WeatherStrip } from "@/components/weather-strip"
 import { SpecialRequests } from "@/components/special-requests"
 import { WeeklyPlanView } from "@/components/weekly-plan"
 import { WorldCupSpotsView } from "@/components/worldcup-spots"
-import { WorldCupSchedule } from "@/components/worldcup-schedule"
 import { useLocalStorage } from "@/lib/use-local-storage"
 import {
   DEFAULT_PROFILE,
@@ -20,7 +19,6 @@ import {
   type SpecialRequest,
   type WeatherDay,
   type WeeklyPlan,
-  type WorldCupSpotsResult,
 } from "@/lib/types"
 
 export default function Page() {
@@ -35,9 +33,6 @@ export default function Page() {
   const [plan, setPlan] = useState<WeeklyPlan | null>(null)
   const [generating, setGenerating] = useState(false)
   const [progress, setProgress] = useState("")
-
-  const [worldCup, setWorldCup] = useState<WorldCupSpotsResult | null>(null)
-  const [wcLoading, setWcLoading] = useState(false)
 
   const loadCalendar = useCallback(async () => {
     setCalLoading(true)
@@ -73,34 +68,6 @@ export default function Page() {
     else if (status) toast.error("Could not connect Google Calendar. Please try again.")
     window.history.replaceState({}, "", "/")
   }, [])
-
-  const browseWorldCup = async () => {
-    if (worldCup) {
-      // Toggle closed if already showing.
-      setWorldCup(null)
-      return
-    }
-    setWcLoading(true)
-    try {
-      const res = await fetch("/api/worldcup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ profile }),
-      })
-      const data = await res.json()
-      if (data.error) {
-        toast.error(data.error)
-        return
-      }
-      setWorldCup(data as WorldCupSpotsResult)
-      const n = (data.spots ?? []).length
-      toast.success(n > 0 ? `Showing all ${n} World Cup viewing spots` : "No World Cup spots found")
-    } catch {
-      toast.error("Could not load World Cup events. Please try again.")
-    } finally {
-      setWcLoading(false)
-    }
-  }
 
   const disconnect = async () => {
     await fetch("/api/google/disconnect", { method: "POST" })
@@ -280,37 +247,7 @@ export default function Page() {
                 </>
               )}
             </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              onClick={browseWorldCup}
-              disabled={wcLoading}
-              className="w-full"
-            >
-              {wcLoading ? (
-                <>
-                  <Loader2 className="size-4 animate-spin" /> Loading World Cup events…
-                </>
-              ) : (
-                <>
-                  <Trophy className="size-4" /> {worldCup ? "Hide World Cup events" : "Browse all World Cup viewing"}
-                </>
-              )}
-            </Button>
           </section>
-
-          {worldCup && (
-            <section className="flex flex-col gap-4 rounded-xl border border-border bg-card p-5">
-              <div className="flex items-center gap-2">
-                <Trophy className="size-4 text-accent" />
-                <h2 className="font-mono text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                  World Cup &amp; Soccer — viewing spots
-                </h2>
-              </div>
-              <WorldCupSchedule />
-              <WorldCupSpotsView result={worldCup} />
-            </section>
-          )}
 
           {generating && (
             <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border py-20 text-center">

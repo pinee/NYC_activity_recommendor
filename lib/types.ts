@@ -143,6 +143,47 @@ export const INTEREST_KEYWORDS: Record<string, string[]> = {
   ],
 }
 
+// Who the user is choosing the activity for. Biases both the semantic-search embedding and
+// the LLM curation (e.g. date-friendly spots for a couple, kid-friendly outings for family,
+// low-key group-friendly venues for colleagues). All optional — "" means not provided.
+// "any" is the sentinel for "not provided" across the optional preference fields below.
+// (Radix Select items can't use an empty-string value, so we use "any" instead.)
+export const COMPANY_OPTIONS = [
+  { value: "any", label: "No preference" },
+  { value: "solo", label: "Just me (solo)" },
+  { value: "couple", label: "Couple" },
+  { value: "family", label: "Family" },
+  { value: "colleagues", label: "Colleagues (work)" },
+  { value: "friends", label: "Friends" },
+] as const
+
+export type Company = (typeof COMPANY_OPTIONS)[number]["value"]
+
+// Coarse age groups instead of an exact age. Used to tailor recommendations (e.g. nightlife
+// vs. relaxed daytime outings). Optional — "any" means not provided.
+export const AGE_GROUP_OPTIONS = [
+  { value: "any", label: "No preference" },
+  { value: "under-18", label: "Under 18" },
+  { value: "18-24", label: "18–24" },
+  { value: "25-34", label: "25–34" },
+  { value: "35-44", label: "35–44" },
+  { value: "45-54", label: "45–54" },
+  { value: "55-64", label: "55–64" },
+  { value: "65+", label: "65+" },
+] as const
+
+export type AgeGroup = (typeof AGE_GROUP_OPTIONS)[number]["value"]
+
+// Alcohol preference. Biases the embedding and LLM toward (or away from) bars, breweries,
+// wine tastings, and cocktail-forward events. Optional — "any" means not provided / mixed.
+export const ALCOHOL_OPTIONS = [
+  { value: "any", label: "No preference / mixed" },
+  { value: "none", label: "Alcohol-free" },
+  { value: "drinks", label: "Drinks please" },
+] as const
+
+export type AlcoholPreference = (typeof ALCOHOL_OPTIONS)[number]["value"]
+
 export interface Profile {
   homeAddress: string
   officeAddress: string
@@ -152,6 +193,12 @@ export interface Profile {
   interests: string[]
   maxTravelMinutes: number
   budget: "free" | "low" | "medium" | "any"
+  // Who the activity is being chosen for. Optional ("" = not provided).
+  company: Company
+  // Coarse age group of the person choosing. Optional ("" = not provided).
+  ageGroup: AgeGroup
+  // Alcohol preference. Optional ("" = not provided / mixed).
+  alcohol: AlcoholPreference
   // When false, events whose location/travel time is only approximate (e.g. mapped to a
   // neighborhood centroid rather than an exact venue) are excluded from the plan.
   includeApproximateLocations: boolean
@@ -259,5 +306,8 @@ export const DEFAULT_PROFILE: Profile = {
   interests: ["Live music", "Food & dining", "Art & galleries", "Running & fitness"],
   maxTravelMinutes: 40,
   budget: "any",
+  company: "any",
+  ageGroup: "any",
+  alcohol: "any",
   includeApproximateLocations: true,
 }

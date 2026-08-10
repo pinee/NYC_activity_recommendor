@@ -1,6 +1,6 @@
 "use client"
 
-import { Home, Building2, Clock, Compass, Check, MapPin } from "lucide-react"
+import { Home, Building2, Clock, Compass, Check, MapPin, Users } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { AddressAutocomplete } from "@/components/address-autocomplete"
@@ -12,7 +12,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { INTEREST_OPTIONS, WEEK_DAYS, type Profile, type WeekDay } from "@/lib/types"
+import {
+  AGE_GROUP_OPTIONS,
+  ALCOHOL_OPTIONS,
+  COMPANY_OPTIONS,
+  INTEREST_OPTIONS,
+  WEEK_DAYS,
+  type Profile,
+  type WeekDay,
+} from "@/lib/types"
 import { cn } from "@/lib/utils"
 
 interface Props {
@@ -138,6 +146,75 @@ export function ProfileForm({ profile, onChange }: Props) {
               {interest}
             </Chip>
           ))}
+        </div>
+      </section>
+
+      {/* About you: who you're choosing for, age group, alcohol — all optional */}
+      <section className="flex flex-col gap-3">
+        <span className="flex items-center gap-2 text-xs uppercase tracking-wide text-muted-foreground">
+          <Users className="size-3.5" /> About you <span className="normal-case tracking-normal">(optional — helps us pick)</span>
+        </span>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="company" className="text-xs text-muted-foreground">
+              Choosing for
+            </Label>
+            <Select
+              value={profile.company}
+              onValueChange={(v) => onChange({ ...profile, company: v as Profile["company"] })}
+            >
+              <SelectTrigger id="company">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {COMPANY_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="ageGroup" className="text-xs text-muted-foreground">
+              Age group
+            </Label>
+            <Select
+              value={profile.ageGroup}
+              onValueChange={(v) => onChange({ ...profile, ageGroup: v as Profile["ageGroup"] })}
+            >
+              <SelectTrigger id="ageGroup">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {AGE_GROUP_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="alcohol" className="text-xs text-muted-foreground">
+              Alcohol
+            </Label>
+            <Select
+              value={profile.alcohol}
+              onValueChange={(v) => onChange({ ...profile, alcohol: v as Profile["alcohol"] })}
+            >
+              <SelectTrigger id="alcohol">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {ALCOHOL_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </section>
 
