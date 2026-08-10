@@ -159,9 +159,6 @@ export default function Page() {
               <p className="text-xs text-muted-foreground">Your weekly concierge</p>
             </div>
           </div>
-          <span className="hidden items-center gap-1.5 text-xs text-muted-foreground sm:flex">
-            <Sparkles className="size-3.5 text-accent" /> Live web-sourced recommendations
-          </span>
         </div>
       </header>
 
