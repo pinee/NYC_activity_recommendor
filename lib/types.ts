@@ -143,6 +143,17 @@ export const INTEREST_KEYWORDS: Record<string, string[]> = {
   ],
 }
 
+// Alcohol preference options. Used to bias both the semantic-search embedding and the LLM
+// curation toward (or away from) bars, breweries, wine tastings, and cocktail-forward events.
+export const ALCOHOL_OPTIONS = [
+  { value: "any", label: "No preference" },
+  { value: "none", label: "Alcohol-free" },
+  { value: "social", label: "Social drinker" },
+  { value: "loves", label: "Loves a good drink" },
+] as const
+
+export type AlcoholPreference = (typeof ALCOHOL_OPTIONS)[number]["value"]
+
 export interface Profile {
   homeAddress: string
   officeAddress: string
@@ -152,6 +163,11 @@ export interface Profile {
   interests: string[]
   maxTravelMinutes: number
   budget: "free" | "low" | "medium" | "any"
+  // Rough age in years. Used to tailor recommendations (e.g. nightlife vs. family-friendly)
+  // in both the embedding query and the LLM prompt. 0 means "not provided".
+  age: number
+  // How much the user is into drinking-oriented venues/events.
+  alcohol: AlcoholPreference
   // When false, events whose location/travel time is only approximate (e.g. mapped to a
   // neighborhood centroid rather than an exact venue) are excluded from the plan.
   includeApproximateLocations: boolean
@@ -259,5 +275,7 @@ export const DEFAULT_PROFILE: Profile = {
   interests: ["Live music", "Food & dining", "Art & galleries", "Running & fitness"],
   maxTravelMinutes: 40,
   budget: "any",
+  age: 30,
+  alcohol: "any",
   includeApproximateLocations: true,
 }

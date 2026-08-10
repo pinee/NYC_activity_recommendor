@@ -82,6 +82,8 @@ function cacheKey(profile: any, requests: any, weekStart: string) {
     office: profile.officeAddress || "",
     travel: profile.maxTravelMinutes,
     budget: profile.budget,
+    age: profile.age,
+    alcohol: profile.alcohol,
     workDays: profile.workDays,
     includeApprox: profile.includeApproximateLocations !== false,
     requests: (requests || []).map((r: any) => r.text),
@@ -316,6 +318,34 @@ async function fetchSeriesSpans(
 
 // ---- Filter helpers ----
 
+// A human-readable phrase for the user's alcohol preference, or null when they have no
+// preference (so we don't bias the embedding/prompt for the default).
+function alcoholPhrase(alcohol: string): string | null {
+  switch (alcohol) {
+    case "none":
+      return "prefers alcohol-free venues and non-alcoholic options; avoid bars, breweries, wine tastings, and cocktail-focused events"
+    case "social":
+      return "enjoys the occasional social drink; bars, breweries, and wine bars are welcome but not required"
+    case "loves":
+      return "loves a good drink and is drawn to bars, breweries, cocktail bars, wine tastings, and beer gardens"
+    default:
+      return null // "any"
+  }
+}
+
+// Natural-language description of the age + alcohol signals, shared by the semantic-search
+// embedding and the LLM prompt so both are biased the same way. Returns "" when neither
+// signal is set (age 0, alcohol "any"), so default profiles don't perturb retrieval.
+function profileSignalText(profile: { age?: number; alcohol?: string }): string {
+  const parts: string[] = []
+  if (typeof profile.age === "number" && profile.age > 0) {
+    parts.push(`Age ${profile.age}`)
+  }
+  const alc = alcoholPhrase(profile.alcohol || "any")
+  if (alc) parts.push(`The user ${alc}`)
+  return parts.join(". ")
+}
+
 // Map the user's budget preference to a maximum acceptable price (null = no cap).
 // Mirrors public.parse_price_usd() semantics on the SQL side.
 function budgetCapUSD(budget: string): number | null {
@@ -394,6 +424,13 @@ async function buildPlan(body: any) {
     .join(". ")
     .trim()
 
+  // Fold the age + alcohol profile signals into the text we embed for semantic search, so
+  // retrieval is biased the same way the LLM prompt is (e.g. surfacing bars for someone who
+  // loves a drink, or steering clear of them for someone alcohol-free). Empty for a default
+  // profile, so plain interest-based plans are unaffected.
+  const profileSignal = profileSignalText(profile)
+  const embedText = [queryText, profileSignal].filter(Boolean).join(". ").trim()
+
   // World Cup viewing is location-first, not date-first (fans already know match times), so
   // when the user selects that interest we surface it as aggregated viewing SPOTS with date
   // spans — never as date-grouped activity cards. Fetched via the same helper the standalone
@@ -427,7 +464,7 @@ async function buildPlan(body: any) {
   // 1) Read the catalog from the database (no live web search). The hard filters are applied
   //    IN SQL here, so only attendable events come back — via the interest keyword filter
   //    and/or semantic search over the user's free-text description.
-  const allRows = await fetchUpcomingEvents(interests, queryText, filters)
+  const allRows = await fetchUpcomingEvents(interests, embedText, filters)
   // Keep World Cup events out of the date-grouped list — they're shown as spots above, so
   // including them here would both duplicate them and reintroduce the date-level display.
   const rows = allRows.filter((r) => r.category !== WORLD_CUP_CATEGORY)
@@ -479,6 +516,8 @@ USER PROFILE
 - Interests: ${(profile.interests || []).join(", ") || "none selected — rely on the description below"}
 - Max travel time one-way: ${profile.maxTravelMinutes} minutes
 - Budget: ${profile.budget}
+- Age: ${profile.age > 0 ? profile.age : "not provided"}
+- Alcohol preference: ${alcoholPhrase(profile.alcohol) || "no particular preference"}
 
 WEATHER FORECAST (prefer outdoor events only on outdoor-friendly days)
 ${(weather || [])
@@ -514,6 +553,7 @@ ${eventLines}
         "You MUST only reference events by an id that appears in the list — never invent events, links, dates, or venues. " +
         "STRICT RELEVANCE: only pick events that match the user's stated interests AND/OR their free-text description of what they feel like doing. If the user gave no interests, rely entirely on their description. Drop anything tangential. If few events match, pick few — it is fine to return very few or none. " +
         "Respect working hours (evenings on workdays, daytime on days off), avoid busy times, keep travel within the limit from home or office, match the weather (indoor on rainy/cold days), and honor special requests. " +
+        "Tailor picks to the user's age and their alcohol preference: for an alcohol-free preference avoid bars, breweries, and drink-focused events, while for someone who loves a drink those venues are great fits. " +
         "Favor a geographically and topically diverse set. " +
         `Pick at most ${MAX_ACTIVITIES} events, ordered by date then time. ` +
         "For each pick, infer the neighborhood from the address, estimate travel from home and office with a mode, and write one sentence on why it fits. " +

@@ -1,6 +1,6 @@
 "use client"
 
-import { Home, Building2, Clock, Compass, Check, MapPin } from "lucide-react"
+import { Home, Building2, Clock, Compass, Check, MapPin, User, Wine } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { AddressAutocomplete } from "@/components/address-autocomplete"
@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { INTEREST_OPTIONS, WEEK_DAYS, type Profile, type WeekDay } from "@/lib/types"
+import { ALCOHOL_OPTIONS, INTEREST_OPTIONS, WEEK_DAYS, type Profile, type WeekDay } from "@/lib/types"
 import { cn } from "@/lib/utils"
 
 interface Props {
@@ -138,6 +138,48 @@ export function ProfileForm({ profile, onChange }: Props) {
               {interest}
             </Chip>
           ))}
+        </div>
+      </section>
+
+      {/* About you: age + alcohol preference */}
+      <section className="grid grid-cols-2 gap-4">
+        <div className="flex flex-col gap-3">
+          <Label htmlFor="age" className="flex items-center gap-2 text-xs uppercase tracking-wide text-muted-foreground">
+            <User className="size-3.5" /> Age
+          </Label>
+          <Input
+            id="age"
+            type="number"
+            min={13}
+            max={120}
+            inputMode="numeric"
+            placeholder="e.g. 30"
+            value={profile.age > 0 ? profile.age : ""}
+            onChange={(e) => {
+              const n = Number.parseInt(e.target.value, 10)
+              onChange({ ...profile, age: Number.isNaN(n) ? 0 : n })
+            }}
+          />
+        </div>
+        <div className="flex flex-col gap-3">
+          <Label className="flex items-center gap-2 text-xs uppercase tracking-wide text-muted-foreground">
+            <Wine className="size-3.5" /> Alcohol
+          </Label>
+          <Select
+            value={profile.alcohol}
+            onValueChange={(v) => onChange({ ...profile, alcohol: v as Profile["alcohol"] })}
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {ALCOHOL_OPTIONS.map((opt) => (
+                <SelectItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </section>
 
