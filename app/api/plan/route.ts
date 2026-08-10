@@ -82,7 +82,8 @@ function cacheKey(profile: any, requests: any, weekStart: string) {
     office: profile.officeAddress || "",
     travel: profile.maxTravelMinutes,
     budget: profile.budget,
-    age: profile.age,
+    company: profile.company,
+    ageGroup: profile.ageGroup,
     alcohol: profile.alcohol,
     workDays: profile.workDays,
     includeApprox: profile.includeApproximateLocations !== false,
@@ -318,30 +319,60 @@ async function fetchSeriesSpans(
 
 // ---- Filter helpers ----
 
-// A human-readable phrase for the user's alcohol preference, or null when they have no
-// preference (so we don't bias the embedding/prompt for the default).
-function alcoholPhrase(alcohol: string): string | null {
+// All three profile signals below are optional; the sentinel "any" (and "" for safety) means
+// "not provided", in which case the helper returns null so we don't perturb the embedding or
+// the prompt for a default profile.
+function isUnset(value?: string): boolean {
+  return !value || value === "any"
+}
+
+// A human-readable phrase for the user's alcohol preference, or null when unset.
+function alcoholPhrase(alcohol?: string): string | null {
   switch (alcohol) {
     case "none":
       return "prefers alcohol-free venues and non-alcoholic options; avoid bars, breweries, wine tastings, and cocktail-focused events"
-    case "social":
-      return "enjoys the occasional social drink; bars, breweries, and wine bars are welcome but not required"
-    case "loves":
-      return "loves a good drink and is drawn to bars, breweries, cocktail bars, wine tastings, and beer gardens"
+    case "drinks":
+      return "is happy to drink and enjoys bars, breweries, cocktail bars, wine tastings, and beer gardens"
     default:
-      return null // "any"
+      return null // "any" / unset / mixed
   }
 }
 
-// Natural-language description of the age + alcohol signals, shared by the semantic-search
-// embedding and the LLM prompt so both are biased the same way. Returns "" when neither
-// signal is set (age 0, alcohol "any"), so default profiles don't perturb retrieval.
-function profileSignalText(profile: { age?: number; alcohol?: string }): string {
-  const parts: string[] = []
-  if (typeof profile.age === "number" && profile.age > 0) {
-    parts.push(`Age ${profile.age}`)
+// A human-readable phrase for who the user is choosing for, or null when unset. Note the
+// family case explicitly asks for kid-friendly events regardless of the chooser's own age.
+function companyPhrase(company?: string): string | null {
+  switch (company) {
+    case "solo":
+      return "is looking for something to do on their own (solo-friendly activities)"
+    case "couple":
+      return "is planning for two as a couple, so date-friendly and romantic outings fit well"
+    case "family":
+      return "is planning for a family, so include kid-friendly and family-friendly events (playgrounds, museums, and all-ages activities) even if the adult is older"
+    case "colleagues":
+      return "is organizing something for work colleagues, so group-friendly, low-key, professional-appropriate outings fit well"
+    case "friends":
+      return "is planning for a group of friends, so lively, social, group-friendly activities fit well"
+    default:
+      return null // "any" / unset
   }
-  const alc = alcoholPhrase(profile.alcohol || "any")
+}
+
+// A human-readable phrase for the user's age group, or null when unset.
+function ageGroupPhrase(ageGroup?: string): string | null {
+  if (isUnset(ageGroup)) return null
+  return `is in the ${ageGroup} age group`
+}
+
+// Natural-language description of the who/age/alcohol signals, shared by the semantic-search
+// embedding and the LLM prompt so both are biased the same way. Returns "" when none are set,
+// so default profiles don't perturb retrieval.
+function profileSignalText(profile: { company?: string; ageGroup?: string; alcohol?: string }): string {
+  const parts: string[] = []
+  const company = companyPhrase(profile.company)
+  if (company) parts.push(`The user ${company}`)
+  const age = ageGroupPhrase(profile.ageGroup)
+  if (age) parts.push(`The user ${age}`)
+  const alc = alcoholPhrase(profile.alcohol)
   if (alc) parts.push(`The user ${alc}`)
   return parts.join(". ")
 }
@@ -516,8 +547,9 @@ USER PROFILE
 - Interests: ${(profile.interests || []).join(", ") || "none selected — rely on the description below"}
 - Max travel time one-way: ${profile.maxTravelMinutes} minutes
 - Budget: ${profile.budget}
-- Age: ${profile.age > 0 ? profile.age : "not provided"}
-- Alcohol preference: ${alcoholPhrase(profile.alcohol) || "no particular preference"}
+- Choosing for: ${companyPhrase(profile.company) ? `the user ${companyPhrase(profile.company)}` : "not provided"}
+- Age group: ${ageGroupPhrase(profile.ageGroup) ? `the user ${ageGroupPhrase(profile.ageGroup)}` : "not provided"}
+- Alcohol preference: ${alcoholPhrase(profile.alcohol) ? `the user ${alcoholPhrase(profile.alcohol)}` : "no particular preference"}
 
 WEATHER FORECAST (prefer outdoor events only on outdoor-friendly days)
 ${(weather || [])
@@ -553,7 +585,7 @@ ${eventLines}
         "You MUST only reference events by an id that appears in the list — never invent events, links, dates, or venues. " +
         "STRICT RELEVANCE: only pick events that match the user's stated interests AND/OR their free-text description of what they feel like doing. If the user gave no interests, rely entirely on their description. Drop anything tangential. If few events match, pick few — it is fine to return very few or none. " +
         "Respect working hours (evenings on workdays, daytime on days off), avoid busy times, keep travel within the limit from home or office, match the weather (indoor on rainy/cold days), and honor special requests. " +
-        "Tailor picks to the user's age and their alcohol preference: for an alcohol-free preference avoid bars, breweries, and drink-focused events, while for someone who loves a drink those venues are great fits. " +
+        "When provided, tailor picks to who the user is choosing for, their age group, and their alcohol preference (all optional — ignore any that are not provided). For a couple favor date-friendly outings; for colleagues favor group-friendly, low-key spots; for friends favor lively social activities; and for a FAMILY always include kid-friendly and all-ages events (playgrounds, museums, family activities) even when the adult's age group is older. For an alcohol-free preference avoid bars, breweries, and drink-focused events, while 'drinks please' makes those venues great fits. " +
         "Favor a geographically and topically diverse set. " +
         `Pick at most ${MAX_ACTIVITIES} events, ordered by date then time. ` +
         "For each pick, infer the neighborhood from the address, estimate travel from home and office with a mode, and write one sentence on why it fits. " +
